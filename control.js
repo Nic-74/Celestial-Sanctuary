@@ -68,26 +68,8 @@ const CHRONICLE_DATA = [
 const $ = (id) => document.getElementById(id);
 const $$ = (selector) => document.querySelectorAll(selector);
 
-const DOM = {
-    bookPasswordGate: $('book-password-gate'),
-    bookPasswordInput: $('book-password-input'),
-    unlockBookBtn: $('unlock-book-btn'),
-    solarSystemContainer: $('solar-system-container'),
-    mainContent: document.querySelector('.main-content'),
-    backToMenuAsteroid: $('back-to-menu-asteroid'),
-    planetNameDisplay: $('planet-name-display'),
-    chapterMetaModal: $('chapter-meta-modal'),
-    editorModal: $('editor-modal'),
-    editorTitle: $('editor-title'),
-    saveEditBtn: $('save-edit-btn'),
-    cancelEditBtn: $('cancel-edit-btn'),
-    memoryLaneModal: $('memory-lane-modal'),
-    closeMemoryBtn: $('close-memory-btn'),
-    lightbox: $('lightbox'),
-    lightboxImg: $('lightbox-image'),
-    lightboxCaption: $('lightbox-caption'),
-    scrollToTopBtn: $('scroll-to-top'),
-};
+// This will be populated after the DOM loads
+let DOM = {};
 
 // Helper function to detect image file with any extension
 async function findImageWithExtension(basePath) {
@@ -109,6 +91,28 @@ async function findImageWithExtension(basePath) {
 document.addEventListener('DOMContentLoaded', initApp);
 
 function initApp() {
+    // Correctly initialize the DOM object after the document is loaded
+    DOM = {
+        bookPasswordGate: $('book-password-gate'),
+        bookPasswordInput: $('book-password-input'),
+        unlockBookBtn: $('unlock-book-btn'),
+        solarSystemContainer: $('solar-system-container'),
+        mainContent: document.querySelector('.main-content'),
+        backToMenuAsteroid: $('back-to-menu-asteroid'),
+        planetNameDisplay: $('planet-name-display'),
+        chapterMetaModal: $('chapter-meta-modal'),
+        editorModal: $('editor-modal'),
+        editorTitle: $('editor-title'),
+        saveEditBtn: $('save-edit-btn'),
+        cancelEditBtn: $('cancel-edit-btn'),
+        memoryLaneModal: $('memory-lane-modal'),
+        closeMemoryBtn: $('close-memory-btn'),
+        lightbox: $('lightbox'),
+        lightboxImg: $('lightbox-image'),
+        lightboxCaption: $('lightbox-caption'),
+        scrollToTopBtn: $('scroll-to-top'),
+    };
+
     initQuill();
     addEventListeners();
     renderSolarSystemNav();
@@ -116,7 +120,6 @@ function initApp() {
     updateRelationshipCounter();
     setInterval(updateRelationshipCounter, 60000);
     renderPanel('home');
-
 }
 
 function addEventListeners() {
@@ -1482,7 +1485,7 @@ async function loadDataFromDrive() {
     } catch (err) {
         console.error("Error loading data from Drive:", err);
         $('auth-status').textContent = 'Sync failed!';
-        alert("Could not load data from Google Drive. Using default data.");
+        alert("Could not load data from Google Drive. Using default data. Please check console for errors.");
         loadDefaultData();
     }
 }
@@ -1511,16 +1514,19 @@ async function findOrCreateDataFile() {
             };
 
             const fileMetadata = { name: DATA_FILE_NAME, mimeType: 'application/json' };
-            const media = { mimeType: 'application/json', body: JSON.stringify(defaultData) };
+            
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+            form.append('file', new Blob([JSON.stringify(defaultData)], { type: 'application/json' }));
 
-            const createResponse = await gapi.client.drive.files.create({
-                resource: fileMetadata,
-                media: media,
-                fields: 'id'
+            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+                method: 'POST',
+                headers: new Headers({ 'Authorization': `Bearer ${gapi.client.getToken().access_token}` }),
+                body: form,
             });
-
-            console.log("New data file created with ID:", createResponse.result.id);
-            return createResponse.result.id;
+            const newFile = await res.json();
+            console.log("New data file created with ID:", newFile.id);
+            return newFile.id;
         }
     } catch (err) {
         console.error("Error finding or creating data file:", err);
