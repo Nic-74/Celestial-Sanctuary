@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Celestial Sanctuary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles specific to the landing page */
+        body {
+            cursor: pointer;
+        }
+        .gate-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+            animation: fade-in 3s ease-out forwards;
+        }
+        .gate-content {
+            max-width: 800px;
+        }
+        .main-title {
+            font-family: var(--font-display);
+            font-size: clamp(3em, 8vw, 6em);
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet);
+            letter-spacing: 5px;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            font-family: var(--font-display);
+            font-size: clamp(1.2em, 3vw, 2em);
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--gold);
+        }
+        .description {
+            font-size: clamp(1em, 2vw, 1.2em);
+            color: var(--gold-light);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+        .countries {
+            font-family: var(--font-body);
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            letter-spacing: 2px;
+        }
+        .heart-icon {
+            color: #dc143c;
+            font-size: 1.2em;
+            margin: 0 10px;
+            text-shadow: 0 0 8px #dc143c;
+        }
+        .prophecy {
+            font-family: var(--font-display);
+            font-size: clamp(1.1em, 2.5vw, 1.4em);
+            color: var(--gold-light);
+            line-height: 1.8;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .prompt {
+            margin-top: 4rem;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            animation: pulse-glow 2.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="stars-bg"></div>
+        <div class="chinese-pattern"></div>
+        <canvas id="particles-canvas"></canvas>
+    </div>
+
+    <div class="gate-container" id="gate">
+        <div class="gate-content">
+            <h1 class="main-title">NINI & ZOYA</h1>
+            <h2 class="subtitle">THE CELESTIAL SANCTUARY</h2>
+            <p class="description">Two souls from different corners of the world, brought together in Japan, finding love in the most unexpected way. A whisper of fate in the quiet alleys of Kyoto, a chance encounter under the Sakura trees, blooming into a love that transcends borders and time.</p>
+            <p class="countries">Uganda <span class="heart-icon">❤</span> China</p>
+            <p class="prophecy">IN A UNIVERSE OF INFINITE POSSIBILITIES, OUR SOULS FOUND EACH OTHER. THAT'S NOT COINCIDENCE—IT'S DESTINY.</p>
+            <p class="prompt">Click anywhere to enter the sanctuary...</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('gate').addEventListener('click', () => {
+            sessionStorage.setItem('enteredFromGate', 'true');
+            window.location.href = 'index.html';
+        });
+
+        // Particle animation script
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        const particleCount = 150;
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.color = `rgba(255, 215, 0, ${this.opacity})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
+

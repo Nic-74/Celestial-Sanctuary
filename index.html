@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nini & Zoya - The Celestial Sanctuary</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&family=Orbitron:wght@400;700&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="control.js"></script> 
+
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoad()"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoad()"></script>
+    <script>
+        // On page load, check if the user has come from the landing page gate.
+        // If not, redirect them to enforce the landing page as the entry point.
+        if (sessionStorage.getItem('enteredFromGate') !== 'true') {
+            window.location.replace('landing.html');
+        }
+    </script>
+</head>
+<body>
+    <div class="background-container">
+        <div class="stars-bg"></div>
+        <div class="chinese-pattern"></div>
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <div id="book-password-gate" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <div class="tome-lock-icon"></div>
+            <h2 class="tome-title">Protected Memory Vault</h2>
+            <p class="tome-subtitle">This sacred tome requires our secret key to unlock.</p>
+            <label class="speak-words-label">Speak the Words</label>
+            <input type="password" id="book-password-input" class="text-input tome-input" placeholder="Enter Secret Key">
+            <button class="btn primary tome-unlock-btn" id="unlock-book-btn">
+                <span class="btn-icon">🔑</span>Unlock Tome
+            </button>
+            <p class="hint-text">Hint: The four words that define our love, all lowercase, no spaces.</p>
+        </div>
+    </div>
+    
+    <main id="celestial-sanctuary">
+        
+        <div id="solar-system-container">
+            <div id="music-player-sun">
+                <div class="sun-surface">
+                    <img id="sun-album-art" src="photos/photo1.jpg" alt="Album Art">
+                </div>
+                <div id="music-player-panel">
+                    <div id="player-view-now-playing" class="player-view active">
+                        <img id="panel-album-art" src="photos/photo1.jpg" alt="Album Art in player">
+                        <div id="song-info">
+                            <div id="song-title">Select a Song</div>
+                            <div id="song-artist">Our Soundtrack</div>
+                        </div>
+                        <div id="progress-bar-container"><div id="progress-bar"></div></div>
+                        <div id="time-container">
+                            <span id="current-time">0:00</span>
+                            <span id="total-duration">0:00</span>
+                        </div>
+                        <div id="music-controls">
+                            <button class="control-btn" id="shuffle-btn" title="Shuffle">🔀</button>
+                            <button class="control-btn" id="prev-btn" title="Previous">⮜</button>
+                            <button class="control-btn" id="play-pause-btn" title="Play/Pause" style="font-size: 2rem;">▶️</button>
+                            <button class="control-btn" id="next-btn" title="Next">⮞</button>
+                        </div>
+                        <div id="volume-container">
+                            <span>🔈</span>
+                            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+                            <span>🔊</span>
+                        </div>
+                    </div>
+                    <div id="player-view-playlist" class="player-view">
+                        <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; font-family: var(--font-display);">Playlist</h4>
+                        <div id="playlist"></div>
+                        <div style="text-align: center; margin-top: 10px;">
+                             <button id="add-song-btn" class="btn">🎵 Add New Song</button>
+                        </div>
+                    </div>
+                    <div class="player-tabs">
+                        <button class="player-tab-btn active" data-view="now-playing">Playing</button>
+                        <button class="player-tab-btn" data-view="playlist">Playlist</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="planet-name-display" class="planet-name-display"></div>
+
+        <div class="main-content"></div>
+        
+    </main>
+    
+    <a href="landing.html" id="back-to-gate-portal" title="Return to the Gate">
+        <span>GATE</span>
+    </a>
+
+    <button id="back-to-menu-asteroid" title="Back to Menu">
+        <span>MENU</span>
+    </button>
+    
+    <div id="chapter-meta-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 class="panel-header" style="margin-bottom: 1.5rem;">A New Memory</h3>
+            <div class="form-group">
+                <label for="new-chapter-title">Chapter Title</label>
+                <input type="text" id="new-chapter-title" class="text-input">
+            </div>
+            <div class="form-group">
+                <label for="new-chapter-author">Author</label>
+                <input type="text" id="new-chapter-author" class="text-input" value="Nini & Zoya">
+            </div>
+            <div class="form-group">
+                <label for="new-chapter-date">Date</label>
+                <input type="date" id="new-chapter-date" class="text-input">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancel-meta-btn">Cancel</button>
+                <button class="btn primary" id="continue-meta-btn">Continue</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="editor-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px; width: 95%;">
+            <h3 id="editor-title" class="panel-header" style="margin-bottom: 1.5rem;">Edit Entry</h3>
+            <div id="quill-editor-container">
+                <div id="quill-editor"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancel-edit-btn">Cancel</button>
+                <button class="btn primary" id="save-edit-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="memory-lane-modal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 id="memory-title" class="panel-header">A Day to Remember</h3>
+            <p id="memory-date" class="panel-subheader"></p>
+            <div id="memory-lane-quote" style="font-style: italic; margin: 1.5rem 0; font-size: 1.1rem;"></div>
+            <p>This was the day our shared story truly began. A single moment that changed our universe forever.</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn primary" id="close-memory-btn">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="lightbox">
+        <div class="lightbox-content">
+            <img class="lightbox-image" id="lightbox-image" src="" alt="Memory">
+            <div class="lightbox-info">
+                <h3 id="lightbox-caption"></h3>
+            </div>
+        </div>
+        <button class="lightbox-nav lightbox-close">×</button>
+        <button class="lightbox-nav lightbox-prev">‹</button>
+        <button class="lightbox-nav lightbox-next">›</button>
+    </div>
+    
+    <button id="scroll-to-top" title="Scroll to Top">▲</button>
+    
+    <div id="auth-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 4000; background: var(--holoscreen-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-glass); text-align: center;">
+        <div id="auth-status" style="color: var(--text-secondary); margin-bottom: 5px; font-size: 0.8rem;">Connecting...</div>
+        <div id="gsi-button"></div>
+        <button id="signout-button" class="btn" style="display: none; width: 100%; padding: 8px 10px; font-size: 0.9rem;">Sign Out</button>
+    </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 id="upload-modal-title" class="panel-header">Upload New File</h3>
+            <div class="form-group">
+                <label for="upload-file-input">Select File</label>
+                <input type="file" id="upload-file-input" class="text-input" style="padding: 5px;">
+            </div>
+            <div class="form-group">
+                <label id="upload-text-label" for="upload-text-input">Caption</label>
+                <input type="text" id="upload-text-input" class="text-input" placeholder="Enter a caption or title...">
+            </div>
+            <div class="form-group" id="upload-category-container" style="display: none;">
+                <label for="upload-category-select">Category</label>
+                <select id="upload-category-select" class="text-input"></select>
+            </div>
+             <div id="upload-status" style="display: none; color: var(--gold-light); margin-top: 1rem;">Uploading...</div>
+            <div class="modal-actions">
+                <button class="btn" id="cancel-upload-btn">Cancel</button>
+                <button class="btn primary" id="save-upload-btn">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="book_content.js"></script>
+    <script>
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 80;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            
+            draw() {
+                ctx.fillStyle = `rgba(173, 216, 230, ${this.opacity})`; /* Light Blue Particles */
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (typeof renderSolarSystemNav === 'function') {
+                renderSolarSystemNav();
+            }
+        });
+        
+        document.body.addEventListener('dblclick', (e) => {
+            const heart = document.createElement('div');
+            heart.className = 'floating-hearts';
+            heart.textContent = ['✨', '💫', '🌟', '☄️', '💖'][Math.floor(Math.random() * 5)];
+            heart.style.left = e.clientX + 'px';
+            heart.style.top = e.clientY + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 3000);
+        });
+
+        // Inactivity Timer
+        let inactivityTimer;
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                // Fade out before redirecting for a smoother transition
+                document.body.style.transition = 'opacity 0.5s ease-in-out';
+                document.body.style.opacity = '0';
+                setTimeout(() => {
+                    window.location.href = 'landing.html';
+                }, 500);
+            }, 3 * 60 * 1000); // 3 minutes
+        };
+
+        // Events that count as activity
+        window.onload = resetInactivityTimer;
+        document.onmousemove = resetInactivityTimer;
+        document.onkeydown = resetInactivityTimer;
+        document.onclick = resetInactivityTimer;
+        document.onscroll = resetInactivityTimer;
+    </script>
+</body>
+</html>
