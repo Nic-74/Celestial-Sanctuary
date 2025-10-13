@@ -7,16 +7,16 @@ const EDITABLE_CONFIG = {
         { then: 'then5', now: 'now5' }
     ],
     PHOTOS_DATA: [
-        { src: `photos/photo1.jpg`, caption: 'First Cooking Adventure', year: 2021, category: 'cooking' }, { src: `photos/photo2.jpg`, caption: 'Homemade Pasta Night', year: 2022, category: 'cooking' },
-        { src: `photos/photo3.jpg`, caption: 'Baking Together', year: 2023, category: 'cooking' }, { src: `photos/photo4.jpg`, caption: 'Kyoto Temple Visit', year: 2021, category: 'travel' },
-        { src: `photos/photo5.jpg`, caption: 'Beach Getaway', year: 2022, category: 'travel' }, { src: `photos/photo6.jpg`, caption: 'Mountain Hiking', year: 2023, category: 'travel' },
-        { src: `photos/photo7.jpg`, caption: 'City Exploration', year: 2024, category: 'travel' }, { src: `photos/photo8.jpg`, caption: 'Rainy Day Fun', year: 2021, category: 'random' },
-        { src: `photos/photo9.jpg`, caption: 'Game Night', year: 2022, category: 'random' }, { src: `photos/photo10.jpg`, caption: 'Study Session', year: 2023, category: 'random' },
-        { src: `photos/photo11.jpg`, caption: 'Quiet Moment', year: 2021, category: 'intimate' }, { src: `photos/photo12.jpg`, caption: 'Sunset Together', year: 2022, category: 'intimate' },
-        { src: `photos/photo13.jpg`, caption: 'Anniversary Celebration', year: 2023, category: 'intimate' }, { src: `photos/photo14.jpg`, caption: 'Zoya\'s Art Showcase', year: 2021, category: 'zoya' },
-        { src: `photos/photo15.jpg`, caption: 'Zoya Reading', year: 2022, category: 'zoya' }, { src: `photos/photo16.jpg`, caption: 'Nicholas Studying', year: 2021, category: 'nicholas' },
-        { src: `photos/photo17.jpg`, caption: 'Nicholas at Library', year: 2022, category: 'nicholas' }, { src: `photos/photo18.jpg`, caption: 'Coffee Date', year: 2024, category: 'random' },
-        { src: `photos/photo19.jpg`, caption: 'Movie Night', year: 2024, category: 'random' }, { src: `photos/photo20.jpg`, caption: 'Spring Blossoms', year: 2025, category: 'random' }
+        { src: `photos/photo1.jpg`, caption: 'Day she cooked Kimuchi fried rice', year: 2024, category: 'cooking' }, { src: `photos/photo2.jpg`, caption: 'Fried rice plus', year: 2024, category: 'cooking' },
+        { src: `photos/photo3.jpg`, caption: 'Day she cooked Chicken fried wings', year: 2024, category: 'cooking' }, { src: `photos/photo4.jpg`, caption: 'Arashiyama Observation Deck', year: 2021, category: 'travel' },
+        { src: `photos/photo5.jpg`, caption: 'Tenryuji temple in Arashiyama', year: 2022, category: 'travel' }, { src: `photos/photo6.jpg`, caption: 'First Onsen trip', year: 2023, category: 'travel' },
+        { src: `photos/photo7.jpg`, caption: 'First day of new year at Yasaka Jinja', year: 2024, category: 'travel' }, { src: `photos/photo8.jpg`, caption: 'Little man', year: 2021, category: 'random' },
+        { src: `photos/photo9.jpg`, caption: 'Dont know how to call this..hahahaha', year: 2022, category: 'random' }, { src: `photos/photo10.jpg`, caption: 'A chip Heart', year: 2023, category: 'random' },
+        { src: `photos/photo11.jpg`, caption: 'A day home', year: 2021, category: 'intimate' }, { src: `photos/photo12.jpg`, caption: 'Ktoto botanical garden', year: 2022, category: 'intimate' },
+        { src: `photos/photo13.jpg`, caption: 'The old good good days', year: 2023, category: 'intimate' }, { src: `photos/photo14.jpg`, caption: 'Shez the prettiest!', year: 2021, category: 'zoya' },
+        { src: `photos/photo15.jpg`, caption: 'While in China', year: 2022, category: 'zoya' }, { src: `photos/photo16.jpg`, caption: 'Caught me off gaurd', year: 2021, category: 'nicholas' },
+        { src: `photos/photo17.jpg`, caption: 'Just Nicholas', year: 2022, category: 'nicholas' }, { src: `photos/photo18.jpg`, caption: 'Bakinggggg', year: 2024, category: 'random' },
+        { src: `photos/photo19.jpg`, caption: 'Random Artifact', year: 2024, category: 'random' }, { src: `photos/photo20.jpg`, caption: 'Lost but found', year: 2025, category: 'random' }
     ],
     SONGS_DATA: Array.from({length: 20}, (_, i) => ({ src: `music/song${i+1}.mp3`, title: `Our Song ${i+1}`, artist: 'Nini & Zoya', albumArt: `photos/photo${(i % 20) + 1}.jpg` })), 
     GALLERY_CATEGORIES: { 'cooking': '🍳 Food', 'travel': '✈️ Trip', 'random': '🎲 Random', 'intimate': '💕 Intimate', 'zoya': '🌸 Zoya', 'nicholas': '📖 Nic' }
@@ -486,6 +486,7 @@ function renderPanel(panelId) {
         DOM.mainContent.classList.remove('visible');
         DOM.solarSystemContainer.classList.remove('hidden');
         DOM.mainContent.style.backgroundColor = '';
+        DOM.mainContent.style.padding = '100px 5vw 50px 120px'; // Reset default padding
         DOM.mainContent.innerHTML = '';
         
         const chantCompliments = () => {
@@ -517,7 +518,19 @@ function renderPanel(panelId) {
     DOM.mainContent.innerHTML = content;
     DOM.mainContent.scrollTop = 0;
 
-    DOM.mainContent.style.backgroundColor = (panelId === 'calendar') ? 'transparent' : '';
+    // Set custom styles for specific panels
+    if (panelId === 'calendar') {
+        DOM.mainContent.style.backgroundColor = 'transparent';
+        DOM.mainContent.style.padding = '0'; // Calendar handles its own padding
+    } else if (panelId === 'sanctuary') {
+        // Set padding to 0 for the iframe to fill the space cleanly
+        DOM.mainContent.style.backgroundColor = '';
+        DOM.mainContent.style.padding = '0';
+    } else {
+        // Reset default padding for other panels
+        DOM.mainContent.style.backgroundColor = '';
+        DOM.mainContent.style.padding = '100px 5vw 50px 120px'; 
+    }
 
     if (panelId === 'book') { if (AppState.bookUnlocked) renderBookUI(); else DOM.bookPasswordGate.classList.add('active'); }
     if (panelId === 'gallery') {
@@ -529,7 +542,7 @@ function renderPanel(panelId) {
     if (panelId === 'calendar') initNebulaOfSolitudeJS();
     if (panelId === 'timeline') initChroniclePanelJS();
     if (panelId === 'guide') initGuidePanelJS();
-    if (panelId === 'sanctuary') initSanctuaryPanelJS();
+    // if (panelId === 'sanctuary') initSanctuaryPanelJS(); // REMOVED: Logic is now in oracle.html (iframe)
     if (panelId === 'games') initGamesPanelJS();
 }
 
@@ -938,31 +951,15 @@ const getGuidePanelHTML = () => `
         </div>
     </div>
 </div>`;
+/**
+ * Replaces the Sanctuary panel content with an iframe loading oracle.html.
+ * This ensures the interactive logic remains in oracle.html's own scope.
+ */
 const getSanctuaryPanelHTML = () => `
-<div id="sanctuary-panel" class="content-panel active">
-    <h2 class="panel-header">Inner Sanctum</h2>
-    <p class="panel-subheader">This is the heart of our universe. Each node represents a core aspect of our bond. Interact to explore.</p>
-    <div class="sanctuary-container">
-        <div class="sanctuary-core">
-            <div class="core-pulse"></div>
-            <span>Our<br>Heart</span>
-        </div>
-        <div class="sanctuary-node" data-node="vows" style="--angle: 0deg;">Vows</div>
-        <div class="sanctuary-node" data-node="comfort" style="--angle: 51.4deg;">Comfort</div>
-        <div class="sanctuary-node" data-node="growth" style="--angle: 102.8deg;">Growth</div>
-        <div class="sanctuary-node" data-node="creations" style="--angle: 154.2deg;">Creations</div>
-        <div class="sanctuary-node" data-node="future" style="--angle: 205.6deg;">Future</div>
-        <div class="sanctuary-node" data-node="protocol" style="--angle: 257deg;">Protocol</div>
-        <div class="sanctuary-node" data-node="notes" style="--angle: 308.4deg;">Notes</div>
+    <div id="sanctuary-panel" class="content-panel active" style="padding: 0; background: none;">
+        <iframe src="oracle.html" style="width: 100%; height: 100vh; border: none; overflow-y: auto;"></iframe>
     </div>
-    <div id="sanctuary-modal" class="modal">
-        <div class="modal-content">
-             <button id="sanctuary-modal-close" class="modal-close-btn">&times;</button>
-            <h3 id="sanctuary-modal-title"></h3>
-            <div id="sanctuary-modal-content"></div>
-        </div>
-    </div>
-</div>`;
+`;
 
 // --- JS FOR NEW/UPDATED PANELS ---
 
@@ -1244,44 +1241,7 @@ function initGuidePanelJS() {
     }
 }
 
-function initSanctuaryPanelJS() {
-    const nodes = $$('.sanctuary-node');
-    const modal = $('sanctuary-modal');
-    const modalTitle = $('sanctuary-modal-title');
-    const modalContent = $('sanctuary-modal-content');
-    const closeModalBtn = $('sanctuary-modal-close');
-
-    const contentData = {
-        vows: { title: 'The Unbreakable Vows', html: `<p>A place for our most serious promises, protected by a secret key.</p><div class="vow-gate"><input type="password" id="vow-password" class="text-input" placeholder="Secret Key"><button class="btn" id="unlock-vow-btn">Unlock</button></div><div id="vow-content" class="hidden-content"><p>"I promise to always listen when you talk about mathematics." - Zoya</p><p>"I promise to always make you a 'Toast Emergency' snack." - Nic</p><p>"I promise to cherish your quiet strength and gentle heart." - Nic</p><p>"I promise to believe in your dreams, even when you doubt them yourself." - Zoya</p></div>` },
-        comfort: { title: 'Emergency Comfort Kit', html: `<p>For when one of us is having a bad day. Press the button for a dose of comfort.</p><button class="btn primary" id="comfort-btn">Dispense Comfort</button><div id="comfort-box" class="hidden-content"></div>` },
-        growth: { title: 'Our Synergy', html: `<h4>Gratitude Log</h4><p>A living repository of small kindnesses.</p><ul class="data-list"><li><strong>Oct 8, 2025:</strong> Thank you for making tea for me without me asking. -Z</li><li><strong>Oct 7, 2025:</strong> Thank you for encouraging me when I was stressed about my project. -N</li></ul><hr><h4>How We've Grown Together</h4><p>Reflections on the positive ways we've changed each other.</p><ul class="data-list"><li>Nic has learned to open his heart and share his feelings more freely.</li><li>Zoya has found a partner who makes her feel completely understood and at home.</li></ul>` },
-        creations: { title: 'Our Collaborative', html: `<h4>Blueprint for a Future Home</h4><p>A shared dream board for a life we'll build together.</p><ul class="data-list"><li>A cozy library corner for Nic's books and Zoya's reading.</li><li>A bright, airy art studio for Zoya's creations.</li><li>A kitchen perfect for making homemade pasta and emergency toast.</li></ul><hr><h4>Shared Pantheon</h4><p>A curated list of things we love to enjoy <em>together</em>.</p><ul class="data-list"><li><strong>Rainy Day Movie:</strong> Spirited Away</li><li><strong>Long Drive Song:</strong> Our Song 5</li></ul>` },
-        future: { title: 'Letters to Our Future Selves', html: `<p>Sealed messages to be unlocked on a future anniversary. What will we tell ourselves?</p><div class="letter-box"><div class="letter-sealed">✉️ Letter for 5th Anniversary (Sealed Until Aug 25, 2026)</div><div class="letter-sealed">✉️ Letter for 10th Anniversary (Sealed Until Aug 25, 2031)</div></div><hr><h4>The Olfactory Archive</h4><p>A list of scents that trigger powerful memories.</p><ul class="data-list"><li><strong>Old Books & Dust:</strong> The smell of the library where we studied.</li><li><strong>Petrichor & Wet Asphalt:</strong> The evening we walked home in the rain.</li></ul>` },
-        protocol: { title: 'The "Pause Button" Protocol', html: `<p>Our agreed-upon rules for navigating disagreements with love and humor.</p><ul class="data-list"><li>The right to invoke 'Silly Goose Time' to break tension.</li><li>A 'Toast Emergency' must be honored, no questions asked.</li><li>All arguments must end with a Panda Cuddle.</li></ul>` },
-        notes: { title: 'Leave a Note', html: `<p>Share a memory on our digital corkboard!</p><div id="notes-container-sanctuary"><form id="note-form-sanctuary" class="note-card"><h3 class="font-bold text-xl mb-4 font-serif">Add Your Note...</h3><input type="text" id="note-name" class="text-input" placeholder="Your Name" required><textarea id="note-message" class="text-input" rows="3" placeholder="Your message..." required></textarea><button type="submit" class="btn primary">Pin it!</button></form><div class="note-card"><p>"So happy for you two! I still remember seeing you both walking the halls in high school. Cheers to many more years!"</p><p class="note-author">- A Friend</p></div></div>` }
-    };
-    nodes.forEach(node => {
-        node.addEventListener('click', () => {
-            const nodeKey = node.dataset.node; const data = contentData[nodeKey];
-            if(data) {
-                modalTitle.textContent = data.title; modalContent.innerHTML = data.html; modal.classList.add('active');
-                if(nodeKey === 'vows') { $('unlock-vow-btn').addEventListener('click', () => { const passwordInput = $('vow-password'); if (passwordInput.value.toLowerCase().replace(/\s/g, '') === EDITABLE_CONFIG.bookPassword) { $('vow-content').classList.remove('hidden-content'); passwordInput.parentElement.style.display = 'none'; } else { alert('Incorrect Secret Key.'); } }); }
-                if(nodeKey === 'comfort') { $('comfort-btn').addEventListener('click', () => { const comforts = [ "Baobei, remember that time we laughed so hard we couldn't breathe? Here's a virtual hug. 🤗", "Take a deep breath. Now, listen to our favorite song. Everything will be okay Zoy.", "Here is a digital coupon for one (1) unlimited hug session.", "I may have done wrong but that doesn't mean I love you no more." ]; const comfortBox = $('comfort-box'); comfortBox.textContent = comforts[Math.floor(Math.random() * comforts.length)]; comfortBox.classList.remove('hidden-content'); }); }
-                 if(nodeKey === 'notes') {
-                    const noteForm = $('note-form-sanctuary');
-                    noteForm.addEventListener('submit', function(e) {
-                        e.preventDefault(); const name = this.querySelector('#note-name').value; const message = this.querySelector('#note-message').value;
-                        const noteElement = document.createElement('div'); noteElement.className = 'note-card';
-                        noteElement.innerHTML = `<p>${message.replace(/</g, "&lt;")}</p><p class="note-author">- ${name.replace(/</g, "&lt;")}</p>`;
-                        $('notes-container-sanctuary').appendChild(noteElement); this.reset();
-                    });
-                }
-            }
-        });
-    });
-    closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); } });
-}
+// REMOVED: initSanctuaryPanelJS as its content is now in the separate oracle.html.
 
 function initNebulaOfSolitudeJS() {
     const nebulaContainer = $('nebula-of-solitude'); if (!nebulaContainer) return;
