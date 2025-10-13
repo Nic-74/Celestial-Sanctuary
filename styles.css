@@ -755,117 +755,22 @@ hr {
 #guide-panel .lexicon-list dd { color: var(--gold-light); margin-left: 1.5rem; margin-bottom: 1rem; line-height: 1.6; }
 
 
-/* --- SANCTUARY PANEL (REDESIGN) --- */
-#sanctuary-panel .sanctuary-container {
-    position: relative;
-    width: 600px;
-    height: 600px;
-    max-width: 90vw;
-    max-height: 90vw;
-    margin: 3rem auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 215, 0, 0.4);
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), 0 0 80px var(--soft-violet);
-    background: radial-gradient(circle, rgba(74, 14, 78, 0.7) 0%, rgba(2, 4, 27, 0.8) 70%);
-}
-#sanctuary-panel .sanctuary-core {
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, var(--gold), var(--crimson));
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center;
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    color: var(--deep-purple);
-    position: relative;
-    box-shadow: 0 0 40px var(--gold), 0 0 60px var(--crimson);
-}
-#sanctuary-panel .core-pulse {
-    position: absolute;
-    width: 100%; height: 100%;
-    border: 3px solid var(--gold);
-    border-radius: 50%;
-    animation: core-pulse-animation 4s infinite ease-in-out;
-}
-#sanctuary-panel .sanctuary-node {
-    position: absolute;
-    left: 50%; top: 50%;
-    width: 90px; height: 90px;
-    margin: -45px 0 0 -45px;
-    background: linear-gradient(135deg, rgba(74, 14, 78, 0.8), rgba(17, 12, 31, 0.9));
-    border: 2px solid var(--gold);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    transform: rotate(var(--angle)) translateY(250px) rotate(calc(-1 * var(--angle)));
-    font-family: var(--font-display); font-size: 1.1rem;
-    color: var(--gold-light);
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    box-shadow: 0 0 20px rgba(0,0,0,0.4), inset 0 0 10px rgba(255,215,0,0.1);
-}
-#sanctuary-panel .sanctuary-node:hover {
-    background: linear-gradient(135deg, var(--gold), var(--soft-violet));
-    color: var(--deep-purple);
-    border-color: var(--gold);
-    box-shadow: 0 0 30px var(--gold), 0 0 50px var(--soft-violet);
-    transform: rotate(var(--angle)) translateY(250px) rotate(calc(-1 * var(--angle))) scale(1.15);
-}
-#sanctuary-panel #sanctuary-modal .modal-content { max-width: 600px; }
-#sanctuary-panel .hidden-content { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gold); }
-#sanctuary-panel .vow-gate { display: flex; gap: 0.5rem; margin-top: 1rem; }
-#sanctuary-panel #comfort-box { background: rgba(255, 215, 0, 0.1); padding: 1.2rem; border-radius: 8px; border-left: 5px solid var(--gold); font-style: italic; color: var(--gold-light); font-size: 1.1em; }
-#sanctuary-panel #comfort-box:not(:empty) { display: block; margin-top: 1.5rem; }
-#sanctuary-panel .letter-sealed { 
-    background: linear-gradient(135deg, rgba(74, 14, 78, 0.7), rgba(17, 12, 31, 0.8)); 
-    padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px; 
-    border-left: 3px solid var(--text-secondary); cursor: not-allowed;
-    color: var(--text-secondary);
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-}
-#sanctuary-panel #vow-content p {
-    font-family: var(--font-handwriting);
-    font-size: 1.3em;
-    color: var(--gold-light);
-    margin: 1em 0;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-/* Note Section styles for Sanctuary */
-#notes-container-sanctuary { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem;}
-#notes-container-sanctuary .note-card {
-    background: var(--gold-light);
-    color: var(--deep-purple);
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-#notes-container-sanctuary #note-form {
-    background: transparent;
-    border: 1px dashed var(--gold);
-    padding: 1rem;
-    color: var(--gold-light);
-}
-#notes-container-sanctuary #note-form h3 { color: var(--gold); font-family: var(--font-body); }
-#notes-container-sanctuary #note-form input, #notes-container-sanctuary #note-form textarea {
-    background: rgba(2, 4, 27, 0.5);
-    border: 1px solid var(--text-secondary);
-    color: var(--gold-light);
-    margin-bottom: 0.5rem;
-}
-#notes-container-sanctuary #note-form button { width: 100%; }
-.note-author {
-    text-align: right;
-    font-style: italic;
-    margin-top: 0.5rem;
-    font-weight: bold;
-    color: var(--deep-purple);
+/* --- SANCTUARY PANEL (IFRAME CONTAINER) --- */
+#sanctuary-panel {
+    /* These styles are set in control.js to override default padding */
+    width: 100%;
+    height: 100%;
+    padding: 0 !important; 
+    background: none !important;
 }
 
-
-#sanctuary-panel .data-list { list-style-type: '🌟 '; }
+#sanctuary-panel iframe {
+    width: 100%;
+    min-height: 100vh; /* Use min-height to ensure it covers the viewport height */
+    border: none;
+    overflow-y: auto;
+}
+/* REMOVED: All other specific styles for the old Inner Sanctum UI */
 
 
 /* DETAILED QUILL EDITOR STYLES */
