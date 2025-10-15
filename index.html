@@ -84,15 +84,15 @@
                     </div>
                     <div id="player-view-playlist" class="player-view">
                         <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; font-family: var(--font-display);">Playlist</h4>
-                        <div style="padding: 0 1rem 1rem 1rem; text-align: center;">
-                            <button class="btn" id="upload-music-btn" style="width: 100%;">Upload Song</button>
+                        <div>
+                            <button class="btn" id="upload-music-btn">Upload Song</button>
                             <input type="file" id="music-upload-input" hidden accept="audio/*">
                         </div>
                         <div id="playlist"></div>
                     </div>
                     <div class="player-tabs">
-                        <button class="player-tab-btn active" data-view="now-playing">Playing</button>
-                        <button class="player-tab-btn" data-view="playlist">Playlist</button>
+                        <button class="player-tab-btn active" data-view="now-playing" title="Now Playing">🎵</button>
+                        <button class="player-tab-btn" data-view="playlist" title="Playlist">📜</button>
                     </div>
                 </div>
             </div>
@@ -107,21 +107,21 @@
     <div id="main-menu-container">
         <button id="main-menu-button" title="Open Menu">≡</button>
         <div id="main-menu-dropdown">
-            <a href="#home">Home (Solar System)</a>
-            <a href="#games">Orion's Challenges</a>
+            <a href="#home" onclick="closeMenu()">Home (Solar System)</a>
+            <a href="#games" onclick="closeMenu()">Orion's Challenges</a>
             <hr>
-            <a href="#timeline">Our Chronicle</a>
-            <a href="#book">The Stardust Tome</a>
-            <a href="#gallery">Gallery of Ages</a>
-            <a href="#guide">Constellation Guide</a>
-            <a href="#calendar">Nebula of Solitude</a>
-            <a href="#sanctuary">Inner Sanctum</a>
+            <a href="#timeline" onclick="closeMenu()">Our Chronicle</a>
+            <a href="#book" onclick="closeMenu()">The Stardust Tome</a>
+            <a href="#gallery" onclick="closeMenu()">Gallery of Ages</a>
+            <a href="#guide" onclick="closeMenu()">Constellation Guide</a>
+            <a href="#calendar" onclick="closeMenu()">Nebula of Solitude</a>
+            <a href="#sanctuary" onclick="closeMenu()">Inner Sanctum</a>
         </div>
     </div>
     
     <div id="chapter-meta-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
-            <h3 class="panel-header" style="margin-bottom: 1.5rem;">A New Memory</h3>
+            <h3 class="panel-header" style="margin-bottom: 1.5rem;">A New Chapter</h3>
             <div class="form-group">
                 <label for="new-chapter-title">Chapter Title</label>
                 <input type="text" id="new-chapter-title" class="text-input">
@@ -154,21 +154,9 @@
         </div>
     </div>
     
-    <div id="memory-lane-modal" class="modal">
-        <div class="modal-content" style="text-align: center;">
-            <h3 id="memory-title" class="panel-header">A Day to Remember</h3>
-            <p id="memory-date" class="panel-subheader"></p>
-            <div id="memory-lane-quote" style="font-style: italic; margin: 1.5rem 0; font-size: 1.1rem;"></div>
-            <p>This was the day our shared story truly began. A single moment that changed our universe forever.</p>
-            <div class="modal-actions" style="justify-content: center;">
-                <button class="btn primary" id="close-memory-btn">Close</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="lightbox">
+    <div id="lightbox" class="modal">
         <div class="lightbox-content">
-            <img class="lightbox-image" id="lightbox-image" src="" alt="Memory">
+            <img class="lightbox-image" id="lightbox-image" src="" alt="Gallery Image">
             <div class="lightbox-info">
                 <h3 id="lightbox-caption"></h3>
             </div>
@@ -178,10 +166,6 @@
         <button class="lightbox-nav lightbox-next">›</button>
     </div>
     
-    <button id="scroll-to-top" title="Scroll to Top">▲</button>
-    
-    <div class="mystical-portal" id="mystical-portal" title="Click for a surprise!">🌟</div>
-
     <div id="game-play-modal" class="reward-modal">
         <div class="game-play-modal-content">
             <span class="close-button" onclick="closeGame()">&times;</span>
@@ -197,9 +181,15 @@
         </div>
     </div>
 
+    <button id="scroll-to-top" title="Go to top">↑</button>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="book_content.js"></script>
     <script src="control.js"></script>
+    <script>
+        function closeMenu() {
+            document.getElementById('main-menu-dropdown').classList.remove('visible');
+        }
+    </script>
 </body>
 </html>
