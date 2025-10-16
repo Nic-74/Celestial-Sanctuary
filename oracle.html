@@ -1113,41 +1113,64 @@
             ]
         };
 
-        function createStarfield() {
+        function createThemedStarfield(themeName) {
             const starfield = document.getElementById('starfield');
             if (!starfield) return;
-            // Clear existing stars to prevent duplicates on script re-run
+            
+            const theme = THEME_COLORS[themeName];
+            const starShape = THEME_STAR_SHAPES[themeName];
+            if (!theme || !starShape) return;
+
+            // Clear existing stars
             starfield.innerHTML = '';
-            for (let i = 0; i < 300; i++) {
+            
+            // Apply theme background
+            starfield.style.background = theme.bgGradient;
+            
+            // Create stars with theme-appropriate shapes (REDUCED COUNT)
+            for (let i = 0; i < 100; i++) { // Reduced from 300
                 const star = document.createElement('div');
                 star.className = 'star';
+                star.textContent = starShape.char;
                 star.style.left = Math.random() * 100 + '%';
                 star.style.top = Math.random() * 100 + '%';
-                star.style.width = Math.random() * 3 + 'px';
-                star.style.height = star.style.width;
+                star.style.fontSize = (Math.random() * 10 + 6) + 'px'; // Smaller size range
+                star.style.color = theme.colors['--gold'];
+                star.style.filter = `drop-shadow(0 0 ${Math.random() * 2 + 1}px ${starShape.shadowColor})`;
                 star.style.animationDelay = Math.random() * 3 + 's';
                 star.style.animationDuration = (2 + Math.random() * 3) + 's';
+                star.style.opacity = (Math.random() * 0.4 + 0.3); // More subtle
                 starfield.appendChild(star);
             }
-            for (let i = 0; i < 5; i++) {
+            
+            // Create shooting stars (REDUCED COUNT)
+            for (let i = 0; i < 2; i++) { // Reduced from 5
                 const shootingStar = document.createElement('div');
                 shootingStar.className = 'shooting-star';
+                shootingStar.textContent = starShape.char;
                 shootingStar.style.left = Math.random() * 100 + '%';
                 shootingStar.style.top = Math.random() * 50 + '%';
+                shootingStar.style.color = theme.colors['--gold'];
+                shootingStar.style.filter = `drop-shadow(0 0 8px ${starShape.shadowColor})`;
                 shootingStar.style.animationDelay = Math.random() * 10 + 's';
+                shootingStar.style.fontSize = '14px';
                 starfield.appendChild(shootingStar);
             }
+            
+            // Create nebulae with theme colors
             const nebulae = [
-                { color: 'rgba(138, 43, 226, 0.3)', left: '10%', top: '20%' },
-                { color: 'rgba(0, 100, 255, 0.3)', left: '70%', top: '60%' },
-                { color: 'rgba(255, 20, 147, 0.3)', left: '40%', top: '80%' }
+                { left: '10%', top: '20%' },
+                { left: '70%', top: '60%' },
+                { left: '40%', top: '80%' }
             ];
+            
             nebulae.forEach(neb => {
                 const nebula = document.createElement('div');
                 nebula.className = 'nebula';
-                nebula.style.background = neb.color;
+                nebula.style.background = theme.colors['--soft-violet'];
                 nebula.style.left = neb.left;
                 nebula.style.top = neb.top;
+                nebula.style.opacity = '0.2'; // More subtle nebulae
                 starfield.appendChild(nebula);
             });
         }
@@ -1411,6 +1434,44 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
+
+        // Listen for theme changes from parent
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'THEME_CHANGED') {
+    const themeName = event.data.theme;
+    applyThemeToOracle(themeName);
+  }
+});
+
+function applyThemeToOracle(themeName) {
+  // Apply the same theme system here
+  const themeStars = {
+    mystical: { char: '✦', color: '#ffd700' },
+    ethereal: { char: '💧', color: '#64ffda' },
+    sunset: { char: '🔥', color: '#ff9f43' },
+    forest: { char: '🍃', color: '#2ecc71' },
+    midnight: { char: '✨', color: '#e0e0e0' },
+    coral: { char: '🪸', color: '#ff7b54' },
+    royal: { char: '💎', color: '#c4af9f' },
+    ocean: { char: '🌊', color: '#00d9ff' }
+  };
+  
+  const starShape = themeStars[themeName];
+  if (!starShape) return;
+  
+  // Update existing stars
+  const stars = document.querySelectorAll('.star');
+  stars.forEach(star => {
+    star.textContent = starShape.char;
+    star.style.color = starShape.color;
+  });
+  
+  const shootingStars = document.querySelectorAll('.shooting-star');
+  shootingStars.forEach(star => {
+    star.textContent = starShape.char;
+    star.style.color = starShape.color;
+  });
+}
     </script>
 </body>
 </html>

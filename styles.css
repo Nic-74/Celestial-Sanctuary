@@ -1276,3 +1276,21 @@ hr {
         font-size: clamp(2rem, 8vw, 2.8rem);
     }
 }
+
+.star {
+    position: absolute;
+    background: none;
+    border-radius: 0;
+    animation: twinkle 3s infinite;
+    user-select: none;
+    pointer-events: none;
+}
+
+.shooting-star {
+    position: absolute;
+    background: none;
+    animation: shoot 3s ease-in infinite;
+    user-select: none;
+    pointer-events: none;
+    font-size: 16px;
+}

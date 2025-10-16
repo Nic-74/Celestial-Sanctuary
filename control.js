@@ -350,52 +350,100 @@ function initApp() {
 
 function initLandingPage() {
     DOM.landingGate.addEventListener('click', enterSanctuary, { once: true });
+    
+    // Apply saved theme to landing page
+    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
+    applyThemeToLanding(savedTheme);
+}
+
+function applyThemeToLanding(themeName) {
     const canvas = $('landing-particles-canvas');
     if (!canvas) return;
+    
+    const theme = THEME_COLORS[themeName];
+    const starShape = THEME_STAR_SHAPES[themeName];
+    if (!theme || !starShape) return;
+
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
     const particles = [];
-    const particleCount = 150;
+    const particleCount = 40; // Reduced from 150
+    
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedX = Math.random() * 0.5 - 0.25;
-            this.speedY = Math.random() * 0.5 - 0.25;
-            this.opacity = Math.random() * 0.5 + 0.2;
-            this.color = `rgba(255, 215, 0, ${this.opacity})`;
+            this.size = Math.random() * 12 + 8; // Slightly smaller
+            this.speedX = Math.random() * 0.3 - 0.15; // Slower movement
+            this.speedY = Math.random() * 0.3 - 0.15;
+            this.opacity = Math.random() * 0.4 + 0.2; // More subtle
+            this.char = starShape.char;
+            this.color = theme.colors['--gold'];
         }
         update() {
-            this.x += this.speedX; this.y += this.speedY;
+            this.x += this.speedX;
+            this.y += this.speedY;
             if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
             if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
         }
         draw() {
-            ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.font = `${this.size}px Arial`;
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.char, this.x, this.y);
+            ctx.restore();
         }
     }
-    for (let i = 0; i < particleCount; i++) { particles.push(new Particle()); }
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
     function animateParticles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
         requestAnimationFrame(animateParticles);
     }
+    
     animateParticles();
-    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
 }
 
 function enterSanctuary() {
     sessionStorage.setItem('enteredFromGate', 'true');
-    DOM.landingGate.style.transition = 'opacity 0.5s ease-out';
+
+    // 1. Prepare the main sanctuary element (make it visible immediately but transparent)
+    DOM.celestialSanctuary.style.display = 'block';
+    DOM.celestialSanctuary.style.opacity = '0';
+    
+    // 2. Force a reflow to ensure display:block is applied
+    void DOM.celestialSanctuary.offsetHeight;
+    
+    // 3. Start cross-fade immediately
+    DOM.landingGate.style.transition = 'opacity 0.6s ease-out';
+    DOM.celestialSanctuary.style.transition = 'opacity 0.6s ease-in';
     DOM.landingGate.style.opacity = '0';
+    DOM.celestialSanctuary.style.opacity = '1';
+
+    // 4. Clean up the landing gate after the transition
     setTimeout(() => {
         DOM.landingGate.style.display = 'none';
-        DOM.celestialSanctuary.style.display = 'block';
-        initSanctuary();
-    }, 500);
+    }, 650);
+
+    // 5. Initialize the sanctuary functionality
+    initSanctuary();
 }
+
 
 function initSanctuary() {
     renderSolarSystemNav();
@@ -498,39 +546,73 @@ function addSanctuaryEventListeners() {
 }
 
 function initMainParticles() {
+    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
+    applyThemeToMainParticles(savedTheme);
+}
+
+function applyThemeToMainParticles(themeName) {
     const canvas = $('particles-canvas');
-    if(!canvas) return;
+    if (!canvas) return;
+    
+    const theme = THEME_COLORS[themeName];
+    const starShape = THEME_STAR_SHAPES[themeName];
+    if (!theme || !starShape) return;
+
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
     const particles = [];
-    const particleCount = 80;
+    const particleCount = 30; // Reduced for a subtle effect
+    
     class Particle {
         constructor() {
-            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 0.5; this.speedX = Math.random() * 0.5 - 0.25;
-            this.speedY = Math.random() * 0.5 - 0.25; this.opacity = Math.random() * 0.5 + 0.2;
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 12 + 8; // Subtle size
+            this.speedX = Math.random() * 0.3 - 0.15; // Slow movement
+            this.speedY = Math.random() * 0.3 - 0.15;
+            this.opacity = Math.random() * 0.4 + 0.2; // Subtle opacity
+            this.char = starShape.char;
+            this.color = theme.colors['--gold'];
         }
         update() {
-            this.x += this.speedX; this.y += this.speedY;
+            this.x += this.speedX;
+            this.y += this.speedY;
             if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
             if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
         }
         draw() {
-            ctx.fillStyle = `rgba(173, 216, 230, ${this.opacity})`;
-            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.font = `${this.size}px Arial`;
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.char, this.x, this.y);
+            ctx.restore();
         }
     }
-    for (let i = 0; i < particleCount; i++) { particles.push(new Particle()); }
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
     function animateParticles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
         requestAnimationFrame(animateParticles);
     }
+    
     animateParticles();
+    
     window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        if (typeof renderSolarSystemNav === 'function') { renderSolarSystemNav(); }
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        if (typeof renderSolarSystemNav === 'function') {
+            renderSolarSystemNav();
+        }
     });
 }
 
@@ -2379,4 +2461,544 @@ function changeLightboxImage(direction) {
         newIndex = 0;
     }
     updateLightboxContent(newIndex);
+}
+
+
+const THEME_COLORS = {
+  mystical: {
+    name: 'Mystical (Default)',
+    icon: '✨',
+    colors: {
+      '--space-black': '#02041b',
+      '--deep-purple': '#4a0e4e',
+      '--gold': '#ffd700',
+      '--gold-light': '#fff3c4',
+      '--soft-violet': '#8a2be2',
+      '--crimson': '#dc143c',
+      '--jade': '#00a86b',
+      '--text-primary': '#e6f1ff',
+      '--text-secondary': '#8892b0',
+      '--holoscreen-bg': 'rgba(10, 25, 47, 0.85)',
+      '--highlight-glass': 'rgba(4, 24, 61, 0.6)',
+      '--border-glass': 'rgba(100, 255, 218, 0.1)',
+      '--glow-cyan': '#64ffda',
+      '--glow-magenta': '#f779dd',
+      '--shadow-color': 'rgba(0, 0, 0, 0.7)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #1a2a45 0%, #0d152b 50%, #02041b 100%)',
+    bodyBg: '#02041b'
+  },
+  ethereal: {
+    name: 'Ethereal Blue',
+    icon: '🌌',
+    colors: {
+      '--space-black': '#0a1628',
+      '--deep-purple': '#0a2540',
+      '--gold': '#64ffda',
+      '--gold-light': '#a8ffff',
+      '--soft-violet': '#5a7dbf',
+      '--crimson': '#ff6b9d',
+      '--jade': '#4ecdc4',
+      '--text-primary': '#d4f1f9',
+      '--text-secondary': '#7fb3d5',
+      '--holoscreen-bg': 'rgba(10, 37, 64, 0.85)',
+      '--highlight-glass': 'rgba(10, 60, 100, 0.6)',
+      '--border-glass': 'rgba(100, 255, 218, 0.15)',
+      '--glow-cyan': '#64ffda',
+      '--glow-magenta': '#ff6b9d',
+      '--shadow-color': 'rgba(0, 10, 20, 0.8)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #1a4a6b 0%, #0d2b45 50%, #0a1628 100%)',
+    bodyBg: '#0a1628'
+  },
+  sunset: {
+    name: 'Sunset',
+    icon: '🌅',
+    colors: {
+      '--space-black': '#2c1810',
+      '--deep-purple': '#2c1e3e',
+      '--gold': '#ff9f43',
+      '--gold-light': '#ffc857',
+      '--soft-violet': '#d94369',
+      '--crimson': '#ff6348',
+      '--jade': '#ffa500',
+      '--text-primary': '#ffe8cc',
+      '--text-secondary': '#d4a574',
+      '--holoscreen-bg': 'rgba(44, 30, 62, 0.85)',
+      '--highlight-glass': 'rgba(90, 40, 60, 0.6)',
+      '--border-glass': 'rgba(255, 159, 67, 0.15)',
+      '--glow-cyan': '#ffb347',
+      '--glow-magenta': '#ff6b9d',
+      '--shadow-color': 'rgba(0, 0, 0, 0.9)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #5c3a2a 0%, #3d2817 50%, #2c1810 100%)',
+    bodyBg: '#2c1810'
+  },
+  forest: {
+    name: 'Enchanted Forest',
+    icon: '🌲',
+    colors: {
+      '--space-black': '#0d1f16',
+      '--deep-purple': '#1a3a2a',
+      '--gold': '#2ecc71',
+      '--gold-light': '#58d68d',
+      '--soft-violet': '#27ae60',
+      '--crimson': '#e74c3c',
+      '--jade': '#16a085',
+      '--text-primary': '#b8e6d5',
+      '--text-secondary': '#7fb3a0',
+      '--holoscreen-bg': 'rgba(26, 58, 42, 0.85)',
+      '--highlight-glass': 'rgba(22, 80, 60, 0.6)',
+      '--border-glass': 'rgba(46, 204, 113, 0.15)',
+      '--glow-cyan': '#58d68d',
+      '--glow-magenta': '#e74c3c',
+      '--shadow-color': 'rgba(0, 0, 0, 0.85)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #1a4a35 0%, #0f2917 50%, #0d1f16 100%)',
+    bodyBg: '#0d1f16'
+  },
+  midnight: {
+    name: 'Midnight',
+    icon: '🌙',
+    colors: {
+      '--space-black': '#0f0f1e',
+      '--deep-purple': '#1a1a2e',
+      '--gold': '#e0e0e0',
+      '--gold-light': '#ffffff',
+      '--soft-violet': '#6b5b95',
+      '--crimson': '#c91f16',
+      '--jade': '#88c540',
+      '--text-primary': '#f0f0f0',
+      '--text-secondary': '#b0b0b0',
+      '--holoscreen-bg': 'rgba(26, 26, 46, 0.85)',
+      '--highlight-glass': 'rgba(30, 30, 60, 0.6)',
+      '--border-glass': 'rgba(200, 200, 200, 0.1)',
+      '--glow-cyan': '#e0e0e0',
+      '--glow-magenta': '#ff6b9d',
+      '--shadow-color': 'rgba(0, 0, 0, 0.95)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #1a1a35 0%, #0f0f25 50%, #0f0f1e 100%)',
+    bodyBg: '#0f0f1e'
+  },
+  coral: {
+    name: 'Coral Dream',
+    icon: '🪸',
+    colors: {
+      '--space-black': '#2d1b24',
+      '--deep-purple': '#2d1b3d',
+      '--gold': '#ff7b54',
+      '--gold-light': '#ffa270',
+      '--soft-violet': '#ff6b9d',
+      '--crimson': '#c0392b',
+      '--jade': '#26c281',
+      '--text-primary': '#ffd9c9',
+      '--text-secondary': '#d4a5a0',
+      '--holoscreen-bg': 'rgba(45, 27, 45, 0.85)',
+      '--highlight-glass': 'rgba(70, 30, 50, 0.6)',
+      '--border-glass': 'rgba(255, 123, 84, 0.15)',
+      '--glow-cyan': '#ffa270',
+      '--glow-magenta': '#ff6b9d',
+      '--shadow-color': 'rgba(0, 0, 0, 0.9)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #5c2a35 0%, #3d1b24 50%, #2d1b24 100%)',
+    bodyBg: '#2d1b24'
+  },
+  royal: {
+    name: 'Royal Amethyst',
+    icon: '👑',
+    colors: {
+      '--space-black': '#3d2817',
+      '--deep-purple': '#4a3728',
+      '--gold': '#c4af9f',
+      '--gold-light': '#e8dcc8',
+      '--soft-violet': '#9b59b6',
+      '--crimson': '#e74c3c',
+      '--jade': '#8e44ad',
+      '--text-primary': '#e8dcc8',
+      '--text-secondary': '#c4b5a0',
+      '--holoscreen-bg': 'rgba(74, 55, 40, 0.85)',
+      '--highlight-glass': 'rgba(90, 70, 50, 0.6)',
+      '--border-glass': 'rgba(196, 175, 159, 0.15)',
+      '--glow-cyan': '#d4c5b9',
+      '--glow-magenta': '#c4af9f',
+      '--shadow-color': 'rgba(0, 0, 0, 0.85)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #5c4a3a 0%, #4a3a2a 50%, #3d2817 100%)',
+    bodyBg: '#3d2817'
+  },
+  ocean: {
+    name: 'Ocean Deep',
+    icon: '🌊',
+    colors: {
+      '--space-black': '#001a33',
+      '--deep-purple': '#003d66',
+      '--gold': '#00d9ff',
+      '--gold-light': '#66f2ff',
+      '--soft-violet': '#0099cc',
+      '--crimson': '#ff3366',
+      '--jade': '#00cc99',
+      '--text-primary': '#ccf2ff',
+      '--text-secondary': '#66b3cc',
+      '--holoscreen-bg': 'rgba(0, 61, 102, 0.85)',
+      '--highlight-glass': 'rgba(0, 100, 150, 0.6)',
+      '--border-glass': 'rgba(0, 217, 255, 0.15)',
+      '--glow-cyan': '#00d9ff',
+      '--glow-magenta': '#ff3366',
+      '--shadow-color': 'rgba(0, 0, 0, 0.9)'
+    },
+    bgGradient: 'radial-gradient(ellipse at center, #1a4a6b 0%, #0d2b4a 50%, #001a33 100%)',
+    bodyBg: '#001a33'
+  }
+};
+
+// Star shapes for each theme
+const THEME_STAR_SHAPES = {
+  mystical: { char: '✦', shadowColor: '#ffd700' },
+  ethereal: { char: '❄️', shadowColor: '#64ffda' },
+  sunset: { char: 'ִֶָ. ..𓂃 ࣪ ִֶָ🔥་༘࿐', shadowColor: '#ff9f43' },
+  forest: { char: '🍀', shadowColor: '#2ecc71' },
+  midnight: { char: '✨', shadowColor: '#e0e0e0' },
+  coral: { char: '🪸', shadowColor: '#ff7b54' },
+  royal: { char: '°🥂⋆.ೃ🍾࿔*:･', shadowColor: '#c4af9f' },
+  ocean: { char: '⊹ ࣪ ﹏𓊝﹏𓂁﹏⊹ ࣪ ˖', shadowColor: '#00d9ff' }
+};
+
+// Function to create themed stars
+function createThemedStarfield(themeName) {
+  const starfield = document.getElementById('starfield');
+  if (!starfield) return;
+  
+  const theme = THEME_COLORS[themeName];
+  const starShape = THEME_STAR_SHAPES[themeName];
+  if (!theme || !starShape) return;
+
+  // Clear existing stars
+  starfield.innerHTML = '';
+  
+  // Apply theme background
+  starfield.style.background = theme.bgGradient;
+  
+  // Create stars with theme-appropriate shapes
+  for (let i = 0; i < 300; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.textContent = starShape.char;
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.fontSize = (Math.random() * 12 + 8) + 'px';
+    star.style.color = theme.colors['--gold'];
+    star.style.filter = `drop-shadow(0 0 ${Math.random() * 3 + 2}px ${starShape.shadowColor})`;
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (2 + Math.random() * 3) + 's';
+    starfield.appendChild(star);
+  }
+  
+  // Create shooting stars
+  for (let i = 0; i < 5; i++) {
+    const shootingStar = document.createElement('div');
+    shootingStar.className = 'shooting-star';
+    shootingStar.textContent = starShape.char;
+    shootingStar.style.left = Math.random() * 100 + '%';
+    shootingStar.style.top = Math.random() * 50 + '%';
+    shootingStar.style.color = theme.colors['--gold'];
+    shootingStar.style.filter = `drop-shadow(0 0 10px ${starShape.shadowColor})`;
+    shootingStar.style.animationDelay = Math.random() * 10 + 's';
+    starfield.appendChild(shootingStar);
+  }
+  
+  // Create nebulae with theme colors
+  const nebulae = [
+    { left: '10%', top: '20%' },
+    { left: '70%', top: '60%' },
+    { left: '40%', top: '80%' }
+  ];
+  
+  nebulae.forEach(neb => {
+    const nebula = document.createElement('div');
+    nebula.className = 'nebula';
+    nebula.style.background = theme.colors['--soft-violet'];
+    nebula.style.left = neb.left;
+    nebula.style.top = neb.top;
+    nebula.style.opacity = '0.3';
+    starfield.appendChild(nebula);
+  });
+}
+function applyTheme(themeName) {
+  const theme = THEME_COLORS[themeName];
+  if (!theme) return;
+
+  // Apply all CSS variables to root
+  Object.entries(theme.colors).forEach(([key, value]) => {
+    document.documentElement.style.setProperty(key, value, 'important');
+  });
+
+  // Apply directly to body background
+  document.body.style.backgroundColor = theme.bodyBg;
+  document.body.style.background = theme.bgGradient;
+
+  // Target all .background-container elements
+  const bgContainers = document.querySelectorAll('.background-container');
+  bgContainers.forEach(container => {
+    container.style.background = theme.bgGradient;
+    container.style.backgroundAttachment = 'fixed';
+  });
+
+  // Target html element
+  document.documentElement.style.backgroundColor = theme.bodyBg;
+  document.documentElement.style.background = theme.bgGradient;
+
+  // Apply to starfield if it exists (oracle.html)
+  const starfield = document.getElementById('starfield');
+  if (starfield) {
+    starfield.style.background = theme.bgGradient;
+  }
+
+  // Create themed stars for oracle.html
+  createThemedStarfield(themeName);
+
+  // Update main particles if they exist
+  if ($('particles-canvas')) {
+    applyThemeToMainParticles(themeName);
+  }
+  
+  // Update landing particles if they exist
+  if ($('landing-particles-canvas')) {
+    applyThemeToLanding(themeName);
+  }
+
+  // Save to localStorage for persistence
+  localStorage.setItem('selectedTheme', themeName);
+
+  // Update active button in main menu
+  const themeButtons = document.querySelectorAll('.theme-color-btn');
+  themeButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === themeName);
+  });
+
+  // Close menu after selecting theme
+  const menuDropdown = document.getElementById('main-menu-dropdown');
+  if (menuDropdown) {
+    menuDropdown.classList.remove('visible');
+  }
+
+  // Notify oracle.html if in iframe
+  window.postMessage({ type: 'THEME_CHANGED', theme: themeName }, '*');
+}
+
+// Load saved theme on page load
+function loadSavedTheme() {
+  const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
+  setTimeout(() => applyTheme(savedTheme), 100);
+}
+
+// Initialize theme system
+function initThemeSystem() {
+  const menuDropdown = document.getElementById('main-menu-dropdown');
+  if (!menuDropdown) return;
+
+  // Check if theme section already exists
+  if (document.querySelector('.theme-colors-grid')) return;
+
+  // Create theme section AFTER all menu items (at the end)
+  const themeSeparator = document.createElement('hr');
+  
+  const themeLabel = document.createElement('div');
+  themeLabel.className = 'theme-label';
+  themeLabel.textContent = '🎨 Themes';
+
+  const themeContainer = document.createElement('div');
+  themeContainer.className = 'theme-colors-grid';
+
+  // Create color theme buttons
+  Object.entries(THEME_COLORS).forEach(([key, theme]) => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-color-btn';
+    btn.dataset.theme = key;
+    btn.title = theme.name;
+    
+    // Get primary and secondary colors for gradient
+    const primaryColor = theme.colors['--deep-purple'];
+    const secondaryColor = theme.colors['--soft-violet'];
+    const accentColor = theme.colors['--gold'];
+
+    btn.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
+    btn.style.color = accentColor;
+
+    // Add hover effect
+    btn.addEventListener('mouseenter', function() {
+      this.style.transform = 'scale(1.05)';
+      this.style.borderColor = accentColor;
+      this.style.boxShadow = `0 0 15px ${accentColor}`;
+    });
+
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+      this.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+      this.style.boxShadow = 'none';
+    });
+
+    // Add click handler
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      applyTheme(key);
+    });
+
+    // Create inner content
+    btn.innerHTML = `
+      <span style="font-size: 1.4rem;">${theme.icon}</span>
+      <span style="font-size: 0.7rem; line-height: 1.1;">${theme.name}</span>
+    `;
+
+    themeContainer.appendChild(btn);
+  });
+
+  // Add theme section to END of dropdown (after all links)
+  menuDropdown.appendChild(themeSeparator);
+  menuDropdown.appendChild(themeLabel);
+  menuDropdown.appendChild(themeContainer);
+
+  // Load saved theme
+  loadSavedTheme();
+}
+
+// Call this after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initThemeSystem, 100);
+});
+
+// Add CSS styles (add to your styles.css)
+const themeStyles = `
+.theme-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 10px 10px;
+  margin-bottom: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.theme-colors-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.theme-colors-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.theme-colors-grid::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+
+.theme-colors-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
+
+.theme-color-btn {
+  padding: 12px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-direction: column;
+  text-align: center;
+  font-size: 0.7rem;
+  font-family: var(--font-body);
+}
+
+.theme-color-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--gold);
+  box-shadow: 0 0 15px var(--gold);
+}
+
+.theme-color-btn.active {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet) !important;
+  transform: scale(1.1);
+  position: relative;
+}
+
+.theme-color-btn.active::after {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--gold);
+  color: var(--deep-purple);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.theme-label {
+  padding: 10px 15px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border-glass);
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+#main-menu-dropdown {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+#main-menu-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
+
+@media (max-width: 768px) {
+  .theme-colors-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-height: 250px;
+  }
+  
+  .theme-color-btn {
+    padding: 10px;
+    font-size: 0.65rem;
+  }
+
+  #main-menu-dropdown {
+    max-height: 500px;
+  }
+}
+`;
+
+// Inject styles into document
+if (!document.querySelector('style[data-theme-system]')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.setAttribute('data-theme-system', 'true');
+  styleSheet.textContent = themeStyles;
+  document.head.appendChild(styleSheet);
 }
