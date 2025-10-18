@@ -69,6 +69,7 @@ hr {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
     opacity: 0.5;
+    z-index: 0;
 }
 .chinese-pattern {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -76,8 +77,27 @@ hr {
     opacity: 0.1;
     pointer-events: none;
     display: block;
+    z-index: 0;
 }
-#particles-canvas, #landing-particles-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.8; }
+#web-canvas-landing, #web-canvas-main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1; /* Above stars/patterns, below particles */
+}
+#particles-canvas, #landing-particles-canvas { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    pointer-events: none; 
+    opacity: 0.8; 
+    z-index: 2; /* Ensure particles are on top of the web */
+}
 
 /* MAIN LAYOUT */
 #celestial-sanctuary { width: 100vw; height: 100vh; position: relative; overflow: hidden; }

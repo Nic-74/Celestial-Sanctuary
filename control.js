@@ -22,7 +22,7 @@ const EDITABLE_CONFIG = {
     GALLERY_CATEGORIES: { 'cooking': '🍳 Food', 'travel': '✈️ Trip', 'random': '🎲 Random', 'intimate': '💕 Intimate', 'zoya': '🌸 Zoya', 'nicholas': '📖 Nic' }
 };
 
-const AppState = { bookUnlocked: false, activePanel: 'home', chapters: [], currentChapterIndex: 0, currentGalleryCategory: 'all', gallery: { showAll: false, lightboxIndex: 0, currentPhotoList: [] }, music: { player: null, isPlaying: false, currentIndex: 0, isShuffled: false, albumArtInterval: null, albumArtIndex: 0 }, quill: null, editingChapterIndex: -1, chronicleEvents: [], thenNowState: { availableIndices: [], currentIndexInAvailable: 0, lastReveal: null }, complimentInterval: null };
+const AppState = { bookUnlocked: false, activePanel: 'home', chapters: [], currentChapterIndex: 0, currentGalleryCategory: 'all', gallery: { showAll: false, lightboxIndex: 0, currentPhotoList: [] }, music: { player: null, isPlaying: false, currentIndex: 0, isShuffled: false, albumArtInterval: null, albumArtIndex: 0 }, quill: null, editingChapterIndex: -1, chronicleEvents: [], thenNowState: { availableIndices: [], currentIndexInAvailable: 0, lastReveal: null }, complimentInterval: null, webAnimationLandingId: null, webAnimationMainId: null };
 
 const CHRONICLE_DATA = [
     { year: 'Sep 15, 2019', title: 'First Meeting', desc: 'During the Taiku Taikai (sports festival), two lonely souls from different worlds first crossed paths. A boy with a math book and a girl with a curious heart.', icon: '💕' },
@@ -351,9 +351,9 @@ function initApp() {
 function initLandingPage() {
     DOM.landingGate.addEventListener('click', enterSanctuary, { once: true });
     
-    // Apply saved theme to landing page
     const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     applyThemeToLanding(savedTheme);
+    initWebBackground('web-canvas-landing', THEME_COLORS[savedTheme]);
 }
 
 function applyThemeToLanding(themeName) {
@@ -369,16 +369,16 @@ function applyThemeToLanding(themeName) {
     canvas.height = window.innerHeight;
     
     const particles = [];
-    const particleCount = 40; // Reduced from 150
+    const particleCount = 40;
     
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 12 + 8; // Slightly smaller
-            this.speedX = Math.random() * 0.3 - 0.15; // Slower movement
+            this.size = Math.random() * 12 + 8;
+            this.speedX = Math.random() * 0.3 - 0.15;
             this.speedY = Math.random() * 0.3 - 0.15;
-            this.opacity = Math.random() * 0.4 + 0.2; // More subtle
+            this.opacity = Math.random() * 0.4 + 0.2;
             this.char = starShape.char;
             this.color = theme.colors['--gold'];
         }
@@ -412,35 +412,20 @@ function applyThemeToLanding(themeName) {
     }
     
     animateParticles();
-    
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
 }
 
 function enterSanctuary() {
     sessionStorage.setItem('enteredFromGate', 'true');
-
-    // 1. Prepare the main sanctuary element (make it visible immediately but transparent)
     DOM.celestialSanctuary.style.display = 'block';
     DOM.celestialSanctuary.style.opacity = '0';
-    
-    // 2. Force a reflow to ensure display:block is applied
     void DOM.celestialSanctuary.offsetHeight;
-    
-    // 3. Start cross-fade immediately
     DOM.landingGate.style.transition = 'opacity 0.6s ease-out';
     DOM.celestialSanctuary.style.transition = 'opacity 0.6s ease-in';
     DOM.landingGate.style.opacity = '0';
     DOM.celestialSanctuary.style.opacity = '1';
-
-    // 4. Clean up the landing gate after the transition
     setTimeout(() => {
         DOM.landingGate.style.display = 'none';
     }, 650);
-
-    // 5. Initialize the sanctuary functionality
     initSanctuary();
 }
 
@@ -452,13 +437,16 @@ function initSanctuary() {
     setInterval(updateRelationshipCounter, 60000);
     const panelId = window.location.hash.substring(1) || 'home';
     renderPanel(panelId);
-    initMainParticles();
+    
+    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
+    initMainParticles(savedTheme);
+    initWebBackground('web-canvas-main', THEME_COLORS[savedTheme]);
+    
     addSanctuaryEventListeners();
 }
 
 function addEventListeners() {
     DOM.unlockBookBtn.addEventListener('click', handleBookPasswordAttempt);
-    
     DOM.bookPasswordInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -510,6 +498,26 @@ function addEventListeners() {
             clearInterval(AppState.music.albumArtInterval);
         }
     });
+
+    // Centralized Resize Handler
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical';
+            const theme = THEME_COLORS[savedThemeName];
+            
+            // Re-initialize all background canvases
+            applyThemeToLanding(savedThemeName);
+            initMainParticles(savedThemeName);
+            initWebBackground('web-canvas-landing', theme);
+            initWebBackground('web-canvas-main', theme);
+            
+            if (typeof renderSolarSystemNav === 'function') {
+                renderSolarSystemNav();
+            }
+        }, 250); // Debounce for 250ms
+    });
 }
 
 function addSanctuaryEventListeners() {
@@ -545,9 +553,90 @@ function addSanctuaryEventListeners() {
      });
 }
 
-function initMainParticles() {
-    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
-    applyThemeToMainParticles(savedTheme);
+function initWebBackground(canvasId, theme) {
+    const canvas = $(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    if (canvasId === 'web-canvas-landing' && AppState.webAnimationLandingId) {
+        cancelAnimationFrame(AppState.webAnimationLandingId);
+    }
+    if (canvasId === 'web-canvas-main' && AppState.webAnimationMainId) {
+        cancelAnimationFrame(AppState.webAnimationMainId);
+    }
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let points = [];
+    const numPoints = window.innerWidth > 768 ? 80 : 40;
+    const connectDistance = 150;
+    const pointColor = theme.colors['--gold'];
+    const lineColor = theme.colors['--border-glass'];
+
+    class Point {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.4;
+            this.vy = (Math.random() - 0.5) * 0.4;
+            this.radius = Math.random() * 1.5 + 1;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = pointColor;
+            ctx.fill();
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+    }
+
+    for (let i = 0; i < numPoints; i++) {
+        points.push(new Point());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = 0; i < points.length; i++) {
+            for (let j = i + 1; j < points.length; j++) {
+                const dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+                if (dist < connectDistance) {
+                    ctx.strokeStyle = lineColor;
+                  //  ctx.globalAlpha = (1 - (dist / connectDistance)) * 1; // Make lines subtle
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(points[i].x, points[i].y);
+                    ctx.lineTo(points[j].x, points[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+
+        points.forEach(point => {
+            point.update();
+            point.draw();
+        });
+
+        const animationId = requestAnimationFrame(animate);
+        if (canvasId === 'web-canvas-landing') {
+            AppState.webAnimationLandingId = animationId;
+        } else {
+            AppState.webAnimationMainId = animationId;
+        }
+    }
+    animate();
+}
+
+
+function initMainParticles(themeName) {
+    applyThemeToMainParticles(themeName);
 }
 
 function applyThemeToMainParticles(themeName) {
@@ -563,16 +652,16 @@ function applyThemeToMainParticles(themeName) {
     canvas.height = window.innerHeight;
     
     const particles = [];
-    const particleCount = 30; // Reduced for a subtle effect
+    const particleCount = 30;
     
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 12 + 8; // Subtle size
-            this.speedX = Math.random() * 0.3 - 0.15; // Slow movement
+            this.size = Math.random() * 12 + 8;
+            this.speedX = Math.random() * 0.3 - 0.15;
             this.speedY = Math.random() * 0.3 - 0.15;
-            this.opacity = Math.random() * 0.4 + 0.2; // Subtle opacity
+            this.opacity = Math.random() * 0.4 + 0.2;
             this.char = starShape.char;
             this.color = theme.colors['--gold'];
         }
@@ -596,24 +685,18 @@ function applyThemeToMainParticles(themeName) {
         particles.push(new Particle());
     }
     
+    let animationFrameId;
     function animateParticles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => {
             p.update();
             p.draw();
         });
-        requestAnimationFrame(animateParticles);
+        animationFrameId = requestAnimationFrame(animateParticles);
     }
     
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
     animateParticles();
-    
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        if (typeof renderSolarSystemNav === 'function') {
-            renderSolarSystemNav();
-        }
-    });
 }
 
 
@@ -734,7 +817,7 @@ function renderPanel(panelId) {
 
     if (panelId === 'book') { if (AppState.bookUnlocked) renderBookUI(); else DOM.bookPasswordGate.classList.add('active'); }
     if (panelId === 'gallery') {
-        AppState.gallery.showAll = false; // Reset on panel load
+        AppState.gallery.showAll = false;
         renderGalleryFilters();
         renderGallery();
         $('upload-photo-btn')?.addEventListener('click', () => $('photo-upload-input').click());
@@ -1107,10 +1190,6 @@ const getChronicleOfUsHTML = () => `
         </div>
     </div>
 </div>`;
-
-// =================================================================================
-// START: NEW CONSTELLATION GUIDE
-// =================================================================================
 
 const getGuidePanelHTML = () => `
 <div id="guide-panel" class="content-panel active">
@@ -1555,13 +1634,11 @@ function initGuidePanelJS() {
     const tabs = $$('#guide-panel .holo-tab');
     const panes = $$('#guide-panel .holo-pane');
     
-    // Clear any previous animation frames to prevent conflicts
     if (window.physicsAnimationId) cancelAnimationFrame(window.physicsAnimationId);
     if (window.constellationAnimationId) cancelAnimationFrame(window.constellationAnimationId);
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Cancel animations when switching tabs
             if (window.physicsAnimationId) cancelAnimationFrame(window.physicsAnimationId);
             if (window.constellationAnimationId) cancelAnimationFrame(window.constellationAnimationId);
             
@@ -1572,7 +1649,6 @@ function initGuidePanelJS() {
             if (targetPane) {
                 targetPane.classList.add('active');
                 
-                // Initialize specific tab features
                 if (tab.dataset.tab === 'constellation') initConstellationMap();
                 if (tab.dataset.tab === 'physics') initPhysicsSimulator();
                 if (tab.dataset.tab === 'timeline-viz') initTimeWeaver();
@@ -1580,14 +1656,12 @@ function initGuidePanelJS() {
         });
     });
     
-    // Initialize default tab and static tabs
     initConstellationMap();
     initAnatomyEnhanced();
     initArtifactsEnhanced();
     initLexiconEnhanced();
 }
 
-// NEW: Interactive Constellation Map
 function initConstellationMap() {
     const canvas = $('constellation-canvas');
     if (!canvas) return;
@@ -1597,7 +1671,7 @@ function initConstellationMap() {
     
     let scale = window.devicePixelRatio || 1;
     canvas.width = container.offsetWidth * scale;
-    canvas.height = 500 * scale; // Fixed height
+    canvas.height = 500 * scale;
     canvas.style.width = container.offsetWidth + 'px';
     canvas.style.height = '500px';
     ctx.scale(scale, scale);
@@ -1622,8 +1696,6 @@ function initConstellationMap() {
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale);
-
-        // Draw connections
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1638,18 +1710,15 @@ function initConstellationMap() {
         }
         ctx.stroke();
 
-        // Draw stars
         memories.forEach((star, index) => {
             const dist = Math.hypot(mouse.x - star.x, mouse.y - star.y);
             const isHovered = dist < star.size + 5;
             const isSelected = selectedStar === index;
-
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
             ctx.fillStyle = star.color;
             ctx.globalAlpha = isHovered || isSelected ? 1 : 0.7;
             ctx.fill();
-            
             if (isHovered || isSelected) {
                 ctx.strokeStyle = star.color;
                 ctx.lineWidth = 2;
@@ -1666,7 +1735,6 @@ function initConstellationMap() {
         draw();
         window.constellationAnimationId = requestAnimationFrame(animate);
     }
-    
     animate();
 
     canvas.addEventListener('mousemove', (e) => {
@@ -1692,23 +1760,19 @@ function initConstellationMap() {
             }
         });
         if (!starClicked) {
-            selectedStar = null; // Deselect if clicking on empty space
+            selectedStar = null;
         }
     });
 }
 
-
-// NEW: Physics Simulator
 function initPhysicsSimulator() {
     const canvas = $('gravity-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = 600;
     canvas.height = 400;
-
     let gravityEnabled = true;
     let nic, zoya;
-
     class Particle {
         constructor(x, y, radius, color, name) {
             this.x = x; this.y = y; this.radius = radius; this.color = color; this.name = name;
@@ -1735,41 +1799,30 @@ function initPhysicsSimulator() {
             }
             this.x += this.vx;
             this.y += this.vy;
-
-            // Dampening
             this.vx *= 0.99;
             this.vy *= 0.99;
-            
-            // Boundary check
             if (this.x < this.radius || this.x > canvas.width - this.radius) this.vx *= -1;
             if (this.y < this.radius || this.y > canvas.height - this.radius) this.vy *= -1;
         }
     }
-
     function reset() {
         nic = new Particle(100, 200, 10, '#3498db', 'Nic');
         zoya = new Particle(500, 200, 10, '#f779dd', 'Zoya');
     }
-
     function animatePhysics() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw central mass
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
         ctx.fill();
-
         nic.update();
         zoya.update();
         nic.draw();
         zoya.draw();
-
         window.physicsAnimationId = requestAnimationFrame(animatePhysics);
     }
-    
     reset();
     animatePhysics();
-
     $('reset-gravity').addEventListener('click', reset);
     $('toggle-gravity').addEventListener('click', () => {
         gravityEnabled = !gravityEnabled;
@@ -1777,11 +1830,9 @@ function initPhysicsSimulator() {
     });
 }
 
-// NEW: Anatomy Enhanced Logic
 function initAnatomyEnhanced() {
     const points = $$('.anatomy-point-enhanced');
     const tooltip = $('anatomy-tooltip-enhanced');
-
     points.forEach(point => {
         point.addEventListener('mouseover', (e) => {
             const target = e.currentTarget;
@@ -1799,12 +1850,10 @@ function initAnatomyEnhanced() {
     });
 }
 
-// NEW: Artifacts Enhanced Logic
 function initArtifactsEnhanced() {
     const cards = $$('.artifact-card');
     const modal = $('artifact-modal');
     const closeBtn = modal.querySelector('.artifact-modal-close');
-
     cards.forEach(card => {
         card.addEventListener('click', () => {
             $('modal-artifact-icon').textContent = card.dataset.icon;
@@ -1813,7 +1862,6 @@ function initArtifactsEnhanced() {
             modal.classList.add('active');
         });
     });
-
     closeBtn.addEventListener('click', () => modal.classList.remove('active'));
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -1822,23 +1870,18 @@ function initArtifactsEnhanced() {
     });
 }
 
-// NEW: Lexicon Enhanced Logic
 function initLexiconEnhanced() {
     const searchInput = $('lexicon-search-input');
     const catBtns = $$('.lexicon-cat-btn');
     const entries = $$('.lexicon-entry');
-
     function filterEntries() {
         const searchTerm = searchInput.value.toLowerCase();
         const activeCategory = document.querySelector('.lexicon-cat-btn.active').dataset.category;
-
         entries.forEach(entry => {
             const textContent = entry.textContent.toLowerCase();
             const category = entry.dataset.category;
-            
             const matchesSearch = textContent.includes(searchTerm);
             const matchesCategory = activeCategory === 'all' || category === activeCategory;
-
             if (matchesSearch && matchesCategory) {
                 entry.style.display = 'block';
             } else {
@@ -1846,9 +1889,7 @@ function initLexiconEnhanced() {
             }
         });
     }
-
     searchInput.addEventListener('keyup', filterEntries);
-
     catBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             catBtns.forEach(b => b.classList.remove('active'));
@@ -1858,24 +1899,20 @@ function initLexiconEnhanced() {
     });
 }
 
-// NEW: Time Weaver Visualization
 function initTimeWeaver() {
     const svg = $('spiral-svg');
     if (!svg) return;
     
     const events = CHRONICLE_DATA.map(e => ({...e, dateObj: new Date(e.year)})).sort((a,b) => a.dateObj - b.dateObj);
     const startDate = events[0].dateObj;
-    const endDate = new Date(); // Today
+    const endDate = new Date();
     const totalDuration = endDate - startDate;
-
     const width = 800, height = 800;
     const cx = width / 2, cy = height / 2;
     const turns = 5;
     const radius = 350;
-
     let pathString = `M ${cx},${cy} `;
     let points = [];
-
     for (let i = 0; i < 360 * turns; i++) {
         const angle = i * Math.PI / 180;
         const r = (radius / (360 * turns)) * i;
@@ -1884,7 +1921,6 @@ function initTimeWeaver() {
         pathString += `L ${x},${y} `;
         points.push({x, y});
     }
-
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute('d', pathString);
     path.setAttribute('fill', 'none');
@@ -1892,38 +1928,27 @@ function initTimeWeaver() {
     path.setAttribute('stroke-width', '2');
     path.id = 'timeline-spiral-path';
     svg.appendChild(path);
-
     const detailCard = $('timeline-detail-card');
-    
     events.forEach(event => {
         const eventDuration = event.dateObj - startDate;
         const progress = eventDuration / totalDuration;
         const pointIndex = Math.floor(progress * (points.length - 1));
         const point = points[pointIndex];
-
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute('cx', point.x);
         circle.setAttribute('cy', point.y);
         circle.setAttribute('r', 6);
         circle.setAttribute('fill', 'var(--gold)');
         circle.classList.add('timeline-event-dot');
-        
         svg.appendChild(circle);
-        
         circle.addEventListener('mouseover', () => {
             circle.setAttribute('r', 12);
-            detailCard.innerHTML = `
-                <h4>${event.icon} ${event.title}</h4>
-                <p>${event.desc}</p>
-                <span>${event.year}</span>
-            `;
+            detailCard.innerHTML = `<h4>${event.icon} ${event.title}</h4><p>${event.desc}</p><span>${event.year}</span>`;
         });
-
         circle.addEventListener('mouseout', () => {
             circle.setAttribute('r', 6);
         });
     });
-
     const animateBtn = $('animate-timeline');
     animateBtn.addEventListener('click', () => {
         const pathLength = path.getTotalLength();
@@ -1933,17 +1958,11 @@ function initTimeWeaver() {
         path.style.transition = `stroke-dashoffset ${events.length * (speed / 10)}s linear`;
         setTimeout(() => { path.style.strokeDashoffset = 0; }, 100);
     });
-
     $('reset-timeline').addEventListener('click', () => {
         path.style.transition = 'none';
         path.style.strokeDashoffset = path.getTotalLength();
     });
 }
-
-
-// =================================================================================
-// END: NEW CONSTELLATION GUIDE
-// =================================================================================
 
 const getSanctuaryPanelHTML = () => `
     <div id="sanctuary-panel" class="content-panel active" style="padding: 0; background: none;">
@@ -2651,19 +2670,17 @@ const THEME_COLORS = {
   }
 };
 
-// Star shapes for each theme
 const THEME_STAR_SHAPES = {
   mystical: { char: '✦', shadowColor: '#ffd700' },
   ethereal: { char: '❄️', shadowColor: '#64ffda' },
-  sunset: { char: 'ִֶָ. ..𓂃 ࣪ ִֶָ🔥་༘࿐', shadowColor: '#ff9f43' },
+  sunset: { char: '🔥', shadowColor: '#ff9f43' },
   forest: { char: '🍀', shadowColor: '#2ecc71' },
   midnight: { char: '✨', shadowColor: '#e0e0e0' },
   coral: { char: '🪸', shadowColor: '#ff7b54' },
-  royal: { char: '°🥂⋆.ೃ🍾࿔*:･', shadowColor: '#c4af9f' },
-  ocean: { char: '⊹ ࣪ ﹏𓊝﹏𓂁﹏⊹ ࣪ ˖', shadowColor: '#00d9ff' }
+  royal: { char: '💎', shadowColor: '#c4af9f' },
+  ocean: { char: '🌊', shadowColor: '#00d9ff' }
 };
 
-// Function to create themed stars
 function createThemedStarfield(themeName) {
   const starfield = document.getElementById('starfield');
   if (!starfield) return;
@@ -2672,13 +2689,9 @@ function createThemedStarfield(themeName) {
   const starShape = THEME_STAR_SHAPES[themeName];
   if (!theme || !starShape) return;
 
-  // Clear existing stars
   starfield.innerHTML = '';
-  
-  // Apply theme background
   starfield.style.background = theme.bgGradient;
   
-  // Create stars with theme-appropriate shapes
   for (let i = 0; i < 300; i++) {
     const star = document.createElement('div');
     star.className = 'star';
@@ -2693,7 +2706,6 @@ function createThemedStarfield(themeName) {
     starfield.appendChild(star);
   }
   
-  // Create shooting stars
   for (let i = 0; i < 5; i++) {
     const shootingStar = document.createElement('div');
     shootingStar.className = 'shooting-star';
@@ -2706,12 +2718,7 @@ function createThemedStarfield(themeName) {
     starfield.appendChild(shootingStar);
   }
   
-  // Create nebulae with theme colors
-  const nebulae = [
-    { left: '10%', top: '20%' },
-    { left: '70%', top: '60%' },
-    { left: '40%', top: '80%' }
-  ];
+  const nebulae = [ { left: '10%', top: '20%' }, { left: '70%', top: '60%' }, { left: '40%', top: '80%' } ];
   
   nebulae.forEach(neb => {
     const nebula = document.createElement('div');
@@ -2723,279 +2730,90 @@ function createThemedStarfield(themeName) {
     starfield.appendChild(nebula);
   });
 }
+
 function applyTheme(themeName) {
   const theme = THEME_COLORS[themeName];
   if (!theme) return;
 
-  // Apply all CSS variables to root
   Object.entries(theme.colors).forEach(([key, value]) => {
     document.documentElement.style.setProperty(key, value, 'important');
   });
 
-  // Apply directly to body background
-  document.body.style.backgroundColor = theme.bodyBg;
-  document.body.style.background = theme.bgGradient;
-
-  // Target all .background-container elements
   const bgContainers = document.querySelectorAll('.background-container');
   bgContainers.forEach(container => {
     container.style.background = theme.bgGradient;
-    container.style.backgroundAttachment = 'fixed';
   });
 
-  // Target html element
-  document.documentElement.style.backgroundColor = theme.bodyBg;
-  document.documentElement.style.background = theme.bgGradient;
-
-  // Apply to starfield if it exists (oracle.html)
-  const starfield = document.getElementById('starfield');
-  if (starfield) {
-    starfield.style.background = theme.bgGradient;
-  }
-
-  // Create themed stars for oracle.html
-  createThemedStarfield(themeName);
-
-  // Update main particles if they exist
-  if ($('particles-canvas')) {
-    applyThemeToMainParticles(themeName);
-  }
+  // Re-initialize all backgrounds with new theme
+  initWebBackground('web-canvas-landing', theme);
+  initWebBackground('web-canvas-main', theme);
+  applyThemeToLanding(themeName);
+  initMainParticles(themeName);
   
-  // Update landing particles if they exist
-  if ($('landing-particles-canvas')) {
-    applyThemeToLanding(themeName);
-  }
-
-  // Save to localStorage for persistence
   localStorage.setItem('selectedTheme', themeName);
 
-  // Update active button in main menu
   const themeButtons = document.querySelectorAll('.theme-color-btn');
   themeButtons.forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === themeName);
   });
-
-  // Close menu after selecting theme
-  const menuDropdown = document.getElementById('main-menu-dropdown');
-  if (menuDropdown) {
-    menuDropdown.classList.remove('visible');
+  
+  // Notify iframe of theme change
+  const iframe = document.querySelector('#sanctuary-panel iframe');
+  if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'THEME_CHANGED', theme: themeName }, '*');
   }
-
-  // Notify oracle.html if in iframe
-  window.postMessage({ type: 'THEME_CHANGED', theme: themeName }, '*');
 }
 
-// Load saved theme on page load
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
-  setTimeout(() => applyTheme(savedTheme), 100);
+  applyTheme(savedTheme);
 }
 
-// Initialize theme system
 function initThemeSystem() {
   const menuDropdown = document.getElementById('main-menu-dropdown');
-  if (!menuDropdown) return;
+  if (!menuDropdown || document.querySelector('.theme-colors-grid')) return;
 
-  // Check if theme section already exists
-  if (document.querySelector('.theme-colors-grid')) return;
-
-  // Create theme section AFTER all menu items (at the end)
   const themeSeparator = document.createElement('hr');
-  
   const themeLabel = document.createElement('div');
   themeLabel.className = 'theme-label';
   themeLabel.textContent = '🎨 Themes';
-
   const themeContainer = document.createElement('div');
   themeContainer.className = 'theme-colors-grid';
 
-  // Create color theme buttons
   Object.entries(THEME_COLORS).forEach(([key, theme]) => {
     const btn = document.createElement('button');
     btn.className = 'theme-color-btn';
     btn.dataset.theme = key;
     btn.title = theme.name;
-    
-    // Get primary and secondary colors for gradient
     const primaryColor = theme.colors['--deep-purple'];
     const secondaryColor = theme.colors['--soft-violet'];
     const accentColor = theme.colors['--gold'];
-
     btn.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
     btn.style.color = accentColor;
-
-    // Add hover effect
-    btn.addEventListener('mouseenter', function() {
-      this.style.transform = 'scale(1.05)';
-      this.style.borderColor = accentColor;
-      this.style.boxShadow = `0 0 15px ${accentColor}`;
-    });
-
-    btn.addEventListener('mouseleave', function() {
-      this.style.transform = 'scale(1)';
-      this.style.borderColor = 'rgba(255, 215, 0, 0.3)';
-      this.style.boxShadow = 'none';
-    });
-
-    // Add click handler
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      applyTheme(key);
-    });
-
-    // Create inner content
-    btn.innerHTML = `
-      <span style="font-size: 1.4rem;">${theme.icon}</span>
-      <span style="font-size: 0.7rem; line-height: 1.1;">${theme.name}</span>
-    `;
-
+    btn.addEventListener('click', (e) => { e.preventDefault(); applyTheme(key); });
+    btn.innerHTML = `<span style="font-size: 1.4rem;">${theme.icon}</span><span style="font-size: 0.7rem; line-height: 1.1;">${theme.name}</span>`;
     themeContainer.appendChild(btn);
   });
 
-  // Add theme section to END of dropdown (after all links)
   menuDropdown.appendChild(themeSeparator);
   menuDropdown.appendChild(themeLabel);
   menuDropdown.appendChild(themeContainer);
-
-  // Load saved theme
   loadSavedTheme();
 }
 
-// Call this after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initThemeSystem, 100);
 });
 
-// Add CSS styles (add to your styles.css)
 const themeStyles = `
-.theme-colors-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding: 10px 10px;
-  margin-bottom: 10px;
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.theme-colors-grid::-webkit-scrollbar {
-  width: 6px;
-}
-
-.theme-colors-grid::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.theme-colors-grid::-webkit-scrollbar-thumb {
-  background: var(--gold);
-  border-radius: 3px;
-}
-
-.theme-colors-grid::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-light);
-}
-
-.theme-color-btn {
-  padding: 12px;
-  border: 2px solid rgba(255, 215, 0, 0.3);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-direction: column;
-  text-align: center;
-  font-size: 0.7rem;
-  font-family: var(--font-body);
-}
-
-.theme-color-btn:hover {
-  transform: scale(1.05);
-  border-color: var(--gold);
-  box-shadow: 0 0 15px var(--gold);
-}
-
-.theme-color-btn.active {
-  border-color: var(--gold) !important;
-  box-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet) !important;
-  transform: scale(1.1);
-  position: relative;
-}
-
-.theme-color-btn.active::after {
-  content: '✓';
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--gold);
-  color: var(--deep-purple);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.theme-label {
-  padding: 10px 15px;
-  color: var(--gold);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid var(--border-glass);
-  margin-bottom: 5px;
-  text-align: center;
-}
-
-#main-menu-dropdown {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-#main-menu-dropdown::-webkit-scrollbar {
-  width: 8px;
-}
-
-#main-menu-dropdown::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-#main-menu-dropdown::-webkit-scrollbar-thumb {
-  background: var(--gold);
-  border-radius: 4px;
-}
-
-#main-menu-dropdown::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-light);
-}
-
-@media (max-width: 768px) {
-  .theme-colors-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-height: 250px;
-  }
-  
-  .theme-color-btn {
-    padding: 10px;
-    font-size: 0.65rem;
-  }
-
-  #main-menu-dropdown {
-    max-height: 500px;
-  }
-}
+.theme-label { padding: 10px 15px; color: var(--gold); font-family: var(--font-display); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; text-align: center; }
+.theme-colors-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
+.theme-color-btn { padding: 10px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; flex-direction: column; text-align: center; font-size: 0.7rem; font-family: var(--font-body); }
+.theme-color-btn:hover { transform: scale(1.05); border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
+.theme-color-btn.active { border-color: var(--gold) !important; box-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet) !important; transform: scale(1.1); position: relative; }
+.theme-color-btn.active::after { content: '✓'; position: absolute; top: -8px; right: -8px; background: var(--gold); color: var(--deep-purple); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
 `;
 
-// Inject styles into document
 if (!document.querySelector('style[data-theme-system]')) {
   const styleSheet = document.createElement('style');
   styleSheet.setAttribute('data-theme-system', 'true');
