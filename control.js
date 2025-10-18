@@ -2509,7 +2509,7 @@ const THEME_COLORS = {
   },
   ethereal: {
     name: 'Ethereal Blue',
-    icon: '🌌',
+    icon: '❄️',
     colors: {
       '--space-black': '#0a1628',
       '--deep-purple': '#0a2540',
@@ -2532,7 +2532,7 @@ const THEME_COLORS = {
   },
   sunset: {
     name: 'Sunset',
-    icon: '🌅',
+    icon: '🍁',
     colors: {
       '--space-black': '#2c1810',
       '--deep-purple': '#2c1e3e',
@@ -2555,7 +2555,7 @@ const THEME_COLORS = {
   },
   forest: {
     name: 'Enchanted Forest',
-    icon: '🌲',
+    icon: '🍀',
     colors: {
       '--space-black': '#0d1f16',
       '--deep-purple': '#1a3a2a',
@@ -2624,7 +2624,7 @@ const THEME_COLORS = {
   },
   royal: {
     name: 'Royal Amethyst',
-    icon: '👑',
+    icon: '🔮',
     colors: {
       '--space-black': '#3d2817',
       '--deep-purple': '#4a3728',
@@ -2639,15 +2639,15 @@ const THEME_COLORS = {
       '--highlight-glass': 'rgba(90, 70, 50, 0.6)',
       '--border-glass': 'rgba(196, 175, 159, 0.15)',
       '--glow-cyan': '#d4c5b9',
-      '--glow-magenta': '#c4af9f',
+      '--glow-magenta': '#a8419cff',
       '--shadow-color': 'rgba(0, 0, 0, 0.85)'
     },
-    bgGradient: 'radial-gradient(ellipse at center, #5c4a3a 0%, #4a3a2a 50%, #3d2817 100%)',
+    bgGradient: 'radial-gradient(ellipse at center, #7a5c7aff 0%, #6c4b67ff 50%, #6b496dff 100%)',
     bodyBg: '#3d2817'
   },
   ocean: {
     name: 'Ocean Deep',
-    icon: '🌊',
+    icon: '🪼',
     colors: {
       '--space-black': '#001a33',
       '--deep-purple': '#003d66',
@@ -2673,12 +2673,12 @@ const THEME_COLORS = {
 const THEME_STAR_SHAPES = {
   mystical: { char: '✦', shadowColor: '#ffd700' },
   ethereal: { char: '❄️', shadowColor: '#64ffda' },
-  sunset: { char: '🔥', shadowColor: '#ff9f43' },
+  sunset: { char: '₊˚⊹⋆🍁⋆⊹˚ ₊', shadowColor: '#ff9f43' },
   forest: { char: '🍀', shadowColor: '#2ecc71' },
   midnight: { char: '✨', shadowColor: '#e0e0e0' },
   coral: { char: '🪸', shadowColor: '#ff7b54' },
-  royal: { char: '💎', shadowColor: '#c4af9f' },
-  ocean: { char: '🌊', shadowColor: '#00d9ff' }
+  royal: { char: '🔮', shadowColor: '#b59fc4ff' },
+  ocean: { char: '🪼 ⋆‧🫧', shadowColor: '#00d9ff' }
 };
 
 function createThemedStarfield(themeName) {
