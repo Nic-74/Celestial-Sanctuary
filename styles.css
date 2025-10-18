@@ -216,6 +216,10 @@ hr {
     transform: translateY(-10px);
     transition: var(--transition-fast);
     box-shadow: 0 10px 30px var(--shadow-color);
+
+    /* --- ADD THESE TWO LINES --- */
+    max-height: 80vh; /* Set a max height (80% of viewport height) */
+    overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
 }
 #main-menu-dropdown.visible {
     opacity: 1;
@@ -241,6 +245,24 @@ hr {
     margin: 0.5rem 0;
     box-shadow: none;
     background-image: linear-gradient(to right, transparent, var(--border-glass), transparent);
+}
+/* --- ADD THIS NEW RULE BLOCK FOR THE SCROLLBAR --- */
+#main-menu-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+#main-menu-dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-light);
 }
 
 /* SOLAR SYSTEM NAVIGATION */
