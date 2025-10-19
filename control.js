@@ -62,6 +62,7 @@ const DOM = {
     saveEditBtn: $('save-edit-btn'),
     cancelEditBtn: $('cancel-edit-btn'),
     lightbox: $('lightbox'),
+    scrollToTopBtn: $('scroll-to-top'),
     lightboxImg: $('lightbox-image'),
     lightboxCaption: $('lightbox-caption'),
     scrollToTopBtn: $('scroll-to-top'),
@@ -523,23 +524,26 @@ function addEventListeners() {
 function addSanctuaryEventListeners() {
      const menuButton = document.getElementById('main-menu-button');
      const menuDropdown = document.getElementById('main-menu-dropdown');
-     if(menuButton && menuDropdown) {
-         menuButton.addEventListener('click', (e) => {
-             e.stopPropagation();
-             menuDropdown.classList.toggle('visible');
-         });
-         
-         $$('#main-menu-dropdown a').forEach(link => {
-            link.addEventListener('click', () => {
-                menuDropdown.classList.remove('visible');
-            });
-         });
+     const menuIcon = document.getElementById('menu-icon-img');
 
-         document.addEventListener('click', (e) => {
-             if (!menuDropdown.contains(e.target) && !menuButton.contains(e.target)) {
-                 menuDropdown.classList.remove('visible');
-             }
-         });
+     if(menuButton && menuDropdown && menuIcon) {
+        // This handles the main click on the button itself
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = menuDropdown.classList.toggle('visible');
+            menuIcon.src = isVisible ? 'photos/favicon2.png' : 'photos/favicon1.png';
+        });
+
+        // The link clicks inside the menu are handled by the global closeMenu() in index.html
+
+        // This handles closing the menu by clicking outside of it
+        document.addEventListener('click', (e) => {
+            if (!menuDropdown.contains(e.target) && !menuButton.contains(e.target)) {
+                if (menuDropdown.classList.contains('visible')) {
+                    closeMenu(); // Use the global closeMenu() to reset icon and hide menu
+                }
+            }
+        });
      }
 
      document.body.addEventListener('dblclick', (e) => {
@@ -804,13 +808,12 @@ function renderPanel(panelId) {
     DOM.mainContent.innerHTML = content;
     DOM.mainContent.scrollTop = 0;
 
+    // Apply specific full-page styling only for Nebula of Solitude
     if (panelId === 'calendar') {
         DOM.mainContent.style.backgroundColor = 'transparent';
         DOM.mainContent.style.padding = '0';
-    } else if (panelId === 'sanctuary') {
-        DOM.mainContent.style.backgroundColor = '';
-        DOM.mainContent.style.padding = '0';
     } else {
+        // All other panels, including the sanctuary, now use the default padding
         DOM.mainContent.style.backgroundColor = '';
         DOM.mainContent.style.padding = '100px 7vw 50px 7vw'; 
     }
@@ -827,6 +830,7 @@ function renderPanel(panelId) {
     if (panelId === 'timeline') initChroniclePanelJS();
     if (panelId === 'guide') initGuidePanelJS();
     if (panelId === 'games') initGamesPanelJS();
+    if (panelId === 'sanctuary') initSanctuaryPanelJS();
 }
 
 function handleMainContentClick(e) {
@@ -1045,6 +1049,359 @@ function updateProgressBar() {
 }
 function setProgress(e) { const width = e.currentTarget.clientWidth; const clickX = e.offsetX; if (AppState.music.player.duration) AppState.music.player.currentTime = (clickX / width) * AppState.music.player.duration; }
 function formatTime(seconds) { const minutes = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return isNaN(minutes) || isNaN(secs) ? '0:00' : `${minutes}:${secs < 10 ? '0' : ''}${secs}`; }
+
+// ===================================================================
+// START: CODE INTEGRATED FROM ORACLE.HTML
+// ===================================================================
+
+const personalizedContent = {
+    apology: [
+        "My Zoya (我的宝贝), I'm sorry if I ever get lost in my own world, like I did with that mathematics book on the day we met. You broke through my shyness then, and you deserve all my attention now. 对不起.",
+        "I'm sorry if my quietness ever makes you feel distant. Sometimes I'm still that boy who was scared to send a Facebook message, afraid of saying the wrong thing. But my heart is always talking to you.",
+        "Forgive me if I ever seem clumsy with my feelings. I'm better at fixing bicycles than expressing what's in my heart, but I promise I'm always trying my best for you.",
+        "对不起, my love. I'm sorry if I ever get too focused on my own plans, like when I wanted to rush back from Kyoto. It was only to see you, but your feelings should always come first.",
+        "I apologize for any time I've made you feel unseen. You saw me when I felt invisible at the sports festival, and I promise to always see you, the true you.",
+        "Sometimes my overthinking gets the best of me, and I'm sorry if that ever causes you worry. You are the calm to my storm, the answer to all my 'what ifs'.",
+        "I'm sorry if I'm not always as expressive as I should be. You once called my goodnight message a 'sweet poem', and it meant the world to me. I'll try to write more poems for you.",
+        "Forgive my shyness. Remember how I couldn't approach you in art class? I'm so glad we moved past that, and I'm sorry if my hesitation ever made you doubt my feelings.",
+        "I'm sorry for being a silly boy who thought girls were 'complicated'. You taught me that love is the simplest, most beautiful thing in the world. Thank you for your patience.",
+        "对不起. I'm sorry if my husky voice ever speaks a sharp word. It was the first thing you noticed about me, and I only ever want it to speak words of love and kindness to you."
+    ],
+    promise: [
+        "To make it up to you, I promise to put my world on pause and listen, just like you always listen to me talk about mathematics.",
+        "I promise to always come to your home, just like I did when I worried about your dream, to make sure you're okay and see your beautiful smile.",
+        "I promise to take you on a date to Joyful, just us, for chicken steak and to remember how our story began.",
+        "As compensation, let's have an art date. We can draw together, and I'll sketch your face like I promised, as if you're the first and only person I've ever drawn.",
+        "I promise a full day of your favorite Chinese dramas, and I won't complain once. I'll even try to learn some phrases!",
+        "To make it right, I'll cook for you, just like your father cooked for me. It's my turn to welcome you with a warm meal and a full heart.",
+        "I promise to hold you and never let go, a cuddle more powerful than the typhoon that couldn't keep me away from you."
+    ],
+    comfort: [
+        "Remember when we were two 'forlorn birds in a foreign land'? No matter how lonely the world feels, you are not alone. I'm here, and my heart is your home.",
+        "Let my love be like the blanket that covers you when you sleep, chasing away all the worries and pains, just like in the goodnight message I sent.",
+        "You are the girl with hair like 'strands of heaven'. Let me gently stroke your hair until all your sadness melts away.",
+        "The world saw a boy with a book; you saw me. When you feel down, remember that I will always see the incredible, beautiful you. 我爱你."
+    ],
+    sweet: [
+        "You deserve all the sweet things in the cosmos. Let's get your favorite dessert, find a quiet place, and just be together.",
+        "My love for you is sweeter than any cake. But a cake would be nice too, right? Your wish is my command."
+    ],
+    pamper: [
+        "You once appeared in my dreams looking unhappy, and it made me rush to your side. Let me erase all your worries with a day of pure relaxation. You deserve to be treated like the queen you are.",
+        "Let me take care of you. A full spa day, a massage, anything you need to feel refreshed and cherished."
+    ],
+    qualityTime: [
+        "Remember our first real 'date' at the library? Let's go back. We don't have to talk, we can just exist in the same space, together. That's all I need.",
+        "No phones, no distractions. Just you and me, like that first conversation at the sports festival where the whole world disappeared."
+    ],
+    dinner: [
+        "Let's celebrate your victory! How about we go to Joyful for our special chicken steak? A tribute to the day our journey really began.",
+        "Your achievement deserves a feast worthy of your family's hospitality. I'll find the best place to honor you tonight."
+    ],
+    shopping: [
+        "You are a treasure. For this great accomplishment, you deserve a material treasure of your choice. Let's go find something as beautiful as you are.",
+    ],
+    adventure: [
+        "Let's go on a spontaneous adventure! Maybe not as dramatic as me jogging to your house to fix a bicycle, but just as memorable.",
+        "You deserve a victory trip. Maybe we can finally take some cityscape photos in Kyoto together."
+    ],
+    queen: [
+        "For the next 24 hours, you are the absolute ruler. Your every wish is my command. No task too great, no request too small for my queen.",
+    ],
+    amends: [
+        "To balance the scales, you can choose your compensation: a trip to the restaurant of your choice, a shopping spree for something that makes you smile, or an adventure to create a new happy memory.",
+        "The cosmos demands balance. Therefore, I offer a 'Customized Coupon' just like the one Zoya wanted. You can redeem it for absolutely anything your heart desires."
+    ],
+    burden: [
+        "For one full week, all your chores are mine. No dishes, no worries. Your only job is to rest and feel loved.",
+        "Tell me the heaviest thing on your mind. For the next three days, I will carry that worry for you so you can be peace."
+    ]
+};
+
+function createOracleStarfield(themeName) {
+    const starfield = document.getElementById('starfield');
+    if (!starfield) return;
+    const theme = THEME_COLORS[themeName];
+    const starShape = THEME_STAR_SHAPES[themeName];
+    if (!theme || !starShape) return;
+    starfield.innerHTML = '';
+    starfield.style.background = theme.bgGradient;
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = starShape.char;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.fontSize = (Math.random() * 10 + 6) + 'px';
+        star.style.color = theme.colors['--gold'];
+        star.style.filter = `drop-shadow(0 0 ${Math.random() * 2 + 1}px ${starShape.shadowColor})`;
+        star.style.animationDelay = Math.random() * 3 + 's';
+        star.style.animationDuration = (2 + Math.random() * 3) + 's';
+        star.style.opacity = (Math.random() * 0.4 + 0.3);
+        starfield.appendChild(star);
+    }
+    for (let i = 0; i < 2; i++) {
+        const shootingStar = document.createElement('div');
+        shootingStar.className = 'shooting-star';
+        shootingStar.textContent = starShape.char;
+        shootingStar.style.left = Math.random() * 100 + '%';
+        shootingStar.style.top = Math.random() * 50 + '%';
+        shootingStar.style.color = theme.colors['--gold'];
+        shootingStar.style.filter = `drop-shadow(0 0 8px ${starShape.shadowColor})`;
+        shootingStar.style.animationDelay = Math.random() * 10 + 's';
+        shootingStar.style.fontSize = '14px';
+        starfield.appendChild(shootingStar);
+    }
+    const nebulae = [{ left: '10%', top: '20%' }, { left: '70%', top: '60%' }, { left: '40%', top: '80%' }];
+    nebulae.forEach(neb => {
+        const nebula = document.createElement('div');
+        nebula.className = 'nebula';
+        nebula.style.background = theme.colors['--soft-violet'];
+        nebula.style.left = neb.left;
+        nebula.style.top = neb.top;
+        nebula.style.opacity = '0.2';
+        starfield.appendChild(nebula);
+    });
+}
+
+
+
+
+function switchSanctuaryView(viewIdToShow) {
+    
+    document.getElementById('sanctuary-main-container')?.classList.remove('scrollable-content'); 
+
+    document.querySelectorAll('#sanctuary-main-container > .sanctuary-view').forEach(view => {
+        view.classList.remove('active');
+    });
+    const viewToShow = document.getElementById(viewIdToShow);
+    if (viewToShow) {
+        viewToShow.classList.add('active');
+    }
+}
+
+// UPDATED: This now uses the new helper function
+function showWelcomeQuestion() {
+    switchSanctuaryView('welcomeQuestion');
+}
+
+// UPDATED: This now correctly shows the realms container before activating a specific realm
+function showRealm(realmId) {
+    switchSanctuaryView('entranceSection'); 
+
+    // Add scrollable class to the main container when entering a realm
+    document.getElementById('sanctuary-main-container')?.classList.add('scrollable-content'); 
+
+    // This part of the logic remains the same to activate the correct realm inside
+    $$('#sanctuary-panel .realm.active').forEach(realm => realm.classList.remove('active'));
+    const realmToShow = $(realmId + 'Realm');
+    if (realmToShow) realmToShow.classList.add('active');
+    if (realmId === 'guidance') createConstellation();
+    if (realmId === 'fortune') initScratchCard();
+}
+// UPDATED: This now correctly returns to the main hub
+function returnToWelcome() {
+    switchSanctuaryView('welcomeQuestion');
+}
+
+function revealBlessing(icon, title, message) {
+    $('modalIcon').textContent = icon;
+    $('modalTitle').textContent = title;
+    $('modalMessage').innerHTML = message;
+    $('blessingModal').classList.add('active');
+}
+
+function revealDynamicBlessing(category, icon, title) {
+    const mainContentArray = personalizedContent[category];
+    let message = mainContentArray[Math.floor(Math.random() * mainContentArray.length)];
+    if (category === 'apology') {
+        const promiseArray = personalizedContent['promise'];
+        const randomPromise = promiseArray[Math.floor(Math.random() * promiseArray.length)];
+        message += `<span class="promise"><strong>Promise of Compensation:</strong><br>${randomPromise}</span>`;
+    }
+    revealBlessing(icon, title, message);
+}
+
+function readBook(type, title, content) {
+    $('bookTitle').textContent = title;
+    $('bookContent').textContent = content;
+    $('bookModal').classList.add('active');
+}
+
+function closeModal(modalId) { $(modalId).classList.remove('active'); }
+
+const wisdoms = [
+    "The cosmos whispers: Every storm passes, every wound heals. You are loved beyond the capacity of words to express.",
+    "Ancient prophecy reveals: The strongest bonds are forged in the fires of challenge, tempered by time, unbreakable.",
+    "The stars align to say: Your happiness is the universe's greatest priority, written in celestial law.",
+    "Celestial wisdom speaks: In every ending lies a new beginning, in every tear, the seed of future joy.",
+    "The void echoes: You are cherished, valued, and irreplaceable in this cosmic dance of existence.",
+    "Oracle of ages declares: Bad days fade like morning mist before the eternal sun of unconditional love."
+];
+
+function revealWisdom() {
+    const wisdom = wisdoms[Math.floor(Math.random() * wisdoms.length)];
+    const oracleText = $('oracleText');
+    oracleText.style.opacity = '0';
+    setTimeout(() => {
+        oracleText.textContent = wisdom;
+        oracleText.style.transition = 'opacity 1s';
+        oracleText.style.opacity = '1';
+    }, 500);
+}
+
+function createConstellation() {
+    const canvas = $('constellationCanvas');
+    if (!canvas) return;
+    canvas.innerHTML = '';
+    const memories = [
+        { text: "The First Smile", x: 15, y: 20 }, { text: "First Laugh Together", x: 35, y: 15 },
+        { text: "That Perfect Day", x: 55, y: 25 }, { text: "When I Knew", x: 70, y: 20 },
+        { text: "Your Favorite Moment", x: 85, y: 30 }, { text: "Our Inside Joke", x: 25, y: 50 },
+        { text: "The Comfort We Share", x: 45, y: 55 }, { text: "Dancing in the Kitchen", x: 65, y: 60 },
+        { text: "Late Night Talks", x: 80, y: 55 }, { text: "Future Adventures", x: 20, y: 80 },
+        { text: "Forever Promise", x: 50, y: 85 }, { text: "Every Day After", x: 75, y: 75 }
+    ];
+    memories.forEach(memory => {
+        const point = document.createElement('div');
+        point.className = 'astral-point';
+        point.style.left = memory.x + '%';
+        point.style.top = memory.y + '%';
+        point.title = memory.text;
+        canvas.appendChild(point);
+    });
+    for (let i = 0; i < memories.length - 1; i++) {
+        const line = document.createElement('div');
+        line.className = 'astral-line';
+        const p1 = memories[i], p2 = (i % 4 === 3) ? memories[i - 2] : memories[i + 1];
+        const canvasWidth = canvas.offsetWidth, canvasHeight = canvas.offsetHeight;
+        if (canvasWidth > 0 && canvasHeight > 0) {
+            const p1x = p1.x / 100 * canvasWidth, p1y = p1.y / 100 * canvasHeight;
+            const p2x = p2.x / 100 * canvasWidth, p2y = p2.y / 100 * canvasHeight;
+            const length = Math.hypot(p2x - p1x, p2y - p1y);
+            const angle = Math.atan2(p2y - p1y, p2x - p1x) * 180 / Math.PI;
+            line.style.width = length + 'px';
+            line.style.left = p1.x + '%';
+            line.style.top = p1.y + '%';
+            line.style.transform = `rotate(${angle}deg)`;
+            canvas.appendChild(line);
+        }
+    }
+}
+
+let litCandles = 0;
+const totalCandles = 7;
+function lightCandle(candle) {
+    if (!candle.classList.contains('lit')) {
+        candle.classList.add('lit');
+        litCandles++;
+        if (litCandles === totalCandles) {
+            $('ritualComplete').style.display = 'block';
+            setTimeout(() => {
+                revealBlessing('◈', 'The Ritual is Complete', 'Ancient forces smile upon you. Harmony has been restored. All is forgiven, all is renewed, all is well.');
+                setTimeout(resetCandles, 2000);
+            }, 1500);
+        }
+    }
+}
+
+function resetCandles() {
+    $$('#sanctuary-panel .candle.lit').forEach(c => c.classList.remove('lit'));
+    $('ritualComplete').style.display = 'none';
+    litCandles = 0;
+}
+
+const winPrizes = [
+    { title: "Cosmic Coupon: Weekend Getaway!", description: "Claim a weekend away to a destination of your choice." },
+    { title: "Cosmic Coupon: No Dishes For a Week!", description: "You are exempt from all dish-related duties for 7 days." },
+    { title: "Cosmic Coupon: Sunset Dinner!", description: "A romantic dinner and drinks at a beautiful scenic spot." },
+    { title: "Cosmic Coupon: Breakfast in Bed!", description: "A delicious, royal breakfast served to you in bed." },
+    { title: "Cosmic Coupon: Relaxing Massage!", description: "A full, professional-tier massage with luxurious oils." },
+    { title: "Cosmic Coupon: Movie Marathon!", description: "Your choice of movie or show, with all your favorite snacks." },
+    { title: "Cosmic Coupon: A Giant Cuddle!", description: "Redeemable for one enormous, soul-recharging cuddle, anytime." },
+    { title: "Cosmic Coupon: Customized!", description: "This coupon can be whatever you want it to be. Your wish is my command!" }
+];
+const losePrize = { title: "A Whisper from the Void...", description: "The stars weren't aligned this time. But my love for you is constant! Try again." };
+let scratchCtx;
+
+function initScratchCard() {
+    const isWin = Math.random() < 0.1;
+    const prize = isWin ? winPrizes[Math.floor(Math.random() * winPrizes.length)] : losePrize;
+    $('prizeTitle').textContent = prize.title;
+    $('prizeDescription').textContent = prize.description;
+    setupCanvas();
+}
+
+function setupCanvas() {
+    const scratchCanvas = $('scratchCanvas');
+    if (!scratchCanvas) return;
+    scratchCtx = scratchCanvas.getContext('2d');
+    scratchCanvas.width = scratchCanvas.parentElement.offsetWidth;
+    scratchCanvas.height = scratchCanvas.parentElement.offsetHeight;
+    const gradient = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
+    gradient.addColorStop(0, '#d4af37');
+    gradient.addColorStop(1, '#ffd700');
+    scratchCtx.fillStyle = gradient;
+    scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+    scratchCtx.fillStyle = '#4a2c0f';
+    scratchCtx.font = 'bold 30px Cinzel';
+    scratchCtx.textAlign = 'center';
+    scratchCtx.textBaseline = 'middle';
+    scratchCtx.fillText('Scratch to Reveal Your Prize', scratchCanvas.width / 2, scratchCanvas.height / 2);
+    scratchCtx.font = '20px Cinzel';
+    scratchCtx.fillText('✧', scratchCanvas.width / 2, scratchCanvas.height / 2 + 40);
+    let isDrawing = false;
+    const start = (e) => { e.preventDefault(); isDrawing = true; };
+    const end = (e) => { e.preventDefault(); isDrawing = false; };
+    const draw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const rect = scratchCanvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+    };
+    scratchCanvas.addEventListener('mousedown', start);
+    scratchCanvas.addEventListener('mouseup', end);
+    scratchCanvas.addEventListener('mousemove', draw);
+    scratchCanvas.addEventListener('touchstart', start, { passive: false });
+    scratchCanvas.addEventListener('touchend', end, { passive: false });
+    scratchCanvas.addEventListener('touchmove', draw, { passive: false });
+}
+
+function scratch(x, y) {
+    if (!scratchCtx) return;
+    scratchCtx.globalCompositeOperation = 'destination-out';
+    scratchCtx.beginPath();
+    scratchCtx.arc(x, y, 25, 0, Math.PI * 2, true);
+    scratchCtx.fill();
+}
+
+function applyThemeToOracle(themeName) {
+    const themeStars = {
+      mystical: { char: '✦', color: '#ffd700' }, ethereal: { char: '💧', color: '#64ffda' },
+      sunset: { char: '🔥', color: '#ff9f43' }, forest: { char: '🍃', color: '#2ecc71' },
+      midnight: { char: '✨', color: '#e0e0e0' }, coral: { char: '🪸', color: '#ff7b54' },
+      royal: { char: '💎', color: '#c4af9f' }, ocean: { char: '🌊', color: '#00d9ff' }
+    };
+    const starShape = themeStars[themeName];
+    if (!starShape) return;
+    const sanctuaryPanel = $('sanctuary-panel');
+    if (!sanctuaryPanel) return;
+    sanctuaryPanel.querySelectorAll('.star, .shooting-star').forEach(star => {
+      star.textContent = starShape.char;
+      star.style.color = starShape.color;
+    });
+}
+
+function initSanctuaryPanelJS() {
+    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
+    createOracleStarfield(savedTheme);
+}
+
+// ===================================================================
+// END: CODE INTEGRATED FROM ORACLE.HTML
+// ===================================================================
+
 
 const getBookPanelHTML = () => `<div id="book-reader-panel" class="content-panel active"><h2 class="panel-header">The Stardust Tome</h2><p class="panel-subheader">Our complete story, written in the stars.</p><div class="book-actions-sticky"><button class="btn primary" id="add-chapter-btn">✏️ Add New Chapter</button></div><div class="book-layout"><div id="chapter-list-container"></div><div id="chapter-content-container"></div></div></div>`;
 const getGalleryPanelHTML = () => `<div id="gallery-panel" class="content-panel active"><h2 class="panel-header">Gallery of Ages</h2><p class="panel-subheader">Our journey through time, captured in precious moments.</p><div class="upload-button-container"><button class="btn primary" id="upload-photo-btn">🖼️ Upload Photo</button><input type="file" id="photo-upload-input" hidden accept="image/*"></div><div id="gallery-filters"></div><hr><div id="gallery-grid"></div><div id="gallery-show-more-container" style="text-align: center; margin-top: 2rem;"></div></div>`;
@@ -1965,10 +2322,108 @@ function initTimeWeaver() {
 }
 
 const getSanctuaryPanelHTML = () => `
-    <div id="sanctuary-panel" class="content-panel active" style="padding: 0; background: none;">
-        <iframe src="oracle.html" style="width: 100%; height: 100vh; border: none; overflow-y: auto;"></iframe>
+<div id="sanctuary-panel">
+    <div id="sanctuary-main-container">
+
+        <div id="sanctuary-entrance" class="sanctuary-view active">
+            <div class="ancient-seal"></div>
+            <h1 class="sanctuary-title">Inner Sanctum</h1>
+            <p class="sanctuary-subtitle">Where Celestial Powers Heal All Wounds</p>
+            <button class="enter-button" onclick="showWelcomeQuestion()">ENTER</button>
+        </div>
+
+        <div id="welcomeQuestion" class="sanctuary-view sanctuary-hub">
+            <h2 class="hub-title">Welcome, Precious Soul</h2>
+            <p class="hub-subtitle">The cosmos has guided you here. Choose with your heart, and the universe shall respond.</p>
+            <div class="hub-grid">
+                <div class="hub-portal" onclick="showRealm('comfort')">
+                    <div class="portal-icon">🫂</div>
+                    <div class="portal-title">I Seek Comfort</div>
+                </div>
+                <div class="hub-portal" onclick="showRealm('celebrate')">
+                    <div class="portal-icon">✨</div>
+                    <div class="portal-title">I Achieved Something</div>
+                </div>
+                <div class="hub-portal" onclick="showRealm('hurt')">
+                    <div class="portal-icon">🌙</div>
+                    <div class="portal-title">Something Hurt Me</div>
+                </div>
+                <div class="hub-portal" onclick="showRealm('guidance')">
+                    <div class="portal-icon">🔮</div>
+                    <div class="portal-title">I Need Guidance</div>
+                </div>
+                <div class="hub-portal" onclick="showRealm('fortune')">
+                    <div class="portal-icon">🎲</div>
+                    <div class="portal-title">A Game of Fortune</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="entranceSection" class="sanctuary-view sanctuary-realms">
+             <button class="back-to-hub-btn" onclick="returnToWelcome()">← Back to Hub</button>
+            <section id="comfortRealm" class="realm">
+                <h2 class="section-title">✧ The Realm of Comfort ✧</h2>
+                <p class="realm-subheader">"When sadness weighs heavy, these portals and texts open to ease your burden"</p>
+                <div class="sacred-library">
+                    <div class="book-shelf">
+                        <div class="book" onclick="readBook('comfort', 'Scrolls of Solace', 'When sadness descends like night, remember: dawn always comes. The universe has weathered countless storms and always finds balance. Your feelings are valid, your pain is real, but neither are permanent. This too shall pass, and joy will return like spring after winter.')">
+                            <div class="book-title">📜 Scrolls of Solace</div>
+                            <p class="book-description">Words to heal the weary heart</p>
+                        </div>
+                        <div class="book" onclick="readBook('magic', 'The Grimoire of Daily Miracles', 'Magic exists in the mundane: in breakfast made with love, in texts that say ‘thinking of you’, in remembering how she takes her tea. Pay attention to these small enchantments—they are the true sorcery that sustains love.')">
+                            <div class="book-title">✨ The Grimoire of Daily Miracles</div>
+                            <p class="book-description">Finding magic in everyday moments</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="realm-grid">
+                    <div class="realm-portal" onclick="revealDynamicBlessing('comfort', '🫂', 'Warmth & Presence')"><div class="realm-icon">🫂</div><h3 class="realm-title">Warmth & Presence</h3><p class="realm-description">For when you need to feel held</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('sweet', '🍰', 'Sweet Solace')"><div class="realm-icon">🍰</div><h3 class="realm-title">Sweet Comfort</h3><p class="realm-description">For when you crave sweetness</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('pamper', '🌸', 'Sacred Restoration')"><div class="realm-icon">🌸</div><h3 class="realm-title">Rejuvenation</h3><p class="realm-description">For when you need renewal</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('qualityTime', '⏳', 'Timeless Together')"><div class="realm-icon">⏳</div><h3 class="realm-title">Quality Time</h3><p class="realm-description">For when you need connection</p></div>
+                </div>
+            </section>
+            <section id="celebrateRealm" class="realm">
+                <h2 class="section-title">✧ The Realm of Triumph ✧</h2>
+                <p class="realm-subheader">"Your achievements deserve cosmic celebration"</p>
+                <div class="realm-grid">
+                    <div class="realm-portal" onclick="revealDynamicBlessing('dinner', '🎉', 'Victory Feast')"><div class="realm-icon">🎉</div><h3 class="realm-title">Celebration Dinner</h3><p class="realm-description">For worthy accomplishments</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('shopping', '✨', 'Reward of Stars')"><div class="realm-icon">✨</div><h3 class="realm-title">Material Reward</h3><p class="realm-description">For exceptional achievements</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('adventure', '🗺️', 'Victory Quest')"><div class="realm-icon">🗺️</div><h3 class="realm-title">Adventure Reward</h3><p class="realm-description">For brave accomplishments</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('queen', '👑', 'Day of Glory')"><div class="realm-icon">👑</div><h3 class="realm-title">Total Authority</h3><p class="realm-description">For legendary achievements</p></div>
+                </div>
+            </section>
+            <section id="hurtRealm" class="realm">
+                <h2 class="section-title">✧ The Realm of Healing ✧</h2>
+                <p class="realm-subheader">"When wrongs must be righted, these pathways and rituals open"</p>
+                <div class="ritual-altar"><p class="ritual-instructions">"Light each of the seven sacred candles to complete the ancient ritual.<br>With each flame, a burden lifts and harmony returns."</p><div class="candles"><div class="candle" onclick="lightCandle(this)" title="Candle of Understanding"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Forgiveness"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Love"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Joy"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Peace"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Renewal"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Eternity"></div></div><p class="ritual-complete" id="ritualComplete">✧ The Ritual is Complete ✧<br>All is forgiven, all is renewed, all is well.</p></div>
+                <div class="realm-grid">
+                    <div class="realm-portal" onclick="revealDynamicBlessing('apology', '🔮', 'The Sacred Apology')"><div class="realm-icon">🔮</div><h3 class="realm-title">Truth & Apology</h3><p class="realm-description">When I have wronged you</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('amends', '💝', 'Making Amends')"><div class="realm-icon">💝</div><h3 class="realm-title">Making Amends</h3><p class="realm-description">To balance the scales</p></div>
+                    <div class="realm-portal" onclick="revealDynamicBlessing('burden', '⚡', 'Lifting Your Load')"><div class="realm-icon">⚡</div><h3 class="realm-title">Lifting Your Load</h3><p class="realm-description">When life is too heavy</p></div>
+                    <div class="realm-portal" onclick="revealBlessing('🌟', 'The Ultimate Wish', 'Anything. Whatever you need to feel whole again. No limits, no restrictions. The full power of the cosmos bends to make things right for my one and only love.')"><div class="realm-icon">🌟</div><h3 class="realm-title">Cosmic Restoration</h3><p class="realm-description">When only everything will do</p></div>
+                </div>
+            </section>
+            <section id="guidanceRealm" class="realm">
+                <h2 class="section-title">✧ The Realm of Guidance ✧</h2>
+                <p class="realm-subheader">"Wisdom flows through ancient channels to guide your path"</p>
+                <div class="oracle-chamber"><div class="crystal-ball" onclick="revealWisdom()"></div><p class="oracle-prompt">Click the crystal to receive guidance from the cosmos</p><p class="oracle-text" id="oracleText">The oracle awaits your question...</p></div>
+                <div class="astral-map"><h3 class="astral-map-title">The Constellation of Our Love</h3><div id="constellationCanvas" class="constellation-canvas"></div></div>
+            </section>
+            <section id="fortuneRealm" class="realm">
+                <h2 class="section-title">✧ The Realm of Fortune ✧</h2>
+                <p class="realm-subheader">"Scratch the cosmic tablet to reveal your fate. Will the stars align in your favor?"</p>
+                <div class="scratch-card-container"><div id="prizeDiv" class="prize-div"><h3 id="prizeTitle" class="prize-title"></h3><p id="prizeDescription" class="prize-description"></p></div><canvas id="scratchCanvas" class="scratch-canvas"></canvas></div>
+                <div class="realm-actions"><button class="btn primary" onclick="initScratchCard()">Play Again</button></div>
+            </section>
+        </div>
     </div>
+    
+    <div class="modal" id="blessingModal"><div class="modal-content"><span class="modal-icon" id="modalIcon"></span><h2 class="modal-title" id="modalTitle"></h2><div class="modal-message" id="modalMessage"></div><div class="modal-seal"></div><button class="accept-button" onclick="closeModal('blessingModal')">✧ ACCEPT BLESSING ✧</button></div></div>
+    <div class="modal" id="bookModal"><div class="modal-content"><h2 class="modal-title" id="bookTitle" style="font-size: 2.2em;"></h2><div class="book-modal-content"><p id="bookContent"></p></div><button class="accept-button" onclick="closeModal('bookModal')">✧ CLOSE TOME ✧</button></div></div>
+</div>
 `;
+
 
 function initChroniclePanelJS() {
     let currentEventIndex = 0;

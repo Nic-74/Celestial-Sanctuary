@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nini & Zoya - The Celestial Sanctuary</title>
     
+    <link rel="icon" type="image/png" href="photos/favicon1.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&family=Orbitron:wght@400;700&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -107,7 +109,9 @@
     </main>
     
     <div id="main-menu-container">
-        <button id="main-menu-button" title="Open Menu">≡</button>
+        <button id="main-menu-button" title="Open Menu">
+            <img id="menu-icon-img" src="photos/favicon1.png" alt="Open Menu">
+        </button>
         <div id="main-menu-dropdown">
             <a href="#home" onclick="closeMenu()">Home (Solar System)</a>
             <a href="#games" onclick="closeMenu()">Orion's Challenges</a>
@@ -190,7 +194,10 @@
     <script src="control.js"></script>
     <script>
         function closeMenu() {
-            document.getElementById('main-menu-dropdown').classList.remove('visible');
+            const menuDropdown = document.getElementById('main-menu-dropdown');
+            const menuIcon = document.getElementById('menu-icon-img');
+            if (menuDropdown) menuDropdown.classList.remove('visible');
+            if (menuIcon) menuIcon.src = 'photos/favicon1.png';
         }
     </script>
 </body>
