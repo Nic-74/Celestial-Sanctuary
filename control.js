@@ -1168,15 +1168,17 @@ function createOracleStarfield(themeName) {
 
 
 function switchSanctuaryView(viewIdToShow) {
-    
-    document.getElementById('sanctuary-main-container')?.classList.remove('scrollable-content'); 
-
-    document.querySelectorAll('#sanctuary-main-container > .sanctuary-view').forEach(view => {
-        view.classList.remove('active');
-    });
-    const viewToShow = document.getElementById(viewIdToShow);
-    if (viewToShow) {
-        viewToShow.classList.add('active');
+    const mainContainer = document.getElementById('sanctuary-main-container');
+    if (mainContainer) {
+        // This line below is REMOVED to prevent the inner scrollbar.
+        // mainContainer.classList.toggle('scrollable-content', viewIdToShow === 'sanctuary-realms-view');
+        mainContainer.querySelectorAll('.sanctuary-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        const viewToShow = document.getElementById(viewIdToShow);
+        if (viewToShow) {
+            viewToShow.classList.add('active');
+        }
     }
 }
 
@@ -1187,21 +1189,22 @@ function showWelcomeQuestion() {
 
 // UPDATED: This now correctly shows the realms container before activating a specific realm
 function showRealm(realmId) {
-    switchSanctuaryView('entranceSection'); 
-
-    // Add scrollable class to the main container when entering a realm
-    document.getElementById('sanctuary-main-container')?.classList.add('scrollable-content'); 
-
-    // This part of the logic remains the same to activate the correct realm inside
-    $$('#sanctuary-panel .realm.active').forEach(realm => realm.classList.remove('active'));
-    const realmToShow = $(realmId + 'Realm');
-    if (realmToShow) realmToShow.classList.add('active');
+    switchSanctuaryView('sanctuary-realms-view');
+    const realmsContainer = document.getElementById('sanctuary-realms-view');
+    realmsContainer.querySelectorAll('.realm.active').forEach(realm => realm.classList.remove('active'));
+    const realmToShow = document.getElementById(realmId + 'Realm');
+    if (realmToShow) {
+        realmToShow.classList.add('active');
+        // Scroll to the top of the realms container
+        document.getElementById('sanctuary-main-container').scrollTop = 0;
+    }
+    // Initialize realm-specific JS
     if (realmId === 'guidance') createConstellation();
     if (realmId === 'fortune') initScratchCard();
 }
 // UPDATED: This now correctly returns to the main hub
-function returnToWelcome() {
-    switchSanctuaryView('welcomeQuestion');
+function returnToHub() {
+    switchSanctuaryView('sanctuary-hub');
 }
 
 function revealBlessing(icon, title, message) {
@@ -1393,9 +1396,116 @@ function applyThemeToOracle(themeName) {
     });
 }
 
+// REPLACE this entire function in control.js
+// Add this to control.js in the initSanctuaryPanelJS() function
+
 function initSanctuaryPanelJS() {
-    const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
-    createOracleStarfield(savedTheme);
+    const typeTextElement = document.getElementById('typing-text');
+    const riddleElement = document.getElementById('sanctuary-riddle');
+    const passwordInput = document.getElementById('riddle-password');
+    const choiceButtons = document.querySelectorAll('.riddle-choice-btn');
+    const feedbackElement = document.getElementById('riddle-feedback');
+
+    const textToType = `Halt, traveler... You approach a sacred space, woven from stardust and memory... This Inner Sanctum was forged by Nicholas... a celestial architect who shaped this reality to comfort his beloved, Zoya... Only she may enter freely...`;
+    let hasAttempted = false;
+
+    function typewriter(element, text, callback) {
+        let i = 0;
+        element.innerHTML = '';
+        const typingInterval = setInterval(() => {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(typingInterval);
+                if (callback) callback();
+            }
+        }, 50);
+    }
+
+    function showClosedDoorFailure(message) {
+        hasAttempted = true;
+        document.getElementById('sanctuary-main-container').style.display = 'none';
+        const failureOverlay = document.createElement('div');
+        failureOverlay.id = 'sanctuary-failure-overlay';
+        failureOverlay.innerHTML = `
+            <div class="failure-header">
+                <div class="failure-skulls">
+                    <span>💀</span>
+                    <span>💀</span>
+                    <span>💀</span>
+                </div>
+                <h2 class="failure-title">ACCESS DENIED</h2>
+            </div>
+            <div class="failure-content-grid">
+                <div class="failure-message-column left-column">
+                    <p class="failure-message rune-text-left">${message.left}</p>
+                </div>
+                <div class="failure-image-container">
+                    <img src="photos/closed_nebula.png" alt="Sealed cosmic door">
+                </div>
+                <div class="failure-message-column right-column">
+                    <p class="failure-message rune-text-right">${message.right}</p>
+                </div>
+            </div>
+            <p class="failure-prompt">The cosmos has judged you. Begone.</p>`;
+        document.body.appendChild(failureOverlay);
+    }
+
+    function handleCorrectAnswer() {
+        riddleElement.style.display = 'none';
+        typeTextElement.style.display = 'none';
+        const doorAnimationView = document.getElementById('sanctuary-entrance-animation');
+        switchSanctuaryView('sanctuary-entrance-animation');
+        doorAnimationView.classList.add('is-opening');
+        setTimeout(() => switchSanctuaryView('sanctuary-hub'), 2000); // 2 second animation
+    }
+
+    function checkAnswer(isPassword = false, value = '') {
+        if (hasAttempted) return;
+        const correctPassword = "nini";
+        const correctFood = "tomato ramen";
+        let isCorrect = isPassword ? value.toLowerCase().trim() === correctPassword : value.toLowerCase().trim() === correctFood;
+        
+        if (isCorrect) {
+            feedbackElement.textContent = "The Sanctum recognizes you... The way is opened.";
+            feedbackElement.style.color = 'var(--jade)';
+            setTimeout(handleCorrectAnswer, 1000);
+        } else {
+            const failureMessagePairs = [
+                {
+                    left: "A chilling void answers your call. The sacred geometry of this space contorts in disgust at your presence. You are an anomaly, a dissonance in a symphony of starlight, and the cosmos itself recoils from your touch.",
+                    right: "The path is not merely closed; for you, it has been erased from existence. Your trespass has angered forces beyond mortal comprehension, sealing this realm forever against your unworthy spirit. Turn back, for only ruin awaits those who defy the cosmic will."
+                },
+                {
+                    left: "Your whisper is a scream in the silence of this sanctuary. The memories enshrined here curdle at your approach, and the starlight dims, refusing to illuminate one so unworthy. This is a holy place, and you are a trespasser.",
+                    right: "You are not welcome here. You will never be welcome here. The very air you breathe within these bounds is an insult, and the ancient wards now hum with a malevolent energy, eager to repel and punish your audacious intrusion."
+                },
+                {
+                    left: "The guardians of this realm stir from their slumber, awakened by the impurity of your attempt. They see the shadows in your heart that you try to hide and find you wanting. The door does not simply remain shut; it judges you, finds you lacking.",
+                    right: "And casts you out into the cold, empty void from whence you came. Hope withers at the touch of your unworthiness. This portal, once a beacon, now stands as an impenetrable barrier, mocking your futile efforts to enter its sacred depths."
+                },
+                {
+                    left: "You speak a word of profane ignorance into a space built of pure love. The very fabric of this reality rejects your intrusion, treating you as a virus to be purged. The warmth you sought is now an inferno that scorns you.",
+                    right: "There is no comfort for you here, only the cold, hard finality of absolute rejection. May your journey be one of endless wandering, for the grace of this sanctuary will forever elude your grasping hands. Leave this place, and remember your folly."
+                }
+            ];
+            const chosenMessages = failureMessagePairs[Math.floor(Math.random() * failureMessagePairs.length)];
+            showClosedDoorFailure(chosenMessages);
+        }
+        feedbackElement.style.display = 'block';
+    }
+    
+    // Initial setup
+    switchSanctuaryView('sanctuary-threshold'); // Start at the threshold
+    typewriter(typeTextElement, textToType, () => { if (riddleElement) riddleElement.style.display = 'block'; });
+
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(true, passwordInput.value); });
+    }
+    choiceButtons.forEach(button => {
+        button.addEventListener('click', () => checkAnswer(false, button.dataset.answer));
+    });
 }
 
 // ===================================================================
@@ -1445,6 +1555,7 @@ const getGamesPanelHTML = () => `<div id="games-panel" class="content-panel acti
         </div>
     </div>
 </div>`;
+
 const getNebulaOfSolitudeHTML = () => `
 <div id="nebula-of-solitude">
     <div class="achievement" id="achievement">
@@ -2321,109 +2432,117 @@ function initTimeWeaver() {
     });
 }
 
-const getSanctuaryPanelHTML = () => `
-<div id="sanctuary-panel">
-    <div id="sanctuary-main-container">
 
-        <div id="sanctuary-entrance" class="sanctuary-view active">
-            <div class="ancient-seal"></div>
-            <h1 class="sanctuary-title">Inner Sanctum</h1>
-            <p class="sanctuary-subtitle">Where Celestial Powers Heal All Wounds</p>
-            <button class="enter-button" onclick="showWelcomeQuestion()">ENTER</button>
-        </div>
+function getSanctuaryPanelHTML() {
+    return `
+    <div id="sanctuary-panel">
+        <div id="sanctuary-main-container">
 
-        <div id="welcomeQuestion" class="sanctuary-view sanctuary-hub">
-            <h2 class="hub-title">Welcome, Precious Soul</h2>
-            <p class="hub-subtitle">The cosmos has guided you here. Choose with your heart, and the universe shall respond.</p>
-            <div class="hub-grid">
-                <div class="hub-portal" onclick="showRealm('comfort')">
-                    <div class="portal-icon">🫂</div>
-                    <div class="portal-title">I Seek Comfort</div>
-                </div>
-                <div class="hub-portal" onclick="showRealm('celebrate')">
-                    <div class="portal-icon">✨</div>
-                    <div class="portal-title">I Achieved Something</div>
-                </div>
-                <div class="hub-portal" onclick="showRealm('hurt')">
-                    <div class="portal-icon">🌙</div>
-                    <div class="portal-title">Something Hurt Me</div>
-                </div>
-                <div class="hub-portal" onclick="showRealm('guidance')">
-                    <div class="portal-icon">🔮</div>
-                    <div class="portal-title">I Need Guidance</div>
-                </div>
-                <div class="hub-portal" onclick="showRealm('fortune')">
-                    <div class="portal-icon">🎲</div>
-                    <div class="portal-title">A Game of Fortune</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="entranceSection" class="sanctuary-view sanctuary-realms">
-             <button class="back-to-hub-btn" onclick="returnToWelcome()">← Back to Hub</button>
-            <section id="comfortRealm" class="realm">
-                <h2 class="section-title">✧ The Realm of Comfort ✧</h2>
-                <p class="realm-subheader">"When sadness weighs heavy, these portals and texts open to ease your burden"</p>
-                <div class="sacred-library">
-                    <div class="book-shelf">
-                        <div class="book" onclick="readBook('comfort', 'Scrolls of Solace', 'When sadness descends like night, remember: dawn always comes. The universe has weathered countless storms and always finds balance. Your feelings are valid, your pain is real, but neither are permanent. This too shall pass, and joy will return like spring after winter.')">
-                            <div class="book-title">📜 Scrolls of Solace</div>
-                            <p class="book-description">Words to heal the weary heart</p>
+            <div id="sanctuary-threshold" class="sanctuary-view active">
+                <div class="threshold-content">
+                    <p id="typing-text" class="typing-text"></p>
+                    <div id="sanctuary-riddle" class="sanctuary-riddle" style="display: none;">
+                        <p class="riddle-prompt">If you are not the intended soul, speak a secret word, or prove your heart's knowledge to pass...</p>
+                        <input type="password" id="riddle-password" class="text-input riddle-input" placeholder="Whisper the secret word...">
+                        <div class="riddle-divider">OR</div>
+                        <p class="riddle-question">What is Nicholas's favorite food made by Zoya?</p>
+                        <div class="riddle-choices">
+                            <button class="riddle-choice-btn btn" data-answer="kimuchi fried rice">Kimuchi Fried Rice</button>
+                            <button class="riddle-choice-btn btn" data-answer="chicken fried wings">Chicken Fried Wings</button>
+                            <button class="riddle-choice-btn btn" data-answer="tomato ramen">Tomato Ramen</button>
                         </div>
-                        <div class="book" onclick="readBook('magic', 'The Grimoire of Daily Miracles', 'Magic exists in the mundane: in breakfast made with love, in texts that say ‘thinking of you’, in remembering how she takes her tea. Pay attention to these small enchantments—they are the true sorcery that sustains love.')">
-                            <div class="book-title">✨ The Grimoire of Daily Miracles</div>
-                            <p class="book-description">Finding magic in everyday moments</p>
-                        </div>
+                        <p id="riddle-feedback" class="riddle-feedback"></p>
                     </div>
                 </div>
-                <div class="realm-grid">
-                    <div class="realm-portal" onclick="revealDynamicBlessing('comfort', '🫂', 'Warmth & Presence')"><div class="realm-icon">🫂</div><h3 class="realm-title">Warmth & Presence</h3><p class="realm-description">For when you need to feel held</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('sweet', '🍰', 'Sweet Solace')"><div class="realm-icon">🍰</div><h3 class="realm-title">Sweet Comfort</h3><p class="realm-description">For when you crave sweetness</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('pamper', '🌸', 'Sacred Restoration')"><div class="realm-icon">🌸</div><h3 class="realm-title">Rejuvenation</h3><p class="realm-description">For when you need renewal</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('qualityTime', '⏳', 'Timeless Together')"><div class="realm-icon">⏳</div><h3 class="realm-title">Quality Time</h3><p class="realm-description">For when you need connection</p></div>
-                </div>
-            </section>
-            <section id="celebrateRealm" class="realm">
-                <h2 class="section-title">✧ The Realm of Triumph ✧</h2>
-                <p class="realm-subheader">"Your achievements deserve cosmic celebration"</p>
-                <div class="realm-grid">
-                    <div class="realm-portal" onclick="revealDynamicBlessing('dinner', '🎉', 'Victory Feast')"><div class="realm-icon">🎉</div><h3 class="realm-title">Celebration Dinner</h3><p class="realm-description">For worthy accomplishments</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('shopping', '✨', 'Reward of Stars')"><div class="realm-icon">✨</div><h3 class="realm-title">Material Reward</h3><p class="realm-description">For exceptional achievements</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('adventure', '🗺️', 'Victory Quest')"><div class="realm-icon">🗺️</div><h3 class="realm-title">Adventure Reward</h3><p class="realm-description">For brave accomplishments</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('queen', '👑', 'Day of Glory')"><div class="realm-icon">👑</div><h3 class="realm-title">Total Authority</h3><p class="realm-description">For legendary achievements</p></div>
-                </div>
-            </section>
-            <section id="hurtRealm" class="realm">
-                <h2 class="section-title">✧ The Realm of Healing ✧</h2>
-                <p class="realm-subheader">"When wrongs must be righted, these pathways and rituals open"</p>
-                <div class="ritual-altar"><p class="ritual-instructions">"Light each of the seven sacred candles to complete the ancient ritual.<br>With each flame, a burden lifts and harmony returns."</p><div class="candles"><div class="candle" onclick="lightCandle(this)" title="Candle of Understanding"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Forgiveness"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Love"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Joy"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Peace"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Renewal"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Eternity"></div></div><p class="ritual-complete" id="ritualComplete">✧ The Ritual is Complete ✧<br>All is forgiven, all is renewed, all is well.</p></div>
-                <div class="realm-grid">
-                    <div class="realm-portal" onclick="revealDynamicBlessing('apology', '🔮', 'The Sacred Apology')"><div class="realm-icon">🔮</div><h3 class="realm-title">Truth & Apology</h3><p class="realm-description">When I have wronged you</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('amends', '💝', 'Making Amends')"><div class="realm-icon">💝</div><h3 class="realm-title">Making Amends</h3><p class="realm-description">To balance the scales</p></div>
-                    <div class="realm-portal" onclick="revealDynamicBlessing('burden', '⚡', 'Lifting Your Load')"><div class="realm-icon">⚡</div><h3 class="realm-title">Lifting Your Load</h3><p class="realm-description">When life is too heavy</p></div>
-                    <div class="realm-portal" onclick="revealBlessing('🌟', 'The Ultimate Wish', 'Anything. Whatever you need to feel whole again. No limits, no restrictions. The full power of the cosmos bends to make things right for my one and only love.')"><div class="realm-icon">🌟</div><h3 class="realm-title">Cosmic Restoration</h3><p class="realm-description">When only everything will do</p></div>
-                </div>
-            </section>
-            <section id="guidanceRealm" class="realm">
-                <h2 class="section-title">✧ The Realm of Guidance ✧</h2>
-                <p class="realm-subheader">"Wisdom flows through ancient channels to guide your path"</p>
-                <div class="oracle-chamber"><div class="crystal-ball" onclick="revealWisdom()"></div><p class="oracle-prompt">Click the crystal to receive guidance from the cosmos</p><p class="oracle-text" id="oracleText">The oracle awaits your question...</p></div>
-                <div class="astral-map"><h3 class="astral-map-title">The Constellation of Our Love</h3><div id="constellationCanvas" class="constellation-canvas"></div></div>
-            </section>
-            <section id="fortuneRealm" class="realm">
-                <h2 class="section-title">✧ The Realm of Fortune ✧</h2>
-                <p class="realm-subheader">"Scratch the cosmic tablet to reveal your fate. Will the stars align in your favor?"</p>
-                <div class="scratch-card-container"><div id="prizeDiv" class="prize-div"><h3 id="prizeTitle" class="prize-title"></h3><p id="prizeDescription" class="prize-description"></p></div><canvas id="scratchCanvas" class="scratch-canvas"></canvas></div>
-                <div class="realm-actions"><button class="btn primary" onclick="initScratchCard()">Play Again</button></div>
-            </section>
-        </div>
-    </div>
-    
-    <div class="modal" id="blessingModal"><div class="modal-content"><span class="modal-icon" id="modalIcon"></span><h2 class="modal-title" id="modalTitle"></h2><div class="modal-message" id="modalMessage"></div><div class="modal-seal"></div><button class="accept-button" onclick="closeModal('blessingModal')">✧ ACCEPT BLESSING ✧</button></div></div>
-    <div class="modal" id="bookModal"><div class="modal-content"><h2 class="modal-title" id="bookTitle" style="font-size: 2.2em;"></h2><div class="book-modal-content"><p id="bookContent"></p></div><button class="accept-button" onclick="closeModal('bookModal')">✧ CLOSE TOME ✧</button></div></div>
-</div>
-`;
+            </div>
+            
+            <div id="sanctuary-entrance-animation" class="sanctuary-view">
+                 <img src="photos/open_nebula.png" class="door-image" alt="Nebula Door opening">
+            </div>
 
+            <div id="sanctuary-hub" class="sanctuary-view sanctuary-hub-view">
+                <h2 class="hub-title">WELCOME, PRECIOUS SOUL</h2>
+                <p class="hub-subtitle">The cosmos has guided you here. This sanctuary was crafted by ancient forces and boundless love, a place where comfort awaits, where achievements are celebrated, where understanding flows freely, and where wisdom whispers through the stars.</p>
+                <div class="hub-question-box">
+                    <h3>HOW DOES YOUR SPIRIT FEEL IN THIS MOMENT?</h3>
+                    <div class="hub-choices">
+                        <button class="hub-choice-btn" onclick="showRealm('comfort')"><span>🔮</span> I seek comfort</button>
+                        <button class="hub-choice-btn" onclick="showRealm('celebrate')"><span>✨</span> I achieved something</button>
+                        <button class="hub-choice-btn" onclick="showRealm('hurt')"><span>🌙</span> Something hurt me</button>
+                        <button class="hub-choice-btn" onclick="showRealm('guidance')"><span>🧭</span> I need guidance</button>
+                        <button class="hub-choice-btn" onclick="showRealm('fortune')"><span>🎲</span> A Game of Fortune</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sanctuary-realms-view" class="sanctuary-view sanctuary-realms-view">
+                <section id="comfortRealm" class="realm">
+                    <h2 class="section-title">✧ The Realm of Comfort ✧</h2>
+                    <p class="realm-subheader">"When sadness weighs heavy, these portals and texts open to ease your burden"</p>
+                    <div class="book-shelf">
+                        <div class="sacred-scroll" onclick="readBook('solace', 'Scrolls of Solace', 'This scroll contains ancient words of comfort, reminding you that every storm passes and you are loved beyond measure. You are my calm in every chaos.')">
+                            <div class="scroll-icon">📜</div><div class="scroll-text"><h3>Scrolls of Solace</h3><p>Words to heal the weary heart</p></div>
+                        </div>
+                        <div class="sacred-scroll" onclick="readBook('miracles', 'The Grimoire of Daily Miracles', 'This grimoire is filled with small wonders: the memory of a shared laugh, the warmth of a quiet hug, the taste of a favorite meal. These are the true spells of happiness.')">
+                             <div class="scroll-icon">✨</div><div class="scroll-text"><h3>The Grimoire of Daily Miracles</h3><p>Finding magic in everyday moments</p></div>
+                        </div>
+                    </div>
+                    <div class="realm-grid">
+                        <div class="realm-portal" onclick="revealDynamicBlessing('comfort', '🫂', 'Warmth & Presence')"><div class="realm-icon">🫂</div><h3 class="realm-title">Warmth & Presence</h3><p class="realm-description">For when you need to feel held</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('sweet', '🍰', 'Sweet Solace')"><div class="realm-icon">🍰</div><h3 class="realm-title">Sweet Comfort</h3><p class="realm-description">For when you crave sweetness</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('pamper', '🌸', 'Sacred Restoration')"><div class="realm-icon">🌸</div><h3 class="realm-title">Rejuvenation</h3><p class="realm-description">For when you need renewal</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('qualityTime', '⏳', 'Timeless Together')"><div class="realm-icon">⏳</div><h3 class="realm-title">Quality Time</h3><p class="realm-description">For when you need connection</p></div>
+                    </div>
+                    <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
+                </section>
+
+                <section id="celebrateRealm" class="realm">
+                    <h2 class="section-title">✧ The Realm of Triumph ✧</h2>
+                    <p class="realm-subheader">"Your achievements deserve cosmic celebration"</p>
+                    <div class="realm-grid">
+                        <div class="realm-portal" onclick="revealDynamicBlessing('dinner', '🎉', 'Victory Feast')"><div class="realm-icon">🎉</div><h3 class="realm-title">Celebration Dinner</h3><p class="realm-description">For worthy accomplishments</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('shopping', '✨', 'Reward of Stars')"><div class="realm-icon">✨</div><h3 class="realm-title">Material Reward</h3><p class="realm-description">For exceptional achievements</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('adventure', '🗺️', 'Victory Quest')"><div class="realm-icon">🗺️</div><h3 class="realm-title">Adventure Reward</h3><p class="realm-description">For brave accomplishments</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('queen', '👑', 'Day of Glory')"><div class="realm-icon">👑</div><h3 class="realm-title">Total Authority</h3><p class="realm-description">For legendary achievements</p></div>
+                    </div>
+                    <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
+                </section>
+
+                <section id="hurtRealm" class="realm">
+                    <h2 class="section-title">✧ The Realm of Healing ✧</h2>
+                    <p class="realm-subheader">"When wrongs must be righted, these pathways and rituals open"</p>
+                    <div class="realm-grid">
+                        <div class="realm-portal" onclick="revealDynamicBlessing('apology', '🔮', 'The Sacred Apology')"><div class="realm-icon">🔮</div><h3 class="realm-title">Truth & Apology</h3><p class="realm-description">When I have wronged you</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('amends', '💝', 'Making Amends')"><div class="realm-icon">💝</div><h3 class="realm-title">Making Amends</h3><p class="realm-description">To balance the scales</p></div>
+                        <div class="realm-portal" onclick="revealDynamicBlessing('burden', '⚡', 'Lifting Your Load')"><div class="realm-icon">⚡</div><h3 class="realm-title">Lifting Your Load</h3><p class="realm-description">When life is too heavy</p></div>
+                        <div class="realm-portal" onclick="revealBlessing('🌟', 'The Ultimate Wish', 'Anything. Whatever you need to feel whole again. No limits, no restrictions. The full power of the cosmos bends to make things right for my one and only love.')"><div class="realm-icon">🌟</div><h3 class="realm-title">Cosmic Restoration</h3><p class="realm-description">When only everything will do</p></div>
+                    </div>
+                    <div class="ritual-altar"><p class="ritual-instructions">"Light each of the seven sacred candles to complete the ancient ritual.<br>With each flame, a burden lifts and harmony returns."</p><div class="candles"><div class="candle" onclick="lightCandle(this)" title="Candle of Understanding"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Forgiveness"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Love"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Joy"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Peace"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Renewal"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Eternity"></div></div><p class="ritual-complete" id="ritualComplete">✧ The Ritual is Complete ✧<br>All is forgiven, all is renewed, all is well.</p></div>
+                    <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
+                </section>
+
+                <section id="guidanceRealm" class="realm">
+                    <h2 class="section-title">✧ The Realm of Guidance ✧</h2>
+                    <p class="realm-subheader">"Wisdom flows through ancient channels to guide your path"</p>
+                    <div class="oracle-chamber"><div class="crystal-ball" onclick="revealWisdom()"></div><p class="oracle-prompt">Click the crystal to receive guidance from the cosmos</p><p class="oracle-text" id="oracleText">The oracle awaits your question...</p></div>
+                    <div class="astral-map"><h3 class="astral-map-title">The Constellation of Our Love</h3><div id="constellationCanvas" class="constellation-canvas"></div></div>
+                    <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
+                </section>
+
+                <section id="fortuneRealm" class="realm">
+                    <h2 class="section-title">✧ The Realm of Fortune ✧</h2>
+                    <p class="realm-subheader">"Scratch the cosmic tablet to reveal your fate. Will the stars align in your favor?"</p>
+                    <div class="scratch-card-container"><div id="prizeDiv" class="prize-div"><h3 id="prizeTitle" class="prize-title"></h3><p id="prizeDescription" class="prize-description"></p></div><canvas id="scratchCanvas" class="scratch-canvas"></canvas></div>
+                    <div class="realm-actions"><button class="btn primary" onclick="initScratchCard()">Play Again</button></div>
+                    <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
+                </section>
+            </div>
+        </div>
+        
+        <div class="modal" id="blessingModal"><div class="modal-content"><span class="modal-icon" id="modalIcon"></span><h2 class="modal-title" id="modalTitle"></h2><div class="modal-message" id="modalMessage"></div><div class="modal-seal"></div><button class="btn primary accept-button" onclick="closeModal('blessingModal')">✧ ACCEPT BLESSING ✧</button></div></div>
+        <div class="modal" id="bookModal"><div class="modal-content"><h2 class="modal-title" id="bookTitle" style="font-size: 2.2em;"></h2><div class="book-modal-content"><p id="bookContent"></p></div><button class="btn primary accept-button" onclick="closeModal('bookModal')">✧ CLOSE TOME ✧</button></div></div>
+    </div>`;
+}
 
 function initChroniclePanelJS() {
     let currentEventIndex = 0;
@@ -2671,13 +2790,48 @@ function initChroniclePanelJS() {
 
 function initNebulaOfSolitudeJS() {
     const nebulaContainer = $('nebula-of-solitude'); if (!nebulaContainer) return;
+    const mainContentContainer = nebulaContainer.querySelector('#main-container'); if (!mainContentContainer) return;
+    
     let currentChapter = 0, eggScore = 0, chickenCount = 1, heartClicks = 0, starCounterInterval, therapistInterval, hesitateCount = 0, lastHeartClick = 0, secretStarFound = false;
-    const therapistMessages = [ "Remember: Stars don't ghost you. ✨", "Nic, maybe don't send that 3 a.m. message... or do. Love is chaos. 💫", "Overthinking is just love doing mathematics. It's beautiful. 🧮", "The universe aligned for you two. Stop doubting cosmic GPS. 🌌", "Sometimes the best love stories start with a math book. 📚" ];
+    
+    // --- NEW & EXPANDED WISDOM ---
+    const therapistMessages = [ 
+        "Remember: Stars don't ghost you. ✨", 
+        "Nic, maybe don't send that 3 a.m. message... or do. Love is chaos. 💫", 
+        "Overthinking is just love doing mathematics. It's beautiful. 🧮", 
+        "The universe aligned for you two. Stop doubting cosmic GPS. 🌌", 
+        "Sometimes the best love stories start with a math book. 📚",
+        "A love that can fly through a typhoon isn't subject to the normal laws of physics. ✈️",
+        "The universe doesn't mind shyness. It just arranges things so the right person breaks through it.",
+        "Even in a crowd, two souls can create their own quiet universe. All it takes is a book and a curious heart.",
+        "The probability of you two meeting was low, but destiny doesn't care about statistics. 🎲",
+        "Pro-tip from the cosmos: True love often involves chicken steak. 🍗",
+        "Don't worry about the future. You two are a fixed constellation in a sky of changing stars.",
+        "A heart that loves mathematics just needed to find the one variable that made everything make sense. ❤️",
+        "Sometimes the biggest 'what ifs' have the simplest, most beautiful answers.",
+        "Distance is just a test from the universe to see if your emotional gravity is strong enough. Spoiler: it is. 🌍",
+        "Sometimes a broken bicycle isn't a problem, it's a cosmic excuse for two orbits to intersect. 🚲",
+        "You are both stardust, but together you're a supernova. 💥",
+        "Remember, a cheesy 'good night' message can be a treasured memory. The cosmos grades on a curve.",
+        "One person's 'awkward silence' is another person's 'comfortable library date'. It's all about perspective."
+    ];
+    
     const showAchievement = (text) => { const achievement = nebulaContainer.querySelector('#achievement'); nebulaContainer.querySelector('#achievementText').textContent = text; achievement.classList.add('show'); setTimeout(() => achievement.classList.remove('show'), 3000); };
     const showTherapistMessage = () => { const therapist = nebulaContainer.querySelector('#therapist'); const randomMessage = therapistMessages[Math.floor(Math.random() * therapistMessages.length)]; therapist.textContent = randomMessage; therapist.classList.add('active'); setTimeout(() => therapist.classList.remove('active'), 4000); };
-    const switchChapter = (num) => { nebulaContainer.querySelectorAll('.chapter').forEach(ch => ch.classList.remove('active')); const chapterEl = nebulaContainer.querySelector('#chapter-' + num); if (chapterEl) { chapterEl.classList.add('active'); DOM.mainContent.scrollTo({ top: 0, behavior: 'smooth' }); } };
+    
+    const switchChapter = (num) => {
+        currentChapter = parseInt(num, 10);
+        nebulaContainer.querySelectorAll('.chapter').forEach(ch => ch.classList.remove('active')); 
+        const chapterEl = nebulaContainer.querySelector('#chapter-' + num); 
+        if (chapterEl) { 
+            chapterEl.classList.add('active'); 
+            DOM.mainContent.scrollTo({ top: 0, behavior: 'smooth' }); 
+        } 
+    };
+
     const calculateDays = () => { const meetingDate = new Date('2019-09-15'); const confessionDate = new Date('2021-11-01'); const today = new Date(); const daysSinceMeetingEl = nebulaContainer.querySelector('#daysSinceMeeting'); const daysSinceConfessionEl = nebulaContainer.querySelector('#daysSinceConfession'); if (daysSinceMeetingEl) daysSinceMeetingEl.textContent = Math.floor((today - meetingDate) / (1000 * 60 * 60 * 24)).toLocaleString(); if (daysSinceConfessionEl) daysSinceConfessionEl.textContent = Math.floor((today - confessionDate) / (1000 * 60 * 60 * 24)).toLocaleString(); };
     const startStarCounter = () => { let count = 1000000; const starCounterEl = nebulaContainer.querySelector('#starCounter'); if (!starCounterEl) return; starCounterInterval = setInterval(() => { count += Math.floor(Math.random() * 100); starCounterEl.textContent = count.toLocaleString(); }, 2000); };
+    
     const handleNebulaClick = (e) => {
         const target = e.target;
         if (target.closest('.planet-nav')) { switchChapter(target.closest('.planet-nav').getAttribute('data-chapter')); }
@@ -2688,13 +2842,22 @@ function initNebulaOfSolitudeJS() {
         else if (target.id === 'heartButton') { const now = Date.now(); if ((now - lastHeartClick) > 500 && (now - lastHeartClick) < 1200) { heartClicks++; const sync = Math.min(heartClicks * 20, 100); nebulaContainer.querySelector('#heartSync').textContent = sync; if (sync === 100) { showAchievement('Perfect Synchronization! 💕'); target.textContent = '💖 Synced!'; } } else { heartClicks = 0; nebulaContainer.querySelector('#heartSync').textContent = '0'; } lastHeartClick = now; }
         else if (currentChapter == 5 && !secretStarFound && Math.random() > 0.8) { secretStarFound = true; nebulaContainer.querySelector('#secretMessage').style.display = 'block'; showAchievement('Secret Star Found! ⭐'); }
     };
+    
     const handleScroll = () => { const indicator = nebulaContainer.querySelector('.scroll-indicator'); if (indicator) indicator.style.opacity = (DOM.mainContent.scrollTop > 100) ? '0' : '1'; };
-    nebulaContainer.addEventListener('click', handleNebulaClick);
+    
+    mainContentContainer.addEventListener('click', handleNebulaClick);
     DOM.mainContent.addEventListener('scroll', handleScroll);
+    
     setTimeout(() => { const meter = nebulaContainer.querySelector('#lonelinessMeter'); if(meter) meter.style.width = '85%'; }, 1000);
     calculateDays(); startStarCounter();
     therapistInterval = setInterval(() => { if (Math.random() > 0.7 && currentChapter < 3) showTherapistMessage(); }, 15000);
-    window.nebulaCleanup = () => { clearInterval(starCounterInterval); clearInterval(therapistInterval); nebulaContainer.removeEventListener('click', handleNebulaClick); DOM.mainContent.removeEventListener('scroll', handleScroll); };
+    
+    window.nebulaCleanup = () => { 
+        clearInterval(starCounterInterval); 
+        clearInterval(therapistInterval); 
+        mainContentContainer.removeEventListener('click', handleNebulaClick); 
+        DOM.mainContent.removeEventListener('scroll', handleScroll); 
+    };
 }
 
 let gameContentOriginalParent = null;
