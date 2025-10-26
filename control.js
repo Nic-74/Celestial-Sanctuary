@@ -22,7 +22,7 @@ const EDITABLE_CONFIG = {
     GALLERY_CATEGORIES: { 'cooking': '🍳 Food', 'travel': '✈️ Trip', 'random': '🎲 Random', 'intimate': '💕 Intimate', 'zoya': '🌸 Zoya', 'nicholas': '📖 Nic' }
 };
 
-const AppState = { bookUnlocked: false, activePanel: 'home', chapters: [], currentChapterIndex: 0, currentGalleryCategory: 'all', gallery: { showAll: false, lightboxIndex: 0, currentPhotoList: [] }, music: { player: null, isPlaying: false, currentIndex: 0, isShuffled: false, albumArtInterval: null, albumArtIndex: 0 }, quill: null, editingChapterIndex: -1, chronicleEvents: [], thenNowState: { availableIndices: [], currentIndexInAvailable: 0, lastReveal: null }, complimentInterval: null, webAnimationLandingId: null, webAnimationMainId: null };
+const AppState = { bookUnlocked: false, activePanel: 'home', chapters: [], currentChapterIndex: 0, currentGalleryCategory: 'all', gallery: { showAll: false, lightboxIndex: 0, currentPhotoList: [] }, music: { player: null, isPlaying: false, currentIndex: 0, isShuffled: false, albumArtInterval: null, albumArtIndex: 0 }, quill: null, editingChapterIndex: -1, chronicleEvents: [], thenNowState: { availableIndices: [], currentIndexInAvailable: 0, lastReveal: null }, complimentInterval: null, webAnimationLandingId: null, webAnimationMainId: null, spiralAnimationLandingId: null, spiralAnimationMainId: null };
 
 const CHRONICLE_DATA = [
     { year: 'Sep 15, 2019', title: 'First Meeting', desc: 'During the Taiku Taikai (sports festival), two lonely souls from different worlds first crossed paths. A boy with a math book and a girl with a curious heart.', icon: '💕' },
@@ -43,6 +43,495 @@ const COMPLIMENTS = [
     "Zoy, your kindness is a gentle magic.", "Our love story is my favorite, baobei.", "You are my calm in the chaos, Zoy.",
     "Just a random 'I love you', baobei.", "Thank you for being you, Zoy.", "My heart is always with you, baobei."
 ];
+
+// ===================================================================
+// ALTERNATE UNIVERSE CHRONICLES - COMPLETE IMPLEMENTATION
+// ===================================================================
+
+const ALTERNATE_UNIVERSES = [
+    {
+        id: 'ancient_china',
+        title: 'The Scholar & The Artist',
+        era: 'Ancient China (206 BCE)',
+        icon: '🏛️',
+        image: 'photos/alternate universe/Ancient China (206 BCE).png',
+        theme: 'Historical Romance',
+        setting: 'Han Dynasty, along the ancient Silk Road',
+        premise: 'In the bustling trading post of the Silk Road, a traveling scholar from distant Uganda lands (Nicholai of the West) encounters Zhang Zoya, an imperial calligrapher whose brush captures the stars themselves. Their forbidden love blooms amidst political intrigue, poetry exchanges, and secret meetings under the willow trees.',
+        characters: {
+            nic: { name: 'Nicholai of the West', role: 'Scholar & Mathematician from distant lands' },
+            zoya: { name: 'Zhang Zoya', role: 'Imperial Calligrapher & Poet' }
+        },
+        chapters: [
+            {
+                title: 'The Silk Road Encounter',
+                content: `The dust of a thousand miles clung to Nicholai's robes as he approached the trading post at dawn. He had traveled far from his homeland, carrying scrolls of mathematics unknown in these eastern lands. The foreign equations danced in his mind like mystical spells.
+
+Through the morning mist, he saw her for the first time. Zhang Zoya sat beneath a willow tree, brush in hand, painting characters onto silk with such grace that even the birds seemed to pause and watch. Her hair was bound with jade pins, and her robes whispered secrets of the imperial court.
+
+"What are you writing?" he asked in broken Mandarin, his deep voice carrying the accent of distant deserts.
+
+She looked up, eyes like dark pools reflecting starlight. "I am not writing," she replied softly. "I am dreaming with ink. Each stroke carries the weight of heaven."
+
+He knelt beside her, captivated. "In my land, we dream with numbers. May I show you?"
+
+From his leather satchel, he produced a scroll covered in geometric patterns and mathematical proofs. Her eyes widened with wonder at the foreign symbols that somehow spoke of universal truths.
+
+"Your numbers... they dance like my characters," she whispered, tracing a finger along an equation. "Perhaps all languages eventually speak the same truth."
+
+And so began their unlikely friendship, two souls from opposite ends of the world, united by the belief that beauty transcends borders—whether captured in ink or calculated in stars.`
+            },
+            {
+                title: 'Lessons in Calligraphy',
+                content: `"Your hand is too rigid," Zoya laughed softly, guiding Nicholai's grip on the brush. "Let the characters flow like water, not march like soldiers."
+
+They sat in her father's garden, hidden from the eyes of the court. Each meeting was a risk—fraternizing with foreigners was discouraged, even dangerous. But neither could resist the pull between them.
+
+"In my homeland," Nicholai said, struggling with the brush, "we value precision. Every line must be exact, measured."
+
+"Here," Zoya countered, her hand gently correcting his posture, "we value the spirit within the line. See?" She demonstrated, her brush creating a character that seemed to breathe with life. "This is 'yuan'—fate, destiny. The character itself must feel destined."
+
+Nicholai watched her, mesmerized not by the calligraphy but by the artist herself. "Teach me to write 'love,'" he said quietly.
+
+She paused, meeting his gaze. The air between them changed, charged with unspoken emotion. Slowly, she guided his hand, their fingers touching as they formed the character together.
+
+"'Ai,'" she whispered. "It means love. But also, it means to cherish, to hold precious."
+
+"Zhang Zoya," he began, but she placed a finger to his lips.
+
+"The walls have ears, Scholar. And hearts have eyes that see too much."
+
+But they both knew—it was already too late. Their hearts had seen everything.`
+            },
+            {
+                title: 'The Imperial Summons',
+                content: `The summons arrived on a morning painted with frost. Zoya was called to the Forbidden City to create a commemorative scroll for the Emperor's birthday. It was the highest honor a calligrapher could receive—and a gilded cage from which she might never return.
+
+"Three months," she told Nicholai during their final stolen meeting before her departure. "Perhaps longer. The court is... complicated."
+
+"Then I will wait three months," he said firmly. "I have crossed deserts and mountains to reach this place. What are a few more months?"
+
+She pressed a folded silk into his hands. "I wrote something for you. Read it when the moon is full, and know that I am looking at the same moon, thinking of you."
+
+The scroll contained a poem, each character a testament to her feelings:
+
+*"Across the silk roads we found each other,  
+Two stars from different skies,  
+Yet governed by the same celestial laws.  
+Distance is but illusion,  
+For in my ink, you live eternal."*
+
+As her carriage disappeared into the morning mist, Nicholai clutched the silk scroll, his mathematical mind trying to calculate the probability of their reunion. But the heart, he was learning, operated by different mathematics entirely—the mathematics of faith.`
+            }
+        ],
+        stats: { chapters: 3, words: 1847, lastUpdated: '3 days ago' }
+    },
+    {
+        id: 'space_explorers',
+        title: 'Across the Stars',
+        era: 'Space Age (2847 CE)',
+        icon: '🚀',
+        image: 'photos/alternate universe/Space Explorers (2847 CE).png',
+        theme: 'Sci-Fi Adventure',
+        setting: 'Deep space, aboard rival colony ships',
+        premise: 'Captain Nicholas Lubega of the Earth Fleet encounters Navigator Zhang Zoya of the Chinese Space Coalition during a critical first-contact mission with an alien civilization. As their two factions teeter on the brink of interstellar war, Nic and Zoya must work together to save both their peoples—and discover that love can bloom even in the vacuum of space.',
+        characters: {
+            nic: { name: 'Captain Nicholas Lubega', role: 'Earth Fleet Commander & Tactical Genius' },
+            zoya: { name: 'Navigator Zhang Zoya', role: 'Stellar Cartographer & Linguist' }
+        },
+        chapters: [
+            {
+                title: 'First Contact',
+                content: `"Unknown vessel detected, Captain. Configuration matches Chinese Coalition design."
+
+Captain Nicholas Lubega stared at the holographic display suspended before his command chair. After six months of deep space isolation, encountering another human ship should have been a relief. Instead, protocol demanded caution. The Earth Fleet and Chinese Coalition maintained an uneasy truce, but out here in uncharted space, allegiances were... flexible.
+
+"Hail them," he commanded, his Ugandan accent carrying the weight of authority earned across a dozen star systems. "Open channels."
+
+The viewscreen flickered to life, and Nicholas found himself staring at the most striking woman he'd ever seen. Her uniform bore the insignia of a Coalition Navigator—the elite cartographers who mapped the galaxy's infinite mysteries.
+
+"Captain Lubega," she greeted, her voice crisp and professional. "I am Navigator Zhang Zoya of the Stellar Pathfinder. Before we engage in the traditional territorial posturing, you should know: we're both in danger."
+
+He leaned forward, intrigued. "Explain."
+
+"Thirty minutes ago, we detected an anomaly. Not natural. Not human. Something else." Her dark eyes met his through the screen, and he felt an unexpected jolt. "Whatever it is, it's heading for both our ships. And I calculate we have approximately four hours before it arrives."
+
+"Four hours," Nicholas repeated. "Just enough time to either run away separately... or figure this out together."
+
+Zoya smiled, and despite the cosmic distances between their vessels, Nicholas felt the universe shift slightly on its axis. "I was hoping you'd say that, Captain."
+
+"Call me Nic. If we're going to save the galaxy, we might as well be on a first-name basis."
+
+"Zoya," she replied. "And Nic? Welcome to first contact. Try not to start an interstellar incident."
+
+"No promises, Navigator."
+
+And so began the strangest alliance in human space history—one that would change everything.`
+            },
+            {
+                title: 'The Anomaly',
+                content: `The thing defied all known physics.
+
+Nicholas watched the sensor data scroll across his neural implant, numbers that made no sense, readings that contradicted themselves. Beside him on the holographic bridge—beamed from her own ship—Zoya manipulated three-dimensional star charts with graceful gestures.
+
+"It's not traveling through space," she explained, her hands painting constellations in the air. "It's folding space around itself. Look." She highlighted the distortions. "Traditional physics says this is impossible."
+
+"Traditional physics," Nic countered, pulling up his own calculations, "hasn't accounted for mathematics from my homeland. Ancient equations that modern science dismissed as mysticism." He layered his holographic data over hers, and they gasped in unison.
+
+The patterns matched. Her Eastern star charts aligned perfectly with his African mathematical models—two halves of a cosmic equation that humanity had never thought to combine.
+
+"We need to work together," Zoya said softly. "Not just our ships. Us. Directly."
+
+"You mean dock the ships? That violates a dozen treaties."
+
+"I mean," she met his eyes through the hologram, "I need to come aboard your vessel. Physical proximity for neural synchronization. If we're going to calculate a defense, our minds need to work in concert."
+
+The political implications were staggering. But the alternative was annihilation.
+
+"Docking port alpha. Thirty minutes. Bring your star charts."
+
+"And Nic?" She smiled. "Bring that brilliant mathematical mind. I have a feeling we're about to revolutionize human understanding of the universe."
+
+"No pressure then."
+
+As her ship maneuvered into position, Nicholas found himself wondering what was more dangerous—the alien anomaly approaching, or the way his heart raced at the thought of meeting her in person.
+
+In space, no one can hear you fall in love. But the universe finds a way.`
+            }
+        ],
+        stats: { chapters: 2, words: 1234, lastUpdated: '1 week ago' }
+    },
+    {
+        id: 'renaissance_italy',
+        title: 'The Painter\'s Muse',
+        era: 'Renaissance Italy (1502)',
+        icon: '🎨',
+        image: 'photos/alternate universe/Renaissance Italy (1502).png',
+        theme: 'Artistic Romance',
+        setting: 'Florence, during the height of Renaissance art',
+        premise: 'Struggling artist Niccolo di Lubega meets Lady Zoya, daughter of a visiting Chinese silk merchant. She becomes his muse, he teaches her perspective drawing. As their lessons evolve into love, they must navigate the rigid social hierarchies and prejudices of Renaissance Florence. Their love story becomes immortalized in paintings that will survive centuries.',
+        characters: {
+            nic: { name: 'Niccolo di Lubega', role: 'Painter & Sculptor' },
+            zoya: { name: 'Lady Zoya Chen', role: 'Merchant\'s Daughter & Secret Artist' }
+        },
+        chapters: [
+            {
+                title: 'The Commission',
+                content: `Niccolo's studio smelled of linseed oil and desperation. Three months behind on rent, his last commission a disaster, he was one failed painting away from abandoning art forever. The mathematics of survival were merciless—even a talented painter needed patrons, and his dark skin made many Florentine nobles... uncomfortable.
+
+The bell above his door chimed. He looked up from mixing pigments to see an impossibility: a Chinese woman in silk robes, accompanied by an older merchant who could only be her father.
+
+"You are Niccolo di Lubega?" the merchant asked in accented Italian. "The painter who studied under the African masters of perspective?"
+
+"I am," Niccolo confirmed, setting down his palette. "Though I doubt many here appreciate those techniques."
+
+"I am Chen Wei, silk merchant from the East. This is my daughter, Zoya. I have heard you paint with mathematical precision—that your understanding of space and light comes from distant knowledge."
+
+Zoya stepped forward, and Niccolo's artist's eye catalogued her automatically: the grace of her movement, the intelligence in her gaze, the way light caught her features. She would be magnificent to paint.
+
+"I wish to learn," she said in flawless Italian, her voice surprising him. "Not to be painted—to paint. My father says you can teach me perspective, the Western techniques. I can teach you in return—Eastern approaches to composition, the philosophy of the brush, the way ink captures spirit."
+
+"You want to trade knowledge?" Niccolo asked, intrigued despite his circumstances.
+
+"I want to learn from the best," she corrected. "And in Florence, you are the only one who might understand that beauty has no borders, that art transcends the color of one's skin or the land of one's birth."
+
+Chen Wei placed a heavy purse on the table. "Three months of lessons. If my daughter shows talent, we extend. If not..." he shrugged.
+
+But Niccolo was already nodding, not for the money (though he desperately needed it), but because he saw in Zoya's eyes something he'd been searching for in every model, every commission, every desperate painting: inspiration.
+
+"When do we begin?"
+
+"Now," Zoya smiled, already reaching for his brushes. "Teach me to see the world as you do, Niccolo di Lubega. And I will show you wonders."`
+            }
+        ],
+        stats: { chapters: 1, words: 892, lastUpdated: '2 weeks ago' }
+    }
+];
+
+// Add more universe data for other images...
+ALTERNATE_UNIVERSES.push(
+    {
+        id: 'medieval_fantasy',
+        title: 'The Knight & The Sorceress',
+        era: 'Medieval Fantasy (Timeless)',
+        icon: '⚔️',
+        image: 'photos/alternate universe/Medieval Fantasy (Timeless).png',
+        theme: 'Fantasy Adventure',
+        setting: 'Kingdom of Valoris, age of magic and steel',
+        premise: 'Sir Nicholas the Brave, a knight from the distant Ugandan kingdoms, is sent on a quest to escort the mysterious Eastern sorceress Zhang Zoya to the Crystal Mountains. As they face dragons, dark magic, and their own growing feelings, they discover that true magic lies not in spells, but in the connection between two souls.',
+        characters: {
+            nic: { name: 'Sir Nicholas the Brave', role: 'Royal Knight & Dragon Slayer' },
+            zoya: { name: 'Zoya the Enchantress', role: 'Sorceress of the Eastern Isles' }
+        },
+        chapters: [
+            {
+                title: 'The Whispering Woods',
+                content: `Sir Nicholas the Brave rode through the Whispering Woods, his armor gleaming like a lone star in the twilight. His quest was simple, yet daunting: escort the sorceress from the East to the Crystal Mountains. He expected a fearsome crone, a wielder of dark and terrible powers.
+
+He found her by a moonlit pond, not chanting incantations, but sketching the reflection of the stars in a small leather-bound book. Zoya the Enchantress was young, her eyes holding the depth of the night sky, her robes the color of twilight.
+
+"You are the knight sent to guard me?" she asked, her voice like the gentle chime of bells.
+
+Nicholas dismounted, taken aback. "I am Sir Nicholas. I am to escort you."
+
+"Escort, or imprison?" she countered, a small, knowing smile on her lips. "My magic is not a weapon to be feared, Sir Knight. It is a language. It speaks with the earth, the sky, the water."
+
+He watched as she dipped her finger in the pond, and the water glowed, showing them a vision of the treacherous path ahead. "In my homeland," he said, his voice softer than he intended, "we trust in steel and strength."
+
+"And here," she replied, her gaze meeting his, "we trust in the connections between things. Perhaps your steel and my starlight can find a common path." In that moment, Nicholas knew this quest would be far more than a simple escort.`
+            },
+            {
+                title: 'The Dragon\'s Pass',
+                content: `The path ahead was blocked by a slumbering mountain dragon, its scales shimmering like obsidian in the afternoon sun. Its snores were like distant thunder. "We must turn back," Nicholas stated, his hand resting on the hilt of his sword. "No knight has ever passed this way and lived."
+
+Zoya shook her head. "Fighting is not the only way, Sir Nicholas. This creature is ancient and wise, not merely a beast. It is grieving. Can't you feel its sorrow?"
+
+Nicholas felt only the heat radiating from the dragon's hide. "I feel a threat."
+
+"Then let me show you what I feel," she whispered. Zoya placed her hand on his armored chest, and a wave of cool, calming energy flowed through him. He suddenly felt a profound sadness that was not his own—a loneliness that echoed through the ages.
+
+Zoya stepped forward, humming a soft, ancient lullaby from her homeland. The dragon's rumbling snores softened. She wove a spell of starlight, not to bind, but to comfort, creating a shimmering blanket of constellations over the great beast. The dragon stirred, opened one massive, molten-gold eye, and looked at her not with malice, but with understanding. It gave a low, mournful sigh, and then shifted its great bulk, clearing the path.
+
+"How...?" Nicholas stammered, his sword forgotten.
+
+"Magic is not about power, Sir Knight," Zoya said, turning back to him, her face illuminated by the magical light. "It is about empathy. You cannot slay a sorrow. You can only soothe it." Nicholas looked at his sword, then at her, and realized he had much to learn about the nature of true strength.`
+            }
+        ],
+        stats: { chapters: 2, words: 1055, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'studio_ghibli',
+        title: 'Spirits of the Garden',
+        era: 'Modern Fantasy (Present)',
+        icon: '🌸',
+        image: 'photos/alternate universe/Studio Ghibli (Present).png',
+        theme: 'Magical Realism',
+        setting: 'Rural Japan, where spirits still walk',
+        premise: 'When Nicholas moves to rural Japan for work, he discovers an enchanted garden where Zoya can communicate with nature spirits. Together, they must protect the sacred garden from developers while learning that magic exists in the modern world for those willing to believe.',
+        characters: {
+            nic: { name: 'Nicholas (Nico)', role: 'City boy learning to see' },
+            zoya: { name: 'Zoya', role: 'Guardian of the Spirit Garden' }
+        },
+        chapters: [
+            {
+                title: 'The Hidden Gate',
+                content: `Nicholas sighed, the city noise still ringing in his ears even here, in the quiet countryside of Japan. He was a programmer, sent here for a six-month project, and he felt utterly out of place. His world was code and concrete, not cicadas and cedar trees.
+
+One evening, chasing a cat that had stolen his sandwich, he stumbled upon a moss-covered gate he'd never noticed before. Pushing it open, he found himself in a garden that seemed to hum with a life of its own. Flowers glowed with a soft, internal light, and the air smelled of rain and honey.
+
+A girl with a watering can looked up, startled. "You found the gate," she said, her voice as soft as moss. It was Zoya, the quiet librarian from the village.
+
+"I... the cat..." Nicholas stammered, feeling foolish.
+
+Zoya smiled. "The spirits led you here. They must think you need this place." She pointed to a small, fuzzy creature peeking from behind a stone lantern. "This is a Makkuro Kurosuke. A soot sprite. They like people who are a little bit lost."
+
+Nicholas stared, his logical mind trying to process the impossible. "Spirits?"
+
+"They're everywhere," Zoya said, her eyes sparkling. "You just have to learn how to see." She offered him a strange, luminous fruit. "Try this. It helps." And as he took a bite, the world around him shimmered, and for the first time, he saw the magic hiding in plain sight.`
+            },
+            {
+                title: 'The Whispers of the Trees',
+                content: `The next day, Nicholas returned to the garden, the taste of the luminous fruit still a memory on his tongue. The soot sprites now danced around his feet, and he could almost hear the ancient cedar tree sighing in the breeze.
+
+Zoya was speaking to a cluster of tiny, frog-like spirits by the pond. "They're worried," she said as Nicholas approached. "They can feel the machines." She pointed towards the edge of the forest, where the distant sound of construction could be heard. "The developers. They want to build a shopping mall here. They don't know this garden is sacred."
+
+Nicholas, the programmer, immediately thought of a logical solution. "We can file a petition. Check the zoning laws. I can build a website to raise awareness."
+
+Zoya smiled sadly. "Their laws don't recognize the spirits, Nico. We can't fight their world with their rules. We have to remind the land of its own magic, make it too wild, too alive for them to tame."
+
+That night, she took him to the heart of the garden. She taught him how to listen to the whispers of the trees, to feel the pulse of the earth beneath his feet. He watched, mesmerized, as she coaxed the vines to grow, weaving them into a living, thorny barrier at the garden's edge. He, in turn, used his phone's flashlight to create dancing patterns of light, which the spirits seemed to love, their chirps and clicks growing stronger and more joyful. He was a city boy, used to solving problems with code. But here, in Zoya's world, he was learning a new kind of logic—the logic of the heart, of nature, of magic.`
+            }
+        ],
+        stats: { chapters: 2, words: 1018, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'steampunk',
+        title: 'Clockwork Hearts',
+        era: 'Steampunk Victorian (1888)',
+        icon: '⚙️',
+        image: 'photos/alternate universe/Steampunk Inventors (1888).png',
+        theme: 'Steampunk Romance',
+        setting: 'Neo-London, age of steam and gears',
+        premise: 'Inventor Nicholas Gearwright creates mechanical wonders in his workshop. When Lady Zoya Chen arrives from the Eastern Confederation with revolutionary clockwork blueprints, their collaboration sparks both innovation and romance in a world of brass, steam, and endless possibilities.',
+        characters: {
+            nic: { name: 'Nicholas Gearwright', role: 'Master Inventor & Engineer' },
+            zoya: { name: 'Lady Zoya Chen', role: 'Clockwork Specialist from the East' }
+        },
+        chapters: [
+            {
+                title: 'The Eastern Blueprints',
+                content: `Nicholas Gearwright’s workshop was a symphony of ticking clocks, hissing steam, and the scent of hot oil and ozone. His latest creation, a clockwork bird, refused to fly. Its gears were perfect, the math was sound, but it lacked... a soul.
+
+The bell above his door chimed, announcing a client. But it was no ordinary Londoner. Lady Zoya Chen, from the Eastern Clockwork Confederation, stood there, holding a lacquered box. Her attire was a fusion of Victorian silk and intricate brass fittings.
+
+"Mr. Gearwright," she said, her English precise, with a hint of a faraway accent. "I am told you are the finest inventor in Neo-London. I have a proposal."
+
+She opened the box, revealing not gears and cogs, but delicate, paper-thin blueprints made of woven silk. They depicted a 'heart-drive', a mechanism that didn't just power a machine, but gave it a semblance of life, of purpose.
+
+"This is... revolutionary," Nicholas breathed, his fingers tracing the elegant lines. "The mathematics are unlike anything I've ever seen. It's almost... poetic."
+
+"In my homeland, we believe engineering is a form of poetry," Zoya replied. "But we lack your mastery of micro-servos and steam compression. I propose a collaboration. Your mechanics, and my heart-drive. Together, we could make our automatons not just move, but live."
+
+Nicholas looked from the impossible blueprints to the brilliant woman who had brought them. He knew, with the certainty of a perfectly balanced gear, that his life was about to change forever.`
+            },
+            {
+                title: 'The First Spark',
+                content: `Their first week working together was a whirlwind of clashing philosophies. Nicholas, with his precise calipers and mathematical calculations, argued for efficiency and power. Zoya, with her delicate tools and focus on balance and flow, argued for grace and elegance.
+
+"The power-to-weight ratio is all wrong!" Nicholas would exclaim, pointing at a diagram with a grease-stained finger.
+
+"You are trying to force it," Zoya would counter softly, adjusting a tiny gear with a pair of tweezers. "A clockwork heart does not want to be a hammer. It wants to be a hummingbird."
+
+The breakthrough came late one night. They were working on a prototype, a small, metallic spider. Nicholas had designed the legs for maximum speed, but they moved jerkily, unnaturally. Frustrated, he slumped over his workbench.
+
+Zoya gently pushed his diagrams aside. "Stop thinking like an engineer for a moment, Nicholas. Think like a poet. What does a spider feel?" She took his hand and placed it on the cool metal casing. "It feels the vibrations of the web. It is patient. It is deliberate."
+
+She began to hum, a low, melodic tune, as she made micro-adjustments to the heart-drive, synchronizing its rhythm with her song. Nicholas watched, fascinated, as he realized her "poetic" adjustments were actually a form of intuitive, complex wave-form analysis his own rigid mathematics had missed. He grabbed a new sheet of paper and began to scribble equations, not of force, but of resonance and harmony.
+
+He layered his new math over her design. Suddenly, the spider's legs twitched. They moved, not with jerky speed, but with a silent, fluid grace. It took a step, then another, moving across the workbench with an eerie, lifelike quality.
+
+They looked at each other, their faces illuminated by the gaslight, the smell of hot metal and ozone filling the air. In that moment, they weren't just inventors. They were creators. And in the shared spark of their creation, another, more dangerous spark had been ignited between them.`
+            }
+        ],
+        stats: { chapters: 2, words: 1120, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'modern_au',
+        title: 'Coffee Shop Chronicles',
+        era: 'Modern AU (Alternate 2019)',
+        icon: '☕',
+        image: 'photos/alternate universe/Modern AU (Alternate 2019).png',
+        theme: 'Contemporary Romance',
+        setting: 'University town, modern Japan',
+        premise: 'What if things went differently? In this alternate 2019, Nicholas and Zoya meet at the same sports festival but become friends immediately—no overthinking, no hesitation. A lighter, fluffier take on your real story where everything comes easy, but the connection is just as real.',
+        characters: {
+            nic: { name: 'Nic', role: 'Engineering Student & Coffee Addict' },
+            zoya: { name: 'Zoya', role: 'Art Student & Dreamer' }
+        },
+        chapters: [
+            {
+                title: 'The Sports Festival',
+                content: `It was hot. Unbearably hot. Nic, an engineering student, had found refuge under the shade of a large oak tree, pretending to be engrossed in a textbook on thermodynamics. In reality, he was just trying to avoid being roped into the three-legged race at the university's sports festival.
+
+Suddenly, a shadow fell over his book. "Is this seat taken?" a voice asked. He looked up and saw a girl with a sketchbook and a kind smile. It was Zoya, an art student from his elective Japanese history class.
+
+"Uh, no, it's all yours," he managed, trying not to sound as flustered as he felt.
+
+She sat down with a grateful sigh. "Thanks. I'm hiding from the cheerleading squad. They're trying to recruit me again." She opened her sketchbook, revealing a beautiful, half-finished drawing of the very tree they were sitting under.
+
+"Wow, that's amazing," Nic said, genuinely impressed. "You really capture the... uh... the leafy-ness." He cringed internally. 'Leafy-ness'?
+
+Zoya laughed, a bright, clear sound. "The 'leafy-ness'? I'll take it. Better than my professor, who just says my perspective is 'sub-optimal'." She glanced at his textbook. "Thermodynamics, huh? Trying to calculate the optimal way to avoid social interaction?"
+
+Nic grinned. "You have no idea. But I have a feeling my calculations are about to be disrupted." He closed his book. "I'm Nic, by the way."
+
+"Zoya," she replied, her eyes sparkling. "So, Nic the thermodynamics expert, what's the probability of two people hiding from a sports festival ending up under the same tree?"
+
+"Given the current variables," he said, leaning in conspiratorially, "I'd say it's approaching 100%." And just like that, with no overthinking and no hesitation, their story began.`
+            }
+        ],
+        stats: { chapters: 1, words: 1089, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'jazz_age',
+        title: 'Midnight in Shanghai',
+        era: 'Jazz Age (1925)',
+        icon: '🎷',
+        image: 'photos/alternate universe/Jazz Age (1925).png',
+        theme: 'Historical Romance',
+        setting: 'Shanghai, during the Roaring Twenties',
+        premise: 'Jazz pianist Nicholas "Nic" Lubega arrives in Shanghai\'s International Settlement seeking fame. At the Paradise Club, he meets Zoya, a singer whose voice captures the spirit of the age. Together, they navigate the glamorous and dangerous world of 1920s Shanghai, where music brings souls together across any divide.',
+        characters: {
+            nic: { name: 'Nicholas "Nic" Lubega', role: 'Jazz Pianist from New Orleans' },
+            zoya: { name: 'Zoya Zhang', role: 'Jazz Singer & Shanghai Rose' }
+        },
+        chapters: [
+            {
+                title: 'The Paradise Club',
+                content: `The air in Shanghai's Paradise Club was thick with smoke, perfume, and the intoxicating sound of jazz. Nicholas "Nic" Lubega, fresh off the boat from New Orleans, let his fingers dance across the ivory keys of the house piano. He was playing for his supper, a stranger in a strange land, his only companions the blues and a dream of making a name for himself.
+
+Then, she stepped onto the stage. The spotlight found her, and the rowdy club fell silent. She was Zoya Zhang, known to the patrons as the "Shanghai Rose." Dressed in a shimmering, beaded cheongsam, she was a vision of modern elegance and ancient grace.
+
+She began to sing. Her voice wasn't loud, but it cut through the haze, a soulful, melancholic melody that spoke of heartbreak and hope. It was a language Nic didn't understand, but a feeling he knew in his bones. He found his fingers moving on their own, weaving a counter-melody, his New Orleans blues wrapping around her Shanghai sorrow.
+
+Her eyes found his across the stage. A flicker of surprise, then a small, appreciative nod. For the rest of the song, they were in their own world. Her voice and his piano, a conversation between two souls who had never met but had known each other forever.
+
+When the song ended, the club erupted in applause. Zoya took her bow and walked directly to the piano. "I have never heard anyone play like that," she said in perfect, lilting English. "It was like you knew what my heart was trying to say."
+
+"And I've never heard a voice that could tell a story in any language," Nic replied, his own voice rough with emotion. "My name is Nic."
+
+"Zoya," she smiled. "It seems the Paradise Club has found its new sound." In the heart of the Roaring Twenties, in the most international city in the world, two different melodies had just become a single, unforgettable song.`
+            }
+        ],
+        stats: { chapters: 1, words: 1042, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'wild_west',
+        title: 'Dust & Destiny',
+        era: 'Wild West (1875)',
+        icon: '🤠',
+        image: 'photos/alternate universe/Wild West (1875).png',
+        theme: 'Western Romance',
+        setting: 'Arizona Territory, frontier town',
+        premise: 'Sheriff Nicholas protects a small frontier town. When Zoya Zhang arrives with her family on the transcontinental railroad, prejudice threatens them both. Together, they must face outlaws, discrimination, and the harsh desert—discovering that love is the strongest force in the Wild West.',
+        characters: {
+            nic: { name: 'Sheriff Nicholas', role: 'Town Lawman & Protector' },
+            zoya: { name: 'Zoya Zhang', role: 'Railroad Worker\'s Daughter' }
+        },
+        chapters: [
+            {
+                title: 'The Iron Horse Arrives',
+                content: `The dust of the Arizona Territory was a permanent part of Sheriff Nicholas's life. It coated his boots, settled on his hat, and seemed to live in the lines on his face. He was the law in the small, burgeoning town of Redemption, a town that was about to change forever.
+
+The clang of the hammer on steel announced the arrival of the transcontinental railroad. With it came a flood of new faces, including a group of Chinese workers and their families. Among them was Zoya Zhang, daughter of the crew's foreman. She was quiet and observant, her hands, though calloused from work, moved with a delicate grace.
+
+Prejudice arrived in town right alongside the railroad. Whispers and suspicious glances followed Zoya and her family wherever they went. One afternoon, a group of rowdy cowboys began harassing her father in the general store.
+
+Before it could escalate, the door swung open. Sheriff Nicholas stood there, his presence filling the doorway. He didn't draw his gun. He didn't raise his voice. He just looked at the cowboys with a calm, steady gaze. "This man is under the protection of the law in this town," he said, his voice a low rumble. "Which means he's under my protection. Is that going to be a problem?"
+
+The cowboys, grumbling, shuffled out of the store. Zoya's father gave Nicholas a grateful, respectful bow. But it was Zoya's eyes that held him. They were filled not with fear, but with a quiet, fierce strength.
+
+"Thank you, Sheriff," she said, her voice clear and steady.
+
+"Just doing my job, ma'am," he replied, tipping his hat. But as he walked out into the dusty street, he knew his job in Redemption had just become a lot more personal. He wasn't just protecting a town anymore; he was protecting her.`
+            }
+        ],
+        stats: { chapters: 1, words: 1029, lastUpdated: '4 days ago' }
+    },
+    {
+        id: 'pirates',
+        title: 'Tides of Fortune',
+        era: 'Age of Sail (Unknown)',
+        icon: '🏴‍☠️',
+        image: 'photos/alternate universe/Sea Pirates (unknown).png',
+        theme: 'Pirate Adventure',
+        setting: 'South China Sea, pirate havens and hidden islands',
+        premise: 'Captain Nicholas "Blackheart," a pirate with a code of honor, captures a merchant ship. Among the prisoners is Zoya Zhang, actually a disguised navigator with her own secrets. As they sail dangerous waters together, they discover that treasure comes in unexpected forms—and the greatest riches are the connections we forge.',
+        characters: {
+            nic: { name: 'Captain Nicholas "Blackheart"', role: 'Pirate Captain with a Code' },
+            zoya: { name: 'Zoya Zhang', role: 'Navigator in Disguise' }
+        },
+        chapters: [
+            {
+                title: 'The Captured Cargo',
+                content: `The merchant ship surrendered without much of a fight. Captain Nicholas "Blackheart," a name whispered in fear across the South China Sea, was known for his swift attacks and his unusual code of honor: he took the cargo, but never a life.
+
+As his crew plundered the silks and spices, Nicholas inspected the ship's log. That's when he saw him—a young, slender boy huddled in the corner of the captain's cabin, clutching a collection of star charts.
+
+"And who are you, lad?" Nicholas asked, his voice surprisingly gentle for a pirate.
+
+"I am... a cabin boy," the youth replied, his voice higher than expected.
+
+Nicholas raised an eyebrow. He'd been at sea long enough to know a lie when he heard one. He picked up one of the charts. The calculations were complex, the handwriting elegant. "A cabin boy who reads the stars better than my own navigator," he mused. "You're no cabin boy. You're the real treasure on this ship, aren't you?"
+
+He reached out and gently pulled the oversized cap from the "boy's" head. A cascade of long, black hair fell free. It was a woman. Zoya Zhang. She met his gaze, her eyes defiant. "I am the navigator," she said, her chin held high. "And my charts are not for pirates."
+
+Nicholas laughed, a deep, booming sound. "That's where you're wrong, my clever navigator. You and your charts are the only cargo I'm interested in today. You're going to guide my ship to the legendary Isle of Whispering Winds." He grinned. "Welcome aboard The Serpent's Kiss. Your new life as a pirate begins now." Zoya glared at him, but for the first time in years, Nicholas felt the thrill of a true adventure, one that had nothing to do with gold or jewels.`
+            }
+        ],
+        stats: { chapters: 1, words: 1036, lastUpdated: '4 days ago' }
+    }
+);
 
 const $ = (id) => document.getElementById(id);
 const $$ = (selector) => document.querySelectorAll(selector);
@@ -97,6 +586,7 @@ function initApp() {
     initQuill();
     addEventListeners();
     initLandingPage();
+    initMoodPickers();
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -355,6 +845,8 @@ function initLandingPage() {
     const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     applyThemeToLanding(savedTheme);
     initWebBackground('web-canvas-landing', THEME_COLORS[savedTheme]);
+    // start a subtle spiral overlay on the landing gate
+    initSpiralAnimation('spiral-canvas-landing', { intensity: 'subtle' });
 }
 
 function applyThemeToLanding(themeName) {
@@ -442,8 +934,12 @@ function initSanctuary() {
     const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     initMainParticles(savedTheme);
     initWebBackground('web-canvas-main', THEME_COLORS[savedTheme]);
+    // creative spiral overlay for the main sanctuary
+    initSpiralAnimation('spiral-canvas-main', { intensity: 'moderate' });
     
     addSanctuaryEventListeners();
+    // Evaluate mood sync and optionally redirect on entry
+    if (typeof evaluateMoodAndRedirect === 'function') evaluateMoodAndRedirect();
 }
 
 function addEventListeners() {
@@ -467,6 +963,22 @@ function addEventListeners() {
             window.location.hash = 'home';
         }
     });
+
+    // Mood bar visibility toggle
+    const moodBar = document.getElementById('mood-sync-bar');
+    const visibilityToggle = document.getElementById('mood-sync-visibility-toggle');
+    if (moodBar && visibilityToggle) {
+       // Start collapsed
+       moodBar.classList.add('collapsed');
+       visibilityToggle.querySelector('span').style.transform = 'rotate(180deg)';
+
+       visibilityToggle.addEventListener('click', () => {
+           const isCollapsed = moodBar.classList.toggle('collapsed');
+           const arrow = visibilityToggle.querySelector('span');
+           arrow.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+       });
+    }
+
 
     document.addEventListener('click', (e) => {
         const musicPlayerSun = $('music-player-sun');
@@ -513,6 +1025,9 @@ function addEventListeners() {
             initMainParticles(savedThemeName);
             initWebBackground('web-canvas-landing', theme);
             initWebBackground('web-canvas-main', theme);
+            // Reinitialize spiral overlays to match new sizes
+            try { initSpiralAnimation('spiral-canvas-landing', { intensity: 'subtle' }); } catch(e) {}
+            try { initSpiralAnimation('spiral-canvas-main', { intensity: 'moderate' }); } catch(e) {}
             
             if (typeof renderSolarSystemNav === 'function') {
                 renderSolarSystemNav();
@@ -545,6 +1060,30 @@ function addSanctuaryEventListeners() {
             }
         });
      }
+
+     // Mood ribbon (if present) should trigger mood-evaluation and redirect
+     const moodRibbon = document.getElementById('mood-ribbon');
+     if (moodRibbon) {
+         moodRibbon.addEventListener('click', (e) => { e.preventDefault(); if (!AppState.moodSyncEnabled) return; try { evaluateMoodAndRedirect(); } catch (err) { console.error('Mood ribbon handler error', err); } });
+     }
+    // Combined mood display (center area) should also trigger evaluation
+    const combinedMood = document.querySelector('.combined-mood-display');
+    if (combinedMood) {
+        combinedMood.addEventListener('click', (e) => { e.preventDefault(); if (!AppState.moodSyncEnabled) return; try { evaluateMoodAndRedirect(); } catch (err) { console.error(err); } });
+    }
+
+    // Mood recommendation popup actions
+    const moodPopupAction = document.querySelector('.mood-popup-action');
+    const moodPopupClose = document.querySelector('.mood-popup-close');
+    if (moodPopupAction) {
+        moodPopupAction.addEventListener('click', (e) => {
+            e.preventDefault(); if (!AppState.moodSyncEnabled) { const p = document.getElementById('mood-recommendation-popup'); if (p) p.style.display = 'none'; return; } try { evaluateMoodAndRedirect(); } catch (err) { console.error(err); }
+            const p = document.getElementById('mood-recommendation-popup'); if (p) p.style.display = 'none';
+        });
+    }
+    if (moodPopupClose) {
+        moodPopupClose.addEventListener('click', (e) => { e.preventDefault(); const p = document.getElementById('mood-recommendation-popup'); if (p) p.style.display = 'none'; });
+    }
 
      document.body.addEventListener('dblclick', (e) => {
          const heart = document.createElement('div');
@@ -638,6 +1177,131 @@ function initWebBackground(canvasId, theme) {
     animate();
 }
 
+// Initialize mood pickers and interactions
+function initMoodPickers() {
+    const MOODS = [
+        { key: 'excited', emoji: '🤩', label: 'Excited' },
+        { key: 'loving', emoji: '💕', label: 'Loving' },
+        { key: 'happy', emoji: '😊', label: 'Happy' },
+        { key: 'sad', emoji: '😢', label: 'Sad' },
+        { key: 'calm', emoji: '😌', label: 'Calm' },
+        { key: 'playful', emoji: '😜', label: 'Playful' },
+        { key: 'adventurous', emoji: '🧭', label: 'Adventurous' },
+        { key: 'nostalgic', emoji: '🎞️', label: 'Nostalgic' },
+        { key: 'neutral', emoji: '✨', label: 'Neutral' }
+    ];
+
+    const nicOptions = document.getElementById('nic-mood-options');
+    const zoyaOptions = document.getElementById('zoya-mood-options');
+    const nicBtn = document.getElementById('nic-current-mood');
+    const zoyaBtn = document.getElementById('zoya-current-mood');
+    const combinedEl = document.querySelector('.combined-mood-display');
+    const popup = document.getElementById('mood-recommendation-popup');
+    const popupMessage = popup ? popup.querySelector('.mood-popup-message') : null;
+    const popupAction = popup ? popup.querySelector('.mood-popup-action') : null;
+
+    function readMood(person) {
+        if (person === 'nic') return (window.NICHO_MOOD || localStorage.getItem('nichoMood') || 'neutral').toLowerCase();
+        return (window.ZOYA_MOOD || localStorage.getItem('zoyaMood') || 'neutral').toLowerCase();
+    }
+
+    function writeMood(person, mood) {
+        if (person === 'nic') {
+            window.NICHO_MOOD = mood; localStorage.setItem('nichoMood', mood);
+        } else {
+            window.ZOYA_MOOD = mood; localStorage.setItem('zoyaMood', mood);
+        }
+    }
+
+    function renderCurrent(person) {
+        const mood = readMood(person) || 'neutral';
+        const def = MOODS.find(m => m.key === mood) || MOODS.find(m => m.key === 'neutral');
+        const btn = person === 'nic' ? nicBtn : zoyaBtn;
+        if (btn && def) {
+            btn.querySelector('.mood-emoji').textContent = def.emoji;
+            btn.querySelector('.mood-name').textContent = def.label;
+        }
+        updateCombinedDisplay();
+    }
+
+    function updateCombinedDisplay() {
+        const nic = readMood('nic');
+        const zoya = readMood('zoya');
+        const combinedTextEl = combinedEl ? combinedEl.querySelector('.combined-text') : null;
+        const combinedIconEl = combinedEl ? combinedEl.querySelector('.combined-icon') : null;
+        if (combinedTextEl) combinedTextEl.textContent = `${nic.charAt(0).toUpperCase() + nic.slice(1)} / ${zoya.charAt(0).toUpperCase() + zoya.slice(1)}`;
+        // pick icon with priority: loving -> 💕, excited -> 🤩, sad -> 😢, default ✨
+        const priorityIcon = zoya === 'loving' || nic === 'loving' ? '💕' : (zoya === 'excited' || nic === 'excited' ? '🤩' : (zoya === 'sad' || nic === 'sad' ? '😢' : '💕'));
+        if (combinedIconEl) combinedIconEl.textContent = priorityIcon;
+
+        // Prepare popup suggestion
+        if (popupMessage && popupAction) {
+            const suggested = mapMoodToPanel(nic, zoya);
+            popupMessage.textContent = `We sense ${nic} and ${zoya}. Would you like to be guided to ${suggested}?`;
+            popupAction.dataset.target = suggested;
+        }
+    }
+
+    function attachOptions(container, person) {
+        if (!container) return;
+        container.innerHTML = MOODS.map(m => `<button class="mood-option" data-mood="${m.key}" title="${m.label}">${m.emoji} <span class="mood-label-text">${m.label}</span></button>`).join('');
+        container.querySelectorAll('.mood-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!AppState || !AppState.moodSyncEnabled) return; const mood = btn.dataset.mood; writeMood(person, mood); renderCurrent(person);
+                // brief visual feedback
+                btn.classList.add('selected');
+                setTimeout(() => btn.classList.remove('selected'), 400);
+                // show recommendation popup
+                if (popup) popup.style.display = 'block';
+            });
+        });
+    }
+
+    // Toggle dropdown behavior for current-mood buttons
+    // NOTE: CSS uses `.mood-options.active` to show the dropdown, so toggle that class here.
+    function wireToggle(btnId, optionsEl) {
+        const btn = document.getElementById(btnId);
+        if (!btn || !optionsEl) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); if (!AppState || !AppState.moodSyncEnabled) return;
+            optionsEl.classList.toggle('active');
+        });
+        // Close when clicking elsewhere
+        document.addEventListener('click', () => { optionsEl.classList.remove('active'); });
+    }
+
+    attachOptions(nicOptions, 'nic');
+    attachOptions(zoyaOptions, 'zoya');
+    wireToggle('nic-current-mood', nicOptions);
+    wireToggle('zoya-current-mood', zoyaOptions);
+    renderCurrent('nic'); renderCurrent('zoya');
+
+    // Initialize Mood Sync toggle (persisted)
+    const moodToggle = document.getElementById('mood-sync-toggle');
+    // Always start with mood sync disabled.
+    AppState.moodSyncEnabled = false;
+    if (moodToggle) {
+        moodToggle.checked = false;
+        moodToggle.addEventListener('change', (e) => {
+            AppState.moodSyncEnabled = !!moodToggle.checked;
+            // small visual affordance: toggle a disabled class
+            const bar = document.getElementById('mood-sync-bar');
+            if (bar) bar.classList.toggle('mood-sync-disabled', !AppState.moodSyncEnabled);
+        });
+        // apply initial visual state
+        const bar = document.getElementById('mood-sync-bar'); if (bar) bar.classList.toggle('mood-sync-disabled', !AppState.moodSyncEnabled);
+    }
+
+    // Popup action triggers redirect (respect toggle)
+    if (popupAction) {
+        popupAction.addEventListener('click', (e) => {
+            e.preventDefault(); if (!AppState.moodSyncEnabled) { if (popup) popup.style.display = 'none'; return; } const target = popupAction.dataset.target || mapMoodToPanel(readMood('zoya'), readMood('nic')); if (popup) popup.style.display = 'none'; showMoodLoadingAndRedirect(target);
+        });
+    }
+
+    // Close popup when clicking outside or on close button handled elsewhere
+}
+
 
 function initMainParticles(themeName) {
     applyThemeToMainParticles(themeName);
@@ -703,19 +1367,124 @@ function applyThemeToMainParticles(themeName) {
     animateParticles();
 }
 
+// Spiral particle animation (creative overlay)
+function initSpiralAnimation(canvasId, options = {}) {
+    const canvas = $(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Cancel any existing animation for this canvas
+    const isMain = canvasId.indexOf('main') !== -1;
+    if (isMain && AppState.spiralAnimationMainId) cancelAnimationFrame(AppState.spiralAnimationMainId);
+    if (!isMain && AppState.spiralAnimationLandingId) cancelAnimationFrame(AppState.spiralAnimationLandingId);
+
+    // Respect reduced motion
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        return;
+    }
+
+    // High-DPI support
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
+        canvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resizeCanvas();
+
+    const center = () => ({ x: canvas.width / (window.devicePixelRatio || 1) / 2, y: canvas.height / (window.devicePixelRatio || 1) / 2 });
+    let cx = center().x, cy = center().y;
+
+    const intensity = options.intensity || 'subtle';
+    const counts = { subtle: 60, moderate: 110, strong: 180 };
+    const baseCount = counts[intensity] || 60;
+
+    const colors = options.colors || ['rgba(255,215,0,0.95)', 'rgba(138,43,226,0.9)', 'rgba(100,255,218,0.9)'];
+
+    const particles = [];
+    const maxR = Math.hypot(window.innerWidth, window.innerHeight) * 0.6;
+
+    class SpiralParticle {
+        constructor() {
+            this.reset(true);
+        }
+        reset(initial = false) {
+            this.t = (Math.random() * 6) - 3; // parameter along spiral
+            this.offset = Math.random() * Math.PI * 2;
+            this.speed = (0.002 + Math.random() * 0.006) * (initial ? 0.6 : 1);
+            this.size = 0.6 + Math.random() * 3.2;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.alpha = 0.06 + Math.random() * 0.6;
+        }
+        update(dt) {
+            this.t += this.speed * dt;
+            const a = 2.5; // spiral tightness
+            const b = 6.5; // growth per revolution
+            this.r = a + b * this.t;
+            this.x = cx + this.r * Math.cos(this.t + this.offset);
+            this.y = cy + this.r * Math.sin(this.t + this.offset);
+            // fade as it moves out
+            this.lifeAlpha = Math.max(0, 1 - (this.r / maxR));
+            if (this.r > maxR || isNaN(this.x) || isNaN(this.y)) {
+                this.reset();
+            }
+        }
+        draw() {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = Math.min(0.9, this.alpha * this.lifeAlpha);
+            const s = this.size * (0.6 + this.lifeAlpha);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < baseCount; i++) particles.push(new SpiralParticle());
+
+    let last = performance.now();
+    function animate(now) {
+        const dt = Math.min(40, now - last); last = now;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // subtle radial vignette to soften edges
+        const grad = ctx.createRadialGradient(cx, cy, Math.min(cx, cy) * 0.2, cx, cy, Math.max(cx, cy));
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.35)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        particles.forEach(p => { p.update(dt); p.draw(); });
+
+        const id = requestAnimationFrame(animate);
+        if (isMain) AppState.spiralAnimationMainId = id; else AppState.spiralAnimationLandingId = id;
+    }
+
+    // Recompute center and maxR on resize
+    const handleResize = () => { resizeCanvas(); cx = center().x; cy = center().y; };
+    window.addEventListener('resize', handleResize);
+
+    animate(performance.now());
+}
+
 
 function renderSolarSystemNav() {
     const navItems = [
         { id: 'timeline', name: 'Our Chronicle', color: '#e74c3c', size: 5, orbit: 1, speed: 40 },
-        { id: 'book', name: 'The Stardust Tome', color: '#3498db', size: 6, orbit: 2, speed: 60 },
-        { id: 'gallery', name: 'Gallery of Ages', color: '#9b59b6', size: 6.5, orbit: 3, speed: 85 },
-        { id: 'guide', name: 'Constellation Guide', color: '#f1c40f', size: 4.5, orbit: 4, speed: 35 },
-        { id: 'games', name: 'Orion\'s Challenges', color: '#e67e22', size: 7, orbit: 5, speed: 110 },
-        { id: 'calendar', name: 'Nebula of Solitude', color: '#2ecc71', size: 5.5, orbit: 6, speed: 50 },
-        { id: 'sanctuary', name: 'Inner Sanctum', color: '#1abc9c', size: 5.2, orbit: 7, speed: 70 }
+        { id: 'book', name: 'The Stardust Tome', color: '#3498db', size: 6, orbit: 2, speed: 60 }, // Existing
+        { id: 'gallery', name: 'Gallery of Ages', color: '#9b59b6', size: 6.5, orbit: 3, speed: 85 }, // Existing
+        { id: 'guide', name: 'Constellation Guide', color: '#f1c40f', size: 4.5, orbit: 4, speed: 35 }, // Existing
+        { id: 'games', name: 'Orion\'s Challenges', color: '#e67e22', size: 7, orbit: 5, speed: 110 }, // Existing
+        { id: 'universes', name: 'Alternate Chronicles', color: '#2ecc71', size: 5.5, orbit: 6, speed: 50 }, // Replaces Calendar
+        { id: 'voicegarden', name: 'Voice Garden', color: '#1abc9c', size: 5.2, orbit: 7, speed: 70 }, // New
+        { id: 'sanctuary', name: 'Inner Sanctum', color: '#e0e0e0', size: 4, orbit: 8, speed: 130 } // Existing, new orbit
     ];
 
-    const orbitRadii = [12, 18, 24, 30, 36, 42, 48];
+    const orbitRadii = [12, 18, 24, 30, 36, 42, 48, 54];
     const container = DOM.solarSystemContainer;
     container.querySelectorAll('.orbit, .planet').forEach(el => el.remove());
 
@@ -773,7 +1542,12 @@ function renderPanel(panelId) {
     if (window.nebulaCleanup) { window.nebulaCleanup(); window.nebulaCleanup = null; }
 
     if (panelId === 'home') {
+        // Ensure main content is hidden and solar system is visible
         DOM.mainContent.classList.remove('visible');
+        // If we previously scheduled hiding the solar system, clear it
+        if (AppState.solarHideTimeout) { clearTimeout(AppState.solarHideTimeout); AppState.solarHideTimeout = null; }
+        // Make sure container is displayed (flex) before removing the .hidden class so transitions work
+        if (DOM.solarSystemContainer) DOM.solarSystemContainer.style.display = 'flex';
         DOM.solarSystemContainer.classList.remove('hidden');
         DOM.mainContent.style.backgroundColor = '';
         DOM.mainContent.style.padding = '100px 7vw 50px 7vw';
@@ -793,7 +1567,16 @@ function renderPanel(panelId) {
     }
     
     DOM.mainContent.classList.add('visible');
-    DOM.solarSystemContainer.classList.add('hidden');
+    // Hide the solar system container completely for non-home panels. Add hidden class for transition
+    if (DOM.solarSystemContainer) {
+        DOM.solarSystemContainer.classList.add('hidden');
+        // After the opacity transition, remove it from layout so it can't be seen through transparent panels
+        if (AppState.solarHideTimeout) clearTimeout(AppState.solarHideTimeout);
+        AppState.solarHideTimeout = setTimeout(() => {
+            try { DOM.solarSystemContainer.style.display = 'none'; } catch (e) {}
+            AppState.solarHideTimeout = null;
+        }, 420);
+    }
     
     let content = '';
     switch(panelId) {
@@ -802,7 +1585,9 @@ function renderPanel(panelId) {
         case 'gallery': content = getGalleryPanelHTML(); break;
         case 'guide': content = getGuidePanelHTML(); break;
         case 'games': content = getGamesPanelHTML(); break;
+        case 'voicegarden': content = getVoiceGardenHTML(); break;
         case 'calendar': content = getNebulaOfSolitudeHTML(); break;
+        case 'universes': content = getUniversePanelHTML(); break;
         case 'sanctuary': content = getSanctuaryPanelHTML(); break;
     }
     DOM.mainContent.innerHTML = content;
@@ -830,7 +1615,9 @@ function renderPanel(panelId) {
     if (panelId === 'timeline') initChroniclePanelJS();
     if (panelId === 'guide') initGuidePanelJS();
     if (panelId === 'games') initGamesPanelJS();
+    if (panelId === 'voicegarden') initVoiceGardenPanelJS();
     if (panelId === 'sanctuary') initSanctuaryPanelJS();
+    if (panelId === 'universes') initUniversePanel();
 }
 
 function handleMainContentClick(e) {
@@ -1170,8 +1957,6 @@ function createOracleStarfield(themeName) {
 function switchSanctuaryView(viewIdToShow) {
     const mainContainer = document.getElementById('sanctuary-main-container');
     if (mainContainer) {
-        // This line below is REMOVED to prevent the inner scrollbar.
-        // mainContainer.classList.toggle('scrollable-content', viewIdToShow === 'sanctuary-realms-view');
         mainContainer.querySelectorAll('.sanctuary-view').forEach(view => {
             view.classList.remove('active');
         });
@@ -1396,9 +2181,6 @@ function applyThemeToOracle(themeName) {
     });
 }
 
-// REPLACE this entire function in control.js
-// Add this to control.js in the initSanctuaryPanelJS() function
-
 function initSanctuaryPanelJS() {
     const typeTextElement = document.getElementById('typing-text');
     const riddleElement = document.getElementById('sanctuary-riddle');
@@ -1463,10 +2245,19 @@ function initSanctuaryPanelJS() {
 
     function checkAnswer(isPassword = false, value = '') {
         if (hasAttempted) return;
+        // Allow temporary bypass if mood-based loading is in progress
+        if (AppState.passwordsTemporarilyBypassed) {
+            feedbackElement.textContent = "The gates sense a special alignment. Entry granted.";
+            feedbackElement.style.color = 'var(--jade)';
+            feedbackElement.style.display = 'block';
+            setTimeout(handleCorrectAnswer, 800);
+            return;
+        }
+
         const correctPassword = "nini";
         const correctFood = "tomato ramen";
         let isCorrect = isPassword ? value.toLowerCase().trim() === correctPassword : value.toLowerCase().trim() === correctFood;
-        
+
         if (isCorrect) {
             feedbackElement.textContent = "The Sanctum recognizes you... The way is opened.";
             feedbackElement.style.color = 'var(--jade)';
@@ -1510,6 +2301,647 @@ function initSanctuaryPanelJS() {
 
 // ===================================================================
 // END: CODE INTEGRATED FROM ORACLE.HTML
+// ===================================================================
+
+
+// ===================================================================
+// START: VOICE GARDEN IMPLEMENTATION
+// ===================================================================
+
+const getVoiceGardenHTML = () => `
+<div id="voice-garden-panel" class="content-panel active">
+    <h2 class="panel-header">🌸 Voice Message Garden 🎤</h2>
+    <p class="panel-subheader">"Where words bloom into memories"</p>
+
+    <div class="voice-garden-container">
+        <div class="garden-stats-bar">
+            <div class="garden-stat">
+                <div id="vg-total-flowers" class="stat-value">0</div>
+                <div class="stat-desc">Total Flowers</div>
+            </div>
+            <div class="garden-stat">
+                <div id="vg-filter-count" class="stat-value">0</div>
+                <div class="stat-desc">Matching Filter</div>
+            </div>
+            <div class="garden-stat">
+                <div id="vg-garden-age" class="stat-value">0d</div>
+                <div class="stat-desc">Garden Age</div>
+            </div>
+            <div class="garden-stat garden-filters">
+                <div class="stat-desc">Show:</div>
+                <div class="filter-buttons">
+                    <button id="vg-filter-all" class="vg-filter active">All</button>
+                    <button id="vg-filter-en" class="vg-filter">English</button>
+                    <button id="vg-filter-zh" class="vg-filter">Chinese</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="garden-view" id="garden-view">
+            <div class="garden-ground"></div>
+            <!-- Flowers will be populated by JS -->
+        </div>
+
+        <div class="voice-playback-modal" id="voice-playback-modal">
+            <div class="playback-header">
+                <h4 id="playback-title">Playing Message...</h4>
+                <button class="playback-close" id="playback-close-btn">&times;</button>
+            </div>
+            <div class="waveform-container" id="playback-waveform"></div>
+            <div class="playback-progress" id="playback-progress-bar">
+                <div class="playback-progress-fill" id="playback-progress-fill"></div>
+            </div>
+            <div class="playback-time">
+                <span id="playback-current-time">0:00</span>
+                <span id="playback-total-duration">0:00</span>
+            </div>
+            <div class="playback-controls">
+                <button class="playback-btn" id="playback-rewind-btn">⏮️</button>
+                <button class="playback-btn" id="playback-play-pause-btn">▶️</button>
+                <button class="playback-btn" id="playback-forward-btn">⏭️</button>
+            </div>
+            <div class="playback-metadata">
+                <div class="metadata-row">
+                    <span class="metadata-label">From:</span>
+                    <span id="playback-from" class="metadata-value"></span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Date:</span>
+                    <span id="playback-date" class="metadata-value"></span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Note:</span>
+                    <span id="playback-note" class="metadata-value"></span>
+                </div>
+                <div class="metadata-row">
+                    <button class="voice-action-btn" id="playback-transcript-btn" style="display:none; padding:6px 10px;">Transcript</button>
+                </div>
+            </div>
+            <div class="voice-actions">
+                <button class="voice-action-btn" id="playback-like-btn">👍 Like</button>
+                <button class="voice-action-btn" id="playback-fav-btn">☆ Favorite</button>
+                <button class="voice-action-btn" id="playback-delete-btn">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+function initVoiceGardenPanelJS() {
+    const FLOWER_LIBRARY = {
+        rose: { emoji: '🌹', color: '#FF1744', meaning: 'Romantic, loving messages' },
+        sunflower: { emoji: '🌻', color: '#FFD700', meaning: 'Happy, cheerful messages' },
+        lily: { emoji: '🌸', color: '#FFB6C1', meaning: 'Sweet, tender messages' },
+        forgetMeNot: { emoji: '💙', color: '#4169E1', meaning: 'Missing you messages' },
+        lavender: { emoji: '💜', color: '#9370DB', meaning: 'Peaceful, calming messages' },
+        daisy: { emoji: '🌼', color: '#FFFFFF', meaning: 'Playful, fun messages' },
+    };
+
+    // Mock data for demonstration; include only files from recordings/ for the Voice Garden
+    const allVoiceMessages = [
+        // legacy music entries are kept in repo but WILL NOT be shown in the Voice Garden (only recordings/ are allowed)
+        // user's English recording (kept)
+        { id: 'vm_004', from: 'Zoya', to: 'Nic', audioFile: 'recordings/Zoyareadletter.m4a', duration: 35, flower: { type: 'rose', position: { x: 35, y: 25 } }, textNote: 'To my Baobei...', recordedDate: '2024-05-22T10:00:00Z', transcript: "To my Baobei, you used to be the light, the hope, the future, the strands in my life after I made you, my sky became clear and bright. I wanted so much to tell you outw. Hey, you're too late, and it's so good to meet you. because if you I decided to love deeply without reservation for only once at that time I thought I have countless features with you, so I began to plan our futuring detail. I believe that people will love each other in this world can go to the end. I thought you love as much as I did and you were as brave as I was and appreciated as much as I did. I you sllept. Oh, you finished?", lang: 'en' },
+        // NEW: Nini's Chinese anniversary message (no transcript provided)
+        { id: 'vm_005', from: 'Nini', to: 'Zoya', audioFile: 'recordings/3rd_anniversary.m4a', duration: null, flower: { type: 'lily', position: { x: 60, y: 50 } }, textNote: '3rd anniversary message (Chinese)', recordedDate: '2025-10-26T12:00:00Z', lang: 'zh' },
+        // User-added: Zoya's sung piece (English, no transcript)
+        { id: 'vm_006', from: 'Zoya', to: 'Nic', audioFile: 'recordings/Zoy_sings.m4a', duration: null, flower: { type: 'daisy', position: { x: 70, y: 30 } }, textNote: '', recordedDate: '2025-10-26T13:00:00Z', lang: 'en' },
+    ];
+
+    // Keep only recordings/* files for the Voice Garden
+    // Ensure user-provided VM (vm_007) is present with its transcript (add if missing)
+    if (!allVoiceMessages.find(m => m.id === 'vm_007')) {
+        allVoiceMessages.push({
+            id: 'vm_007',
+            from: 'Zoya',
+            to: 'Nic',
+            audioFile: 'recordings/The most precios tear.m4a',
+            duration: null,
+            flower: { type: 'lily', position: { x: 25, y: 55 } },
+            textNote: '',
+            recordedDate: '2025-10-26T14:00:00Z',
+            transcript: `Actually, I just feel like it's interesting. Can you tell me one more? I should tell you a boring one so that I can feel sleepy. Tell me one more, please. The title is called The Most Precious Tear. 最珍贵的眼泪 I don't know if you've heard this before.
+Not yet.
+在很久以前有一个国王。
+
+Okay, it's a story happened in a kingdom between a king and his three daughters and their husbands.
+在很久很久以前，有一个国王，他把他的国家治理得非常好。国家不大，但百姓们丰衣足食，安居乐业，十分幸福。国王有三位美丽可爱的小公主。
+
+三位小公主从生下来就拥有一种神奇的魔力。她们哭泣的时候，落下的眼泪会化作一颗颗晶莹剔透的钻石，价值连城。
+有一天，国王发现自己年事已高，国家还没有可以托付的人，而公主们也还没有人照顾，于是昭告天下：
+
+“众所周知，我有三位公主，她们每人都拥有举世无双的美貌，而且她们的眼泪可以化作昂贵的钻石。一个月后，我将召集所有优秀的男人，让她们挑选自己心仪的丈夫。被选中的人将有机会继承我的国家和财富。”
+
+一个月后，国王的城堡里聚满了来自世界各地的王子、骑士和富豪之子。
+每个人都英俊优雅，自信满满，围绕着城堡等待公主们的到来。中午，国王带着三位公主来到大厅。为了欢迎远道而来的客人，长公主为大家唱了一首歌，声音清澈如天空。二公主为大家跳舞，步伐轻盈，身段美妙。
+
+而最年幼的小公主，对着众人浅浅一笑，就躲在国王身后，再也不肯出来。
+国王尴尬地解释道，请大家不要介意。小公主自从生下来之后就没有说过话，而且很怕生人。为了博取公主们的青睐，大家纷纷展示自己的长处，有的当场写诗作画送给大公主，有的表演骑士和射箭技艺给二公主，有的拿出世上稀有的棋艺珍宝送给小公主。
+
+大公主和二公主都很开心，逐渐做出了自己的选择，只有小公主静静地躲在国王身后。
+最终，长公主选择了一位英俊的王子，他承诺会为她征服世界。
+二公主选择了富豪之子，那位聪明的男孩承诺會賺很多的钱，为她建立一座世界上最华丽的宫殿，里面摆满美丽的奇珍异宝。
+
+而小公主平静地摇了摇头。当国王准备宣布结果的时候，一位年轻的牧羊人从人群中走出，走到小公主面前，轻轻在她耳边说了一句话。小公主突然绽放出灿烂的笑容，轻轻握住牧羊人的手。
+
+就这样，三位公主都有了自己的伴侣。五年过去了。
+长公主的丈夫用泪水变成钻石，他带着士兵四处征战，每征服一座城堡都以公主的名字命名。长公主感到非常幸福。
+二公主的丈夫同样用泪水變成鑽石，生意越做越大。她确实天生是商人的女儿，很快積累了大量财富。虽然她们没有建成世界上最豪华的宫殿，但二公主感到满足，也非常幸福。
+
+自从小公主和牧羊人离开城堡开始，她们环游世界，后来找到一片群山环绕、绿意盎然的天堂，决定定居下来。
+他们花半个月時間伐木、搭建房屋，制作家具，在房后种植蔬菜，并在菜地周围搭建篱笆。小公主把美丽的小花移到花园里，虽然不知道它们叫什么名字，但每天看到都会很开心。
+
+傍晚，他们会坐在湖边钓鱼，或数星星。他们一直很穷，但生活非常开心。小公主渐渐开口说话，只对牧羊人一个人说，天上的云彩、河里的鱼、路上的鸟窝、头上的蝴蝶，她滔滔不绝地讲个不停。牧羊人常常安静地坐在湖边听她讲故事，直到小公主累了睡着，把她抱回房间。
+
+国王病危，派人找回三位公主和她们的丈夫。他惊讶地发现，小公主夫婦穿着整齐却打满补丁的衣服。他好奇地问为什么如此贫穷，毕竟小公主随便一滴眼泪就足够买一家服装店。
+牧羊人說：“因为我从不让她哭。”
+
+国王立即决定将王位传给牧羊人。也许每个人对幸福的理解不同，答案永远不止一个。但只有牧羊人知道什么是珍惜。
+国王問小公主：“那年牧羊人对你说了什么？”
+小公主說：“他说，‘即使你的泪水能化作最珍贵的钻石，我也宁愿贫穷流泪，也不让你哭。’”
+
+That's all.
+Thank you.
+You got the story?
+Of course. Even though it was a little bit long, but I got it.
+You want me to tell you what you said?
+Yeah.
+`,
+            lang: 'zh'
+        });
+    }
+
+    // Ensure user-provided VM (vm_008) is present (Zoya's new recording, no transcript)
+    if (!allVoiceMessages.find(m => m.id === 'vm_008')) {
+        allVoiceMessages.push({
+            id: 'vm_008',
+            from: 'Zoya',
+            to: 'Nic',
+            audioFile: 'recordings/Zoya sings again.m4a',
+            duration: null,
+            flower: { type: 'daisy', position: { x: 55, y: 40 } },
+            textNote: '',
+            recordedDate: '2025-10-26T15:00:00Z',
+            lang: 'zh'
+        });
+    }
+    const voiceMessages = allVoiceMessages.filter(m => m.audioFile && m.audioFile.startsWith('recordings/'));
+
+    // Ensure user-provided VM (vm_007) is present with its transcript (add if missing)
+    if (!allVoiceMessages.find(m => m.id === 'vm_007')) {
+        allVoiceMessages.push({
+            id: 'vm_007',
+            from: 'Zoya',
+            to: 'Nic',
+            audioFile: 'recordings/The most precios tear.m4a',
+            duration: null,
+            flower: { type: 'lily', position: { x: 25, y: 55 } },
+            textNote: '',
+            recordedDate: '2025-10-26T14:00:00Z',
+            transcript: `Actually, I just feel like it's interesting. Can you tell me one more? I should tell you a boring one so that I can feel sleepy. Tell me one more, please. The title is called The Most Precious Tear. 最珍贵的眼泪 I don't know if you've heard this before.
+Not yet.
+在很久以前有一个国王。
+
+Okay, it's a story happened in a kingdom between a king and his three daughters and their husbands.
+在很久很久以前，有一个国王，他把他的国家治理得非常好。国家不大，但百姓们丰衣足食，安居乐业，十分幸福。国王有三位美丽可爱的小公主。
+
+三位小公主从生下来就拥有一种神奇的魔力。她们哭泣的时候，落下的眼泪会化作一颗颗晶莹剔透的钻石，价值连城。
+有一天，国王发现自己年事已高，国家还没有可以托付的人，而公主们也还没有人照顾，于是昭告天下：
+
+“众所周知，我有三位公主，她们每人都拥有举世无双的美貌，而且她们的眼泪可以化作昂贵的钻石。一个月后，我将召集所有优秀的男人，让她们挑选自己心仪的丈夫。被选中的人将有机会继承我的国家和财富。”
+
+一个月后，国王的城堡里聚满了来自世界各地的王子、骑士和富豪之子。
+每个人都英俊优雅，自信满满，围绕着城堡等待公主们的到来。中午，国王带着三位公主来到大厅。为了欢迎远道而来的客人，长公主为大家唱了一首歌，声音清澈如天空。二公主为大家跳舞，步伐轻盈，身段美妙。
+
+而最年幼的小公主，对着众人浅浅一笑，就躲在国王身后，再也不肯出来。
+国王尴尬地解释道，请大家不要介意。小公主自从生下来之后就没有说过话，而且很怕生人。为了博取公主们的青睐，大家纷纷展示自己的长处，有的当场写诗作画送给大公主，有的表演骑士和射箭技艺给二公主，有的拿出世上稀有的棋艺珍宝送给小公主。
+
+大公主和二公主都很开心，逐渐做出了自己的选择，只有小公主静静地躲在国王身后。
+最终，长公主选择了一位英俊的王子，他承诺会为她征服世界。
+二公主选择了富豪之子，那位聪明的男孩承诺會賺很多的钱，为她建立一座世界上最华丽的宫殿，里面摆满美丽的奇珍异宝。
+
+而小公主平静地摇了摇头。当国王准备宣布结果的时候，一位年轻的牧羊人从人群中走出，走到小公主面前，轻轻在她耳边说了一句话。小公主突然绽放出灿烂的笑容，轻轻握住牧羊人的手。
+
+就这样，三位公主都有了自己的伴侣。五年过去了。
+长公主的丈夫用泪水变成钻石，他带着士兵四处征战，每征服一座城堡都以公主的名字命名。长公主感到非常幸福。
+二公主的丈夫同样用泪水變成鑽石，生意越做越大。她确实天生是商人的女儿，很快積累了大量财富。虽然她们没有建成世界上最豪华的宫殿，但二公主感到满足，也非常幸福。
+
+自从小公主和牧羊人离开城堡开始，她们环游世界，后来找到一片群山环绕、绿意盎然的天堂，决定定居下来。
+他们花半个月時間伐木、搭建房屋，制作家具，在房后种植蔬菜，并在菜地周围搭建篱笆。小公主把美丽的小花移到花园里，虽然不知道它们叫什么名字，但每天看到都会很开心。
+
+傍晚，他们会坐在湖边钓鱼，或数星星。他们一直很穷，但生活非常开心。小公主渐渐开口说话，只对牧羊人一个人说，天上的云彩、河里的鱼、路上的鸟窝、头上的蝴蝶，她滔滔不绝地讲个不停。牧羊人常常安静地坐在湖边听她讲故事，直到小公主累了睡着，把她抱回房间。
+
+国王病危，派人找回三位公主和她们的丈夫。他惊讶地发现，小公主夫婦穿着整齐却打满补丁的衣服。他好奇地问为什么如此贫穷，毕竟小公主随便一滴眼泪就足够买一家服装店。
+牧羊人說：“因为我从不让她哭。”
+
+国王立即决定将王位传给牧羊人。也许每个人对幸福的理解不同，答案永远不止一个。但只有牧羊人知道什么是珍惜。
+国王問小公主：“那年牧羊人对你说了什么？”
+小公主說：“他说，‘即使你的泪水能化作最珍贵的钻石，我也宁愿贫穷流泪，也不让你哭。’”
+
+That's all.
+Thank you.
+You got the story?
+Of course. Even though it was a little bit long, but I got it.
+You want me to tell you what you said?
+Yeah.
+`,
+            lang: 'zh'
+        });
+    }
+
+    const gardenView = $('garden-view');
+    if (!gardenView) return;
+
+    // Clear existing garden (if re-initialized)
+    gardenView.innerHTML = '';
+
+    // Stats
+    $('vg-total-flowers').textContent = voiceMessages.length;
+    // initial filter is 'all'
+    let currentFilter = 'all';
+    const getFiltered = () => voiceMessages.filter(m => {
+        if (currentFilter === 'all') return true;
+        return m.lang === currentFilter;
+    });
+    const updateFilterCount = () => { const filtered = getFiltered(); const el = $('vg-filter-count'); if (el) el.textContent = filtered.length; };
+    updateFilterCount();
+    const firstMessageDate = voiceMessages.length ? new Date(voiceMessages.reduce((min, p) => p.recordedDate < min ? p.recordedDate : min, voiceMessages[0].recordedDate)) : new Date();
+    const gardenAgeDays = Math.floor((new Date() - firstMessageDate) / (1000 * 60 * 60 * 24));
+    $('vg-garden-age').textContent = `${gardenAgeDays}d`;
+
+    // Audio player for playback (single instance)
+    if (!initVoiceGardenPanelJS._player) {
+        initVoiceGardenPanelJS._player = new Audio();
+        initVoiceGardenPanelJS._player.preload = 'metadata';
+    }
+    const voicePlayer = initVoiceGardenPanelJS._player;
+    let currentMsg = null;
+
+    // Attach UI controls once
+    if (!initVoiceGardenPanelJS._controlsAttached) {
+        const playBtn = $('playback-play-pause-btn');
+        const rewindBtn = $('playback-rewind-btn');
+        const forwardBtn = $('playback-forward-btn');
+        const progressFill = $('playback-progress-fill');
+        const progressBar = $('playback-progress');
+        const currentTimeEl = $('playback-current-time');
+        const totalTimeEl = $('playback-total-duration');
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!voicePlayer.src) return;
+            if (voicePlayer.paused) {
+                voicePlayer.play().catch(err => console.error('Playback error', err));
+                playBtn.textContent = '⏸️';
+            } else {
+                voicePlayer.pause();
+                playBtn.textContent = '▶️';
+            }
+        });
+
+        rewindBtn.addEventListener('click', (e) => { e.stopPropagation(); if (voicePlayer.src) voicePlayer.currentTime = Math.max(0, voicePlayer.currentTime - 10); });
+        forwardBtn.addEventListener('click', (e) => { e.stopPropagation(); if (voicePlayer.src) voicePlayer.currentTime = Math.min(voicePlayer.duration || 0, voicePlayer.currentTime + 10); });
+
+        // Seek
+        const progressContainer = $('playback-progress-bar');
+        progressContainer?.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const pct = clickX / rect.width;
+            if (voicePlayer.duration) voicePlayer.currentTime = pct * voicePlayer.duration;
+        });
+
+        // Update time/progress
+        voicePlayer.addEventListener('timeupdate', () => {
+            const dur = voicePlayer.duration || 0;
+            const cur = voicePlayer.currentTime || 0;
+            const pct = dur ? (cur / dur) * 100 : 0;
+            const fill = $('playback-progress-fill');
+            if (fill) fill.style.width = pct + '%';
+            if (currentTimeEl) currentTimeEl.textContent = formatTime(cur);
+            if (totalTimeEl && !isNaN(dur) && dur > 0) totalTimeEl.textContent = formatTime(dur);
+        });
+
+        voicePlayer.addEventListener('loadedmetadata', () => {
+            const dur = voicePlayer.duration || 0;
+            if ($('playback-total-duration')) $('playback-total-duration').textContent = formatTime(dur);
+        });
+
+        voicePlayer.addEventListener('ended', () => {
+            const playBtnEl = $('playback-play-pause-btn');
+            if (playBtnEl) playBtnEl.textContent = '▶️';
+            if (currentMsg) {
+                // mark as seen (optional flag) — categories are based on language rather than heard/unheard
+                currentMsg.seen = true;
+            }
+        });
+
+        // Close modal handler
+        $('playback-close-btn')?.addEventListener('click', () => {
+            const modalEl = $('voice-playback-modal');
+            if (modalEl) {
+                modalEl.classList.remove('active');
+                modalEl.style.display = '';
+                if (modalEl._voiceOverlayHandler) { modalEl.removeEventListener('click', modalEl._voiceOverlayHandler); modalEl._voiceOverlayHandler = null; }
+            }
+            try { voicePlayer.pause(); } catch (e) {}
+            const playBtnEl = $('playback-play-pause-btn'); if (playBtnEl) playBtnEl.textContent = '▶️';
+        });
+
+        // initialize like/fav controls (idempotent)
+        try { initLikeAndFavControls(); } catch (e) { /* will be available after function declaration */ }
+
+        initVoiceGardenPanelJS._controlsAttached = true;
+    }
+
+    // Render flowers (respecting current filter: only recordings/* messages are considered)
+    const renderFlowers = () => {
+        gardenView.innerHTML = '';
+        const filtered = getFiltered();
+        filtered.forEach(msg => {
+            const flowerData = FLOWER_LIBRARY[msg.flower.type] || { emoji: '🌸', color: '#fff', meaning: 'Message' };
+            const flowerEl = document.createElement('div');
+            flowerEl.className = 'garden-flower';
+            if (!msg.seen) flowerEl.classList.add('flower-unheard');
+            flowerEl.style.left = `${msg.flower.position.x}%`;
+            flowerEl.style.bottom = `${msg.flower.position.y}%`;
+            // base flower icon
+            flowerEl.innerHTML = `
+                <div class="flower-icon" style="color: ${flowerData.color}; font-size: 1.6rem;">${flowerData.emoji}</div>
+                <div class="flower-stem"></div>
+            `;
+            // title shows meaning, from and optional derived note
+            const derivedNote = (!msg.textNote || msg.textNote.trim() === '') ? deriveNoteFromAudioFile(msg.audioFile) : msg.textNote;
+            flowerEl.title = `${flowerData.meaning}\nFrom: ${msg.from} (${msg.lang || 'unknown'})${derivedNote ? '\nNote: ' + derivedNote : ''}`;
+
+            // badges: favorite and emoji
+            try {
+                const favs = loadFavs();
+                const emojis = loadEmojis();
+                const fav = favs[msg.id];
+                const emoji = emojis[msg.id];
+                if (fav) {
+                    const favBadge = document.createElement('div');
+                    favBadge.className = 'vg-badge vg-fav-badge';
+                    favBadge.textContent = '★';
+                    favBadge.title = 'Favorited';
+                    favBadge.style.position = 'absolute';
+                    favBadge.style.top = '6px';
+                    favBadge.style.right = '8px';
+                    favBadge.style.fontSize = '0.9rem';
+                    flowerEl.appendChild(favBadge);
+                }
+                if (emoji) {
+                    const emojiBadge = document.createElement('div');
+                    emojiBadge.className = 'vg-badge vg-emoji-badge';
+                    emojiBadge.textContent = emoji;
+                    emojiBadge.title = 'Reaction';
+                    emojiBadge.style.position = 'absolute';
+                    emojiBadge.style.bottom = '8px';
+                    emojiBadge.style.right = '8px';
+                    emojiBadge.style.fontSize = '1rem';
+                    flowerEl.appendChild(emojiBadge);
+                }
+            } catch (e) { /* ignore storage errors */ }
+
+            flowerEl.addEventListener('click', () => openPlaybackModal(msg));
+            gardenView.appendChild(flowerEl);
+        });
+        updateFilterCount();
+    };
+    renderFlowers();
+
+    // Filter button handlers
+    const setFilter = (f) => {
+        currentFilter = f;
+        ['vg-filter-all','vg-filter-en','vg-filter-zh'].forEach(id => { const b = $(id); if (b) b.classList.remove('active'); });
+        const map = { all: 'vg-filter-all', en: 'vg-filter-en', zh: 'vg-filter-zh' };
+        const btn = $(map[f]); if (btn) btn.classList.add('active');
+        renderFlowers();
+    };
+    $('vg-filter-all')?.addEventListener('click', () => setFilter('all'));
+    $('vg-filter-en')?.addEventListener('click', () => setFilter('en'));
+    $('vg-filter-zh')?.addEventListener('click', () => setFilter('zh'));
+
+    function openPlaybackModal(msg) {
+        currentMsg = msg;
+        const modal = $('voice-playback-modal');
+        
+        if (!modal) return;
+
+        // Move modal to body so it becomes a full-screen overlay (if not already)
+        if (modal.parentElement !== document.body) document.body.appendChild(modal);
+
+        // Wrap inner content for consistent centering/styling if not already wrapped
+        if (!modal.querySelector('.voice-playback-inner')) {
+            const inner = document.createElement('div');
+            inner.className = 'voice-playback-inner';
+            inner.style.cssText = 'background: var(--deep-purple); padding: 1.2rem; border-radius: 12px; max-width:720px; width: calc(100% - 48px); box-shadow: 0 10px 40px rgba(0,0,0,0.6); color: var(--text-primary);';
+            while (modal.firstChild) inner.appendChild(modal.firstChild);
+            modal.appendChild(inner);
+        }
+
+        // Style the overlay to cover the viewport and center the inner card
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.background = 'rgba(0,0,0,0.6)';
+        modal.style.zIndex = '1200';
+        modal.classList.add('active');
+
+        // Populate header/metadata
+        $('playback-title').textContent = FLOWER_LIBRARY[msg.flower.type]?.meaning || 'Message';
+        $('playback-from').textContent = msg.from;
+        $('playback-date').textContent = new Date(msg.recordedDate).toLocaleString();
+
+        // Show short note and transcript (if available)
+        const noteEl = $('playback-note');
+        if (noteEl) {
+            const derivedNote = (!msg.textNote || msg.textNote.trim() === '') ? deriveNoteFromAudioFile(msg.audioFile) : msg.textNote;
+            noteEl.textContent = derivedNote || '';
+            // remove any existing transcript node
+            const existing = document.getElementById('playback-transcript');
+            if (existing) existing.remove();
+            // transcript button (created in markup) - show if transcript exists
+            const transcriptBtn = $('playback-transcript-btn');
+            if (transcriptBtn) {
+                if (msg.transcript) {
+                    transcriptBtn.style.display = 'inline-block';
+                    transcriptBtn.textContent = 'Show Transcript';
+                } else {
+                    transcriptBtn.style.display = 'none';
+                }
+            }
+            if (msg.transcript) {
+                const transcriptEl = document.createElement('div');
+                transcriptEl.id = 'playback-transcript';
+                transcriptEl.style.marginTop = '0.75rem';
+                transcriptEl.style.color = 'var(--text-secondary)';
+                transcriptEl.style.fontSize = '0.95rem';
+                transcriptEl.style.maxHeight = '320px';
+                transcriptEl.style.overflowY = 'auto';
+                transcriptEl.style.padding = '0.6rem';
+                transcriptEl.style.border = '1px solid rgba(255,255,255,0.06)';
+                transcriptEl.style.borderRadius = '6px';
+                transcriptEl.style.display = 'none'; // hidden until user clicks button
+                transcriptEl.innerHTML = `<strong>Transcript:</strong><pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.95rem; margin-top:6px;">${escapeHtml(msg.transcript)}</pre>`;
+                const metadata = modal.querySelector('.playback-metadata');
+                if (metadata) metadata.parentElement.appendChild(transcriptEl);
+                else noteEl.parentElement.appendChild(transcriptEl);
+
+                // wire transcript toggle
+                if (transcriptBtn) {
+                    transcriptBtn.onclick = (ev) => {
+                        ev.stopPropagation();
+                        const el = document.getElementById('playback-transcript');
+                        if (!el) return;
+                        if (el.style.display === 'none' || !el.style.display) {
+                            el.style.display = 'block';
+                            transcriptBtn.textContent = 'Hide Transcript';
+                        } else {
+                            el.style.display = 'none';
+                            transcriptBtn.textContent = 'Show Transcript';
+                        }
+                    };
+                }
+            }
+        }
+
+        // update like/fav button UI to reflect persisted state
+        try {
+            const favs = loadFavs(); const emojis = loadEmojis();
+            const fav = !!favs[msg.id]; const emoji = emojis[msg.id];
+            const favBtnEl = $('playback-fav-btn');
+            const likeBtnEl = $('playback-like-btn');
+            if (favBtnEl) favBtnEl.textContent = (fav ? '★ Favorited' : '☆ Favorite');
+            if (likeBtnEl) likeBtnEl.textContent = (emoji ? (emoji + ' Like') : '👍 Like');
+        } catch (e) {}
+
+        // ensure like/fav listeners are initialized
+        try { initLikeAndFavControls(); } catch (e) {}
+
+        // Load audio into player — enforce recordings/ only
+        try {
+            if (!msg.audioFile || !msg.audioFile.startsWith('recordings/')) {
+                alert('Voice Garden only plays audio files from the recordings/ folder.');
+                return;
+            }
+            if (voicePlayer.src && !voicePlayer.src.endsWith(msg.audioFile)) {
+                voicePlayer.pause();
+            }
+        } catch (e) {}
+        voicePlayer.src = msg.audioFile;
+        voicePlayer.load();
+        // reset progress UI
+        const fill = $('playback-progress-fill'); if (fill) fill.style.width = '0%';
+        $('playback-current-time').textContent = '0:00';
+        $('playback-total-duration').textContent = '0:00';
+        // Auto-play when modal opens
+        voicePlayer.play().then(() => {
+            const playBtnEl = $('playback-play-pause-btn'); if (playBtnEl) playBtnEl.textContent = '⏸️';
+        }).catch(() => { const playBtnEl = $('playback-play-pause-btn'); if (playBtnEl) playBtnEl.textContent = '▶️'; });
+
+        // Ensure overlay click closes the modal (and make handler removable)
+        if (modal._voiceOverlayHandler) modal.removeEventListener('click', modal._voiceOverlayHandler);
+        modal._voiceOverlayHandler = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                modal.style.display = '';
+                try { voicePlayer.pause(); } catch (er) {}
+                const playBtnEl = $('playback-play-pause-btn'); if (playBtnEl) playBtnEl.textContent = '▶️';
+            }
+        };
+        modal.addEventListener('click', modal._voiceOverlayHandler);
+    }
+
+    // Utility: escape HTML for transcript
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function (s) {
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[s];
+        });
+    }
+
+    // Utility: derive a friendly note from the audio filename if no textNote provided
+    function deriveNoteFromAudioFile(path) {
+        if (!path) return '';
+        const name = path.split('/').pop().replace(/\.[^/.]+$/, ''); // remove extension
+        const pretty = name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+        return pretty.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
+    // Persistent state helpers (localStorage)
+    const VG_FAVS_KEY = 'vg_favs_v1';
+    const VG_EMOJIS_KEY = 'vg_emojis_v1';
+    function loadFavs() { try { return JSON.parse(localStorage.getItem(VG_FAVS_KEY) || '{}'); } catch(e) { return {}; } }
+    function saveFavs(obj) { try { localStorage.setItem(VG_FAVS_KEY, JSON.stringify(obj)); } catch(e) {} }
+    function loadEmojis() { try { return JSON.parse(localStorage.getItem(VG_EMOJIS_KEY) || '{}'); } catch(e) { return {}; } }
+    function saveEmojis(obj) { try { localStorage.setItem(VG_EMOJIS_KEY, JSON.stringify(obj)); } catch(e) {} }
+
+    // Emoji set for cycling
+    const EMOJI_SET = ['👍','❤️','⭐','🔥','🌸','🎵'];
+
+    // Wire up like / favorite buttons to be persistent
+    function initLikeAndFavControls() {
+        if (initLikeAndFavControls._inited) return;
+        initLikeAndFavControls._inited = true;
+        const likeBtn = $('playback-like-btn');
+        const favBtn = $('playback-fav-btn');
+        const deleteBtn = $('playback-delete-btn');
+        if (!likeBtn || !favBtn) return;
+
+        likeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!currentMsg) return;
+            const emojis = loadEmojis();
+            const cur = emojis[currentMsg.id] || null;
+            // cycle to next emoji (null -> first)
+            const idx = cur ? (EMOJI_SET.indexOf(cur) + 1) % EMOJI_SET.length : 0;
+            const next = EMOJI_SET[idx];
+            emojis[currentMsg.id] = next;
+            saveEmojis(emojis);
+            // update UI
+            likeBtn.textContent = next + ' Like';
+            // update flower badges
+            renderFlowers();
+        });
+
+        favBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!currentMsg) return;
+            const favs = loadFavs();
+            const cur = !!favs[currentMsg.id];
+            if (cur) delete favs[currentMsg.id]; else favs[currentMsg.id] = true;
+            saveFavs(favs);
+            favBtn.textContent = (cur ? '☆ Favorite' : '★ Favorited');
+            renderFlowers();
+        });
+
+        // Delete (keeps persistence clear for that id)
+        deleteBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!currentMsg) return;
+            // remove persisted state
+            const favs = loadFavs(); const emojis = loadEmojis();
+            delete favs[currentMsg.id]; delete emojis[currentMsg.id];
+            saveFavs(favs); saveEmojis(emojis);
+            // remove from voiceMessages array (soft remove)
+            const idx = voiceMessages.findIndex(v => v.id === currentMsg.id);
+            if (idx >= 0) voiceMessages.splice(idx, 1);
+            // close modal
+            const modal = $('voice-playback-modal'); if (modal) { modal.classList.remove('active'); modal.style.display = ''; if (modal._voiceOverlayHandler) { modal.removeEventListener('click', modal._voiceOverlayHandler); modal._voiceOverlayHandler = null; } }
+            try { voicePlayer.pause(); } catch(e) {}
+            renderFlowers(); updateFilterCount();
+        });
+    }
+
+    // Try to initialize like/fav controls after DOM is attached; called when controls first attached and each time modal opens
+    // Note: initVoiceGardenPanelJS._controlsAttached block will call this once
+
+}
+// ===================================================================
+// END: VOICE GARDEN IMPLEMENTATION
 // ===================================================================
 
 
@@ -1712,80 +3144,210 @@ const getGuidePanelHTML = () => `
             </div>
             
             <div class="holo-pane" id="tab-physics">
-                <h3>The Physics of Our Connection</h3>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                    Love operates on principles beyond conventional physics. Here are the fundamental laws governing our universe.
-                </p>
-                
-                <div class="physics-simulator">
-                    <div class="physics-formula-main">
-                        <div class="formula-title">The Grand Unified Theory of Us</div>
-                        <div class="formula-content">
-                            L<sub>∞</sub> = <sup>(N<sub>ic</sub> ⊗ Z<sub>oya</sub>)<sup>∞</sup></sup>&frasl;<sub>d<sup>0</sup></sub> × Σ(moments)
+                <div class="love-calculator-container">
+                    <h3 class="calc-title">MATHEMATICAL LOVE CALCULATOR 📐💕</h3>
+                    <p class="calc-subtitle">"Proving our love through mathematics" - By Nic, the mathematician who fell in love with more than just numbers.</p>
+
+                    <div class="calc-section">
+                        <h4 class="calc-sub-header">THE GRAND UNIFIED THEORY OF US</h4>
+                        <div class="calc-formula-box">
+                            <div class="calc-formula">
+                                L<sub>∞</sub> = <frac><span class="numerator">(N ⊗ Z)<sup>∞</sup></span><span class="denominator">d<sup>0</sup></span></frac> × Σ(moments) × e<sup>time</sup>
+                            </div>
+                            <ul class="calc-formula-vars">
+                                <li>L∞ = Infinite Love (our constant)</li>
+                                <li>N = Nicholas (mathematician)</li>
+                                <li>Z = Zoya (the artist)</li>
+                                <li>⊗ = Tensor product (deep connection)</li>
+                                <li>d = Distance (approaches 0)</li>
+                                <li>Σ(moments) = Sum of shared memories</li>
+                                <li>e^(time) = Exponential growth</li>
+                            </ul>
+                            <hr class="calc-divider">
+                            <div class="calc-result">Current Value: L∞ = ∞ (As predicted by the equation)</div>
                         </div>
-                        <div class="formula-explanation">
-                            Where love (L) approaches infinity as distance (d) approaches zero, 
-                            multiplied by the sum of all shared moments
-                        </div>
-                    </div>
-                    
-                    <div class="physics-laws-grid">
-                        <div class="physics-law-card">
-                            <div class="law-icon">🌍</div>
-                            <h4>Law of Emotional Gravity</h4>
-                            <p>The force that pulls two souls together increases exponentially with emotional mass. No distance can overcome this attraction.</p>
-                            <div class="law-equation">F<sub>love</sub> = G × (m<sub>1</sub> × m<sub>2</sub>) / r²</div>
-                        </div>
-                        
-                        <div class="physics-law-card">
-                            <div class="law-icon">⚡</div>
-                            <h4>The Zoya Constant (ζ)</h4>
-                            <p>The fundamental constant representing baseline happiness and stability. Measured at 143 kilohearts per moment.</p>
-                            <div class="law-equation">ζ = 143 kH/moment</div>
-                        </div>
-                        
-                        <div class="physics-law-card">
-                            <div class="law-icon">🌊</div>
-                            <h4>Principle of Mood Entanglement</h4>
-                            <p>When two souls become connected, their emotional states remain entangled regardless of physical separation.</p>
-                            <div class="law-equation">ψ<sub>Nic</sub> ↔ ψ<sub>Zoya</sub></div>
-                        </div>
-                        
-                        <div class="physics-law-card">
-                            <div class="law-icon">🔄</div>
-                            <h4>Conservation of Affection</h4>
-                            <p>Love can neither be created nor destroyed, only transformed from one form to another - words to actions to memories.</p>
-                            <div class="law-equation">ΔE<sub>affection</sub> = 0</div>
-                        </div>
-                        
-                        <div class="physics-law-card">
-                            <div class="law-icon">⏳</div>
-                            <h4>Relativity of Time</h4>
-                            <p>Time dilates in moments of joy (passes too quickly) and contracts in moments of longing (stretches infinitely).</p>
-                            <div class="law-equation">t' = t / √(1 - v²/c²) where v = joy velocity</div>
-                        </div>
-                        
-                        <div class="physics-law-card">
-                            <div class="law-icon">🌟</div>
-                            <h4>Parallel Universe Theorem</h4>
-                            <p>In every possible timeline, every quantum possibility, our paths were destined to converge at that sports field.</p>
-                            <div class="law-equation">P(meeting) = 1.000 across all universes</div>
+                        <div class="calc-nav">
+                            Navigate: <a href="#comp-analysis">Compatibility</a> | <a href="#love-timeline">Timeline</a> | <a href="#love-theorems">Theorems</a> | <a href="#love-probability">Probability</a>
                         </div>
                     </div>
-                    
-                    <div class="interactive-physics-demo">
-                        <h4 style="text-align: center; color: var(--gold); margin: 2rem 0 1rem 0;">
-                            Interactive Gravity Simulator
-                        </h4>
-                        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Watch how we orbit around our shared center of emotional mass
-                        </p>
-                        <canvas id="gravity-canvas" width="600" height="400"></canvas>
-                        <div class="physics-controls">
-                            <button class="btn" id="reset-gravity">Reset Simulation</button>
-                            <button class="btn" id="toggle-gravity">Toggle Gravity</button>
+
+                    <div id="comp-analysis" class="calc-section">
+                        <h4 class="calc-sub-header">🎯 Comprehensive Compatibility Analysis</h4>
+                        <div class="calc-compatibility-score">
+                            <div class="score">98.7%</div>
+                            <div>COSMICALLY DESTINED</div>
                         </div>
+                        <p style="text-align:center; font-style:italic;">"Statistically impossible to find a better match. Trust the math."</p>
+                        <hr class="calc-divider">
+                        <pre>
+BREAKDOWN BY CATEGORY:
+
+1. EMOTIONAL RESONANCE                
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.3%          
+Based on: Mood sync rate, voice message sentiment, time capsule tone
+Calculation: ER = (Σ mood_matches / total_days) × sentiment_analysis_score
+             ER = (267/365) × 1.34 = 98.3%
+
+─────────────────────────────────
+
+2. INTELLECTUAL COMPATIBILITY         
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7%          
+Based on: Conversation depth, shared interests, learning together
+Factors:
+• Different strengths that complement 
+• Nic teaches math, Zoya teaches art  
+• Both curious learners               
+• Recipe creation collaboration       
+
+─────────────────────────────────
+
+3. COMMUNICATION EFFICIENCY           
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 99.1%          
+Based on: Response times, message frequency, voice garden activity
+Average Response Time: 14.3 minutes   
+Message Balance: 51% Nic / 49% Zoya   
+Perfectly balanced communication! ✓   
+
+─────────────────────────────────
+
+4. ADVENTURE COMPATIBILITY            
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.4%          
+Based on: Travel memories, world map heat signatures, spontaneity score
+Shared Adventures: 23 locations       
+Spontaneous Dates: 67% of outings     
+Bucket List Overlap: 78%              
+
+─────────────────────────────────
+
+5. CULINARY HARMONY                   
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%           
+Based on: Recipe ratings, cooking together frequency, food preferences
+Nic's Avg Rating: 4.8/5 stars         
+Times "Life or Death": 12             
+Dishes Cooked Together: 47            
+Food Fights: 0 (surprisingly!)        
+
+─────────────────────────────────
+
+6. DESTINY QUOTIENT                   
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%           
+Based on: Probability analysis, multiverse constant, fate algorithms
+Probability of meeting: 0.000047%     
+Probability of connecting: 0.12%      
+Probability of falling in love: ???   
+
+Yet here we are. Mathematics proves some things transcend probability.
+DQ = lim (fate → ∞) P(us) = 1.0 (100%) - It was meant to be.
+                        </pre>
                     </div>
+
+                    <div id="love-timeline" class="calc-section">
+                        <h4 class="calc-sub-header">📈 Relationship Trajectory Analysis</h4>
+                        <pre>
+Love │                                  
+  ∞ │                        ╱──────    
+    │                     ╱─╱           
+    │                  ╱─╱              
+ 100│               ╱─╱                 
+    │            ╱─╱                    
+    │         ╱─╱                       
+  50│      ╱─╱        *Confession       
+    │   ╱─╱          (Aug 25, 2021)     
+    │╱─╱                                
+   0│───────────────────────────────>   
+    2019  2020  2021  2022  2023  2024  
+    Sep   Jan   Aug   Aug   Now   Future
+
+KEY MOMENTS PLOTTED:                  
+○ First Meeting (Sep 15, 2019)        
+○ Friend Request (May 25, 2021)       
+○ First Date (Jul 27, 2021)           
+● Confession (Aug 25, 2021) ⚡ SPIKE  
+○ First Anniversary (Aug 25, 2022)    
+○ Today (Jan 15, 2025)                
+
+GROWTH RATE ANALYSIS:                 
+• Phase 1 (2019-2021): Exponential    
+  Growth rate: dL/dt = 2.3 units/mo   
+• Phase 2 (2021-2023): Rapid Rise     
+  Growth rate: dL/dt = 5.7 units/mo   
+• Phase 3 (2023-Now): Stable Infinity 
+  Growth rate: dL/dt → ∞              
+
+PREDICTION MODEL:                     
+Based on current trajectory, your love will continue to approach infinity asymptotically.
+Mathematical proof that love has no upper bound when it's real. ✓
+                        </pre>
+                    </div>
+
+                    <div id="love-theorems" class="calc-section">
+                        <h4 class="calc-sub-header">📜 Proven Mathematical Theorems of Love</h4>
+                        <pre>
+THEOREM 1: The Bicycle Axiom
+Statement: If Person A fixes Person B's bicycle, the probability of falling in love increases by a factor of e^π.
+Proof: Given the events of June 2021, the subsequent confession occurred 71 days later.
+P(love | bicycle_fixed) / P(love | no_bicycle) = 0.94 / 0.04 ≈ 23.5 ≈ e^π. Q.E.D. ✓
+
+─────────────────────────────────
+
+THEOREM 2: The Chicken Steak Constant
+Statement: There exists a universal constant K ≈ 47.3 joy_units per steak, where K = happiness_increase / chicken_steak_consumed.
+Empirical evidence shows the constant holds across all measurements. Q.E.D. ✓
+
+─────────────────────────────────
+
+THEOREM 3: Typhoon Determination Law
+Statement: The force of love (F_love) is greater than any natural disaster force (F_typhoon) when properly motivated.
+Case Study (Aug 10, 2021): F_love was unmeasurable (∞) while F_typhoon was finite. Nic flew successfully. Q.E.D. ✓
+
+─────────────────────────────────
+
+THEOREM 4: The Overthinking Paradox
+Statement: The amount of overthinking (O) is inversely proportional to confidence (C), but directly proportional to how much you care (H). O = H / C.
+Corollary: High overthinking is not a bug, it's a feature indicating deep care. Q.E.D. ✓
+
+─────────────────────────────────
+
+THEOREM 5: Voice Message Garden Law
+Statement: Emotional closeness (E) correlates with the number of voice messages (V) by E = log(V) × authenticity_factor.
+The more we communicate, the closer we become. The scale has no limit. Q.E.D. ✓
+                        </pre>
+                    </div>
+
+                    <div id="love-probability" class="calc-section">
+                        <h4 class="calc-sub-header">🎲 What Are The Odds?</h4>
+                        <pre>
+SCENARIO 1: Meeting Each Other
+P(meeting) = 0.0000057% or 1 in 17,543,860. Yet it happened. Destiny > Math. ✓
+
+─────────────────────────────────
+
+SCENARIO 2: Both Being Single
+P(both_ready) = 3.0%. A 97% chance we'd have missed each other. But we didn't. ✓
+
+─────────────────────────────────
+
+SCENARIO 3: Language Barrier
+Traditional probability: 23%. Actual outcome: Connected deeply.
+Conclusion: Love translates all languages. Probability irrelevant. ✓
+
+─────────────────────────────────
+
+SCENARIO 4: The Friend Request
+Without Zoya making the first move, there was only a 16.9% chance of connection.
+Conclusion: Sometimes the bravest person wins. ✓
+
+─────────────────────────────────
+
+MASTER PROBABILITY:
+P(us existing exactly as we do) = 0.0000000047% or 1 in 21,276,595,745.
+
+Twenty-one BILLION to one odds.
+
+♥️ Some things transcend probability.
+                        </pre>
+                    </div>
+
                 </div>
             </div>
             
@@ -2969,7 +4531,153 @@ function newFortune(){$('fortune-text').textContent=FORTUNES[Math.floor(Math.ran
 
 function initGamesPanelJS() {}
 
-function handleBookPasswordAttempt() { if (DOM.bookPasswordInput.value.toLowerCase().replace(/\s/g, '') === EDITABLE_CONFIG.bookPassword) { DOM.bookPasswordGate.classList.remove('active'); AppState.bookUnlocked = true; renderBookUI(); } else { alert('Incorrect password.'); }}
+// --- Mood-sync helpers and guarded password bypass ---
+function getMoodFromState() {
+    // Try multiple sources: explicit globals, localStorage, or defaults
+    const zoya = (window.ZOYA_MOOD || localStorage.getItem('zoyaMood') || 'neutral').toString().toLowerCase().trim();
+    const nicho = (window.NICHO_MOOD || localStorage.getItem('nichoMood') || 'neutral').toString().toLowerCase().trim();
+    return { zoya: zoya || 'neutral', nicho: nicho || 'neutral' };
+}
+
+function mapMoodToPanel(zoyaMood, nichoMood) {
+    // Expanded mapping logic with prioritized rules
+    const a = zoyaMood;
+    const b = nichoMood;
+
+    // Strong mutual moods
+    if (a === 'excited' && b === 'excited') return 'games';
+    if (a === 'loving' && b === 'loving') return 'sanctuary';
+    if (a === 'nostalgic' && b === 'nostalgic') return 'gallery';
+    if (a === 'calm' && b === 'calm') return 'guide';
+
+    // Mixed high-energy combos
+    if ((a === 'excited' && b === 'adventurous') || (b === 'excited' && a === 'adventurous')) return 'universes';
+    if ((a === 'excited' && b === 'playful') || (b === 'excited' && a === 'playful')) return 'games';
+    if ((a === 'playful' && b === 'playful')) return 'voicegarden';
+
+    // Comforting / supportive combos
+    if ((a === 'sad' && b === 'loving') || (b === 'sad' && a === 'loving')) return 'sanctuary';
+    if (a === 'sad' && b === 'sad') return 'sanctuary';
+    if (a === 'sad' || b === 'sad') return 'guide';
+
+    // Single-person inclinations
+    if (a === 'adventurous' || b === 'adventurous') return 'universes';
+    if (a === 'nostalgic' || b === 'nostalgic') return 'gallery';
+    if (a === 'playful' || b === 'playful') return 'voicegarden';
+    if (a === 'excited' || b === 'excited') return 'games';
+    if (a === 'loving' || b === 'loving') return 'sanctuary';
+
+    // default fallback
+    return 'home';
+}
+
+function showMoodLoadingAndRedirect(targetPanel, opts = {}) {
+    const message = opts.message || `The stars conspire... We are being guided toward a place of ${targetPanel}...`;
+    // Create overlay
+    let overlay = document.getElementById('mood-loading-overlay');
+    if (overlay) overlay.remove();
+    overlay = document.createElement('div');
+    overlay.id = 'mood-loading-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'radial-gradient(ellipse at center, rgba(0,0,0,0.6), rgba(0,0,0,0.9))';
+    overlay.style.zIndex = '9999';
+    overlay.innerHTML = `
+        <div style="max-width: 800px; padding: 30px; text-align:center; color:var(--gold-light); font-family:var(--font-handwriting);">
+            <div id="mood-typewriter" style="font-size:1.35rem; line-height:1.4; min-height:3.2rem;"></div>
+            <div style="margin-top:18px; opacity:0.9; font-size:0.9rem; color:var(--text-secondary);">(for a moment, passwords are hushed by the cosmos)</div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Activate temporary password bypass while the overlay is present
+    AppState.passwordsTemporarilyBypassed = true;
+    AppState.moodLoading = true;
+
+    // Simple typewriter
+    const el = document.getElementById('mood-typewriter');
+    let i = 0;
+    function typewriterLoop(text, cb) {
+        el.innerHTML = '';
+        const id = setInterval(() => {
+            if (i < text.length) {
+                el.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(id);
+                if (cb) cb();
+            }
+        }, 45);
+    }
+
+    // Compose a slightly mysterious message referencing the panel
+    const prettyName = { games: 'a wild, exciting place', sanctuary: 'the Inner Sanctum of comfort', guide: 'a quiet guide', voicegarden: 'a blooming voice garden', universes: 'a place of adventurous chronicles', gallery: 'a warm gallery of memories', home: 'home' }[targetPanel] || targetPanel;
+    const typeText = `Hush... The constellations whisper of ${prettyName}. Follow.`;
+    i = 0;
+    typewriterLoop(typeText, () => {
+        // after typing, wait a moment then animate transition and redirect
+        setTimeout(() => {
+            // prepare fade-out animation
+            const main = DOM.mainContent || document.querySelector('.main-content');
+            const solar = DOM.solarSystemContainer || document.getElementById('solar-system-container');
+            try {
+                if (main) { main.style.transition = 'opacity 600ms ease'; main.style.opacity = '0'; }
+                if (solar) { solar.style.transition = 'opacity 600ms ease'; solar.style.opacity = '0'; }
+            } catch (e) { /* ignore */ }
+
+            setTimeout(() => {
+                // remove overlay and reset bypass
+                AppState.passwordsTemporarilyBypassed = false;
+                AppState.moodLoading = false;
+                const ov = document.getElementById('mood-loading-overlay'); if (ov) ov.remove();
+                // navigate to panel
+                window.location.hash = targetPanel;
+
+                // fade back in after panel change (give render a short moment)
+                setTimeout(() => {
+                    try { if (main) main.style.opacity = '1'; if (solar) solar.style.opacity = '1'; } catch (e) {}
+                }, 120);
+            }, 650);
+        }, 900);
+    });
+}
+
+function evaluateMoodAndRedirect() {
+    try {
+        if (!AppState.moodSyncEnabled) return; const { zoya, nicho } = getMoodFromState();
+        const target = mapMoodToPanel(zoya, nicho);
+        // If target is home or same panel, do nothing
+        const current = window.location.hash.substring(1) || 'home';
+        if (target && target !== current) {
+            showMoodLoadingAndRedirect(target);
+        }
+    } catch (e) {
+        console.error('Mood redirect failed', e);
+    }
+}
+
+// Enhanced book password handler: respects temporary bypass and still does normal check
+function handleBookPasswordAttempt() {
+    const entered = (DOM.bookPasswordInput.value || '').toLowerCase().replace(/\s/g, '');
+    if (AppState.passwordsTemporarilyBypassed) {
+        // allow entry only during the special loading window
+        DOM.bookPasswordGate.classList.remove('active');
+        AppState.bookUnlocked = true;
+        renderBookUI();
+        return;
+    }
+
+    if (entered === (EDITABLE_CONFIG.bookPassword || '').toLowerCase()) {
+        DOM.bookPasswordGate.classList.remove('active');
+        AppState.bookUnlocked = true;
+        renderBookUI();
+    } else {
+        alert('Incorrect password.');
+    }
+}
 function parseBook(rawBook){ AppState.chapters = rawBook.split('===CHAPTER===').map(s => s.trim()).filter(Boolean).map(chunk => { const lines = chunk.split('\n'); let chapter = {}, contentStartIndex = -1; lines.forEach((line, index) => { if (line.startsWith('TITLE:')) chapter.title = line.substring(6).trim(); else if (line.startsWith('AUTHOR:')) chapter.author = line.substring(7).trim(); else if (line.startsWith('DATE:')) chapter.date = line.substring(5).trim(); else if (line.startsWith('===CONTENT===')) contentStartIndex = index + 1; }); chapter.content = lines.slice(contentStartIndex).join('\n').trim(); return chapter; });}
 function initQuill(){ 
     if($('quill-editor')) {
@@ -3438,3 +5146,165 @@ if (!document.querySelector('style[data-theme-system]')) {
   styleSheet.textContent = themeStyles;
   document.head.appendChild(styleSheet);
 }
+
+// ===================================================================
+// ALTERNATE UNIVERSE CHRONICLES - COMPLETE IMPLEMENTATION
+// ===================================================================
+
+// Universe Panel HTML Generator
+function getUniversePanelHTML() {
+    return `
+    <div id="universe-panel" class="content-panel active">
+        <h2 class="panel-header">∞ The Alternate Chronicles ∞</h2>
+        <p class="panel-subheader">"In every universe, across every timeline, we find each other. Love is the one constant in infinite possibilities."</p>
+        
+        <div class="universe-hub">
+            <div class="universe-portal-viz">
+                <div class="central-nexus">∞</div>
+                <canvas id="portal-particles"></canvas>
+            </div>
+            <p style="color: var(--text-secondary); font-style: italic; margin-top: 1rem;">
+                Each portal leads to a different version of our story. Some we've written, others wait to be discovered...
+            </p>
+        </div>
+
+        <div class="universe-actions" style="display: flex; gap: 1rem; justify-content: center; margin: 2rem 0;">
+            <button class="btn primary" onclick="showCreateUniverse()">🌟 Create New Universe</button>
+            <button class="btn" onclick="filterUniverses('all')">Show All</button>
+            <button class="btn" onclick="filterUniverses('written')">Written Stories</button>
+            <button class="btn" onclick="filterUniverses('unwritten')">Awaiting Creation</button>
+        </div>
+
+        <div class="universe-grid" id="universe-grid">
+            <!-- Universe cards populated by JS -->
+        </div>
+    </div>
+    `;
+}
+
+// Initialize Universe Panel
+function initUniversePanel() {
+    renderUniverseGrid();
+    initPortalAnimation();
+}
+
+// Render Universe Grid
+function renderUniverseGrid(filter = 'all') {
+    const grid = document.getElementById('universe-grid');
+    if (!grid) return;
+
+    let filteredUniverses = ALTERNATE_UNIVERSES;
+    if (filter === 'written') {
+        filteredUniverses = ALTERNATE_UNIVERSES.filter(u => u.chapters.length > 0);
+    } else if (filter === 'unwritten') {
+        filteredUniverses = ALTERNATE_UNIVERSES.filter(u => u.chapters.length === 0);
+    }
+
+    grid.innerHTML = filteredUniverses.map(universe => `
+        <div class="universe-card" onclick="openUniverse('${universe.id}')">
+            <div class="universe-header">
+                <div class="universe-icon">${universe.icon}</div>
+                <h3 class="universe-title">${universe.title}</h3>
+                <div class="universe-era">${universe.era}</div>
+            </div>
+            <img class="universe-illustration" src="${universe.image}" alt="${universe.title}" onerror="this.style.display='none'">
+            <div class="universe-content">
+                <p class="universe-premise">${universe.premise}</p>
+                <div class="universe-stats">
+                    <span>📖 ${universe.stats.chapters} chapters</span>
+                    <span>📝 ${universe.stats.words} words</span>
+                </div>
+                <div class="universe-stats" style="margin-top: 0.5rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                        Last updated: ${universe.stats.lastUpdated}
+                    </span>
+                </div>
+                <div class="universe-actions">
+                    <button class="btn primary" onclick="event.stopPropagation(); openUniverse('${universe.id}')">
+                        ${universe.chapters.length > 0 ? '📖 Read Story' : '✍️ Start Writing'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Open Universe Reading View
+function openUniverse(universeId) {
+    const universe = ALTERNATE_UNIVERSES.find(u => u.id === universeId);
+    if (!universe) return;
+
+    const panel = document.querySelector('#universe-panel');
+    if (!panel) return;
+
+    if (universe.chapters.length === 0) {
+        // No chapters yet - show creation prompt
+        panel.innerHTML = `
+            <div class="universe-reading-view">
+                <button class="btn" onclick="returnToUniverseHub()" style="margin-bottom: 2rem;">← Back to Multiverse</button>
+                
+                <div class="chapter-illustration-container" style="text-align: center; margin-bottom: 2rem;">
+                    <img class="chapter-illustration" src="${universe.image}" alt="${universe.title}" onerror="this.style.display='none'">
+                </div>
+
+                <h2 class="panel-header">${universe.icon} ${universe.title}</h2>
+                <h3 style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">${universe.era}</h3>
+                
+                <div class="universe-premise-full" style="background: var(--highlight-glass); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--gold); margin-bottom: 2rem;">
+                    <h4 style="color: var(--gold); margin-bottom: 1rem;">The Premise</h4>
+                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">${universe.premise}</p>
+                </div>
+
+                <div class="universe-characters" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.nic.name}</h4>
+                        <p style="color: var(--text-secondary);">${universe.characters.nic.role}</p>
+                    </div>
+                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.zoya.name}</h4>
+                        <p style="color: var(--text-secondary);">${universe.characters.zoya.role}</p>
+                    </div>
+                </div>
+            </div>`;
+    } else {
+        // Has chapters - show reading view
+        const chaptersHTML = universe.chapters.map(chapter => `
+            <div class="chapter-content">
+                <h3 class="chapter-title">${chapter.title}</h3>
+                <div class="chapter-text">
+                    ${chapter.content.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('')}
+                </div>
+            </div>
+        `).join('<hr>');
+
+        panel.innerHTML = `
+            <div class="universe-reading-view">
+                <button class="btn" onclick="returnToUniverseHub()" style="margin-bottom: 2rem;">← Back to Multiverse</button>
+                
+                <div class="chapter-illustration-container" style="text-align: center; margin-bottom: 2rem;">
+                    <img class="chapter-illustration" src="${universe.image}" alt="${universe.title}" onerror="this.style.display='none'">
+                </div>
+
+                <h2 class="panel-header">${universe.icon} ${universe.title}</h2>
+                <h3 style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">${universe.era}</h3>
+
+                <div class="universe-characters" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.nic.name}</h4>
+                        <p style="color: var(--text-secondary);">${universe.characters.nic.role}</p>
+                    </div>
+                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.zoya.name}</h4>
+                        <p style="color: var(--text-secondary);">${universe.characters.zoya.role}</p>
+                    </div>
+                </div>
+
+                ${chaptersHTML}
+            </div>`;
+    }
+}
+
+function returnToUniverseHub() { renderPanel('universes'); }
+function showCreateUniverse() { alert('Universe creation interface coming soon!'); }
+function filterUniverses(filter) { renderUniverseGrid(filter); }
+function initPortalAnimation() { /* Placeholder for portal canvas animation */ }
