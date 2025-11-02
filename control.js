@@ -1078,7 +1078,20 @@ function addSanctuaryEventListeners() {
             // Prevent drag logic from interfering with the click
             e.stopPropagation();
 
-            // --- ADVANCED: Full Spatial & Size-Aware Logic ---
+            // --- THIS IS THE NEW LOGIC ---
+            // Check if the menu is already visible
+            const isVisible = menuDropdown.classList.contains('visible');
+
+            if (isVisible) {
+                // If it's visible, just close it using the global closeMenu()
+                // This will also reset the theme/link state.
+                closeMenu();
+                return; // Stop execution here
+            }
+            // --- END OF NEW LOGIC ---
+
+
+            // --- ADVANCED: Full Spatial & Size-Aware Logic (This runs only when opening) ---
             const containerRect = menuButton.parentElement.getBoundingClientRect();
             const vw = window.innerWidth;
             const vh = window.innerHeight;
@@ -1128,8 +1141,9 @@ function addSanctuaryEventListeners() {
                 menuDropdown.style.maxWidth = `${spaceLeft}px`;
             }
 
-            const isVisible = menuDropdown.classList.toggle('visible');
-            menuIcon.src = isVisible ? 'photos/favicon2.png' : 'photos/favicon1.png';
+            // This part just toggles the visibility on and updates the icon
+            menuDropdown.classList.toggle('visible');
+            menuIcon.src = menuDropdown.classList.contains('visible') ? 'photos/favicon2.png' : 'photos/favicon1.png';
         });
 
         // The link clicks inside the menu are handled by the global closeMenu() in index.html
@@ -1202,6 +1216,9 @@ function makeMenuDraggable() {
     let longPressTimer;
 
     const onDragStart = (e) => {
+        // Prevent default behaviors like text selection or page scrolling on touch
+        e.preventDefault();
+        
         longPressTimer = setTimeout(() => {
             isReadyToDrag = true;
             menuContainer.classList.add('ready-to-drag');
@@ -1233,9 +1250,6 @@ function makeMenuDraggable() {
             return;
         }
         
-        // Prevent default behaviors (like scrolling) ONLY when dragging starts.
-        e.preventDefault();
-
         // This is the actual dragging part
         isDragging = true;
         e.stopPropagation(); // Prevent menu click while dragging
@@ -1714,6 +1728,10 @@ function renderPanel(panelId) {
     if (window.chronicleCleanup) { window.chronicleCleanup(); window.chronicleCleanup = null; }
     if (window.nebulaCleanup) { window.nebulaCleanup(); window.nebulaCleanup = null; }
 
+    // Reset immersive panel classes
+    DOM.mainContent.classList.remove('nebula-active');
+    DOM.mainContent.classList.remove('observatory-active');
+
     if (panelId === 'home') {
         // Ensure main content is hidden and solar system is visible
         DOM.mainContent.classList.remove('visible');
@@ -1762,6 +1780,7 @@ function renderPanel(panelId) {
 
     // Apply specific full-page styling only for Nebula of Solitude
     if (panelId === 'calendar') {
+        DOM.mainContent.classList.add('nebula-active');
         DOM.mainContent.style.backgroundColor = 'transparent';
         DOM.mainContent.style.padding = '0';
     } else {
@@ -3471,19 +3490,21 @@ function initGuidePanelJS() {
 }
 
 function closeMenu() {
-    const menuDropdown = document.getElementById('main-menu-dropdown');
-    const menuIcon = document.getElementById('menu-icon-img');
-    if (menuDropdown) menuDropdown.classList.remove('visible');
-    if (menuIcon) menuIcon.src = 'photos/favicon1.png';
+  const menuDropdown = document.getElementById('main-menu-dropdown');
+  const menuIcon = document.getElementById('menu-icon-img');
+  if (menuDropdown) menuDropdown.classList.remove('visible');
+  if (menuIcon) menuIcon.src = 'photos/favicon1.png';
 
-    const themeContainer = document.querySelector('.theme-colors-grid');
-    const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-    if (themeContainer) {
-        themeContainer.style.display = 'none';
-    }
-    if (themeToggleBtn) {
-        themeToggleBtn.classList.remove('active');
-    }
+  // Reset theme selector state when menu closes
+  const themeContainer = document.querySelector('.theme-colors-grid');
+  const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+  const menuLinks = menuDropdown ? menuDropdown.querySelectorAll('a') : [];
+  const separator = menuDropdown ? menuDropdown.querySelector('hr') : null;
+
+  if (themeContainer) themeContainer.style.display = 'none';
+  if (themeToggleBtn) themeToggleBtn.classList.remove('active');
+  menuLinks.forEach(link => link.style.display = 'block');
+  if (separator) separator.style.display = 'block';
 }
 
 function initAnatomyEnhanced() {
@@ -5539,6 +5560,14 @@ function applyTheme(themeName) {
   const theme = THEME_COLORS[themeName];
   if (!theme) return;
 
+  // --- FIX: Apply CSS variables to the root element for global theme change ---
+  const root = document.documentElement;
+  if (root && theme.colors) {
+      for (const [key, value] of Object.entries(theme.colors)) {
+          root.style.setProperty(key, value);
+      }
+  }
+
   const bgContainers = document.querySelectorAll('.background-container');
   bgContainers.forEach(container => {
     container.style.background = theme.bgGradient;
@@ -5563,21 +5592,17 @@ function applyTheme(themeName) {
       iframe.contentWindow.postMessage({ type: 'THEME_CHANGED', theme: themeName }, '*');
   }
 
-  // --- ADDED: Hide theme grid after selection ---
-  const themeContainer = document.querySelector('.theme-colors-grid');
-  const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-  if (themeContainer) {
-      themeContainer.style.display = 'none';
-  }
-  if (themeToggleBtn) {
-      themeToggleBtn.classList.remove('active');
-  }
+  // --- THIS IS THE NEW LINE ---
+  // This will close the menu and reset it to show the links next time.
+  closeMenu();
 
-    // --- THIS IS THE NEW LINE ---
-    // If the observatory is currently active, re-initialize it to apply the new theme colors to the galaxy
-    if (document.getElementById('tab-observatory')) {
-        initObservatory();
-    }
+  // --- The old logic to hide the theme grid is no longer needed here,
+  // --- as closeMenu() already handles it.
+    
+  // If the observatory is currently active, re-initialize it to apply the new theme colors to the galaxy
+  if (document.getElementById('tab-observatory')) {
+      initObservatory();
+  }
 }
 
 function loadSavedTheme() {
@@ -5600,10 +5625,23 @@ function initThemeSystem() {
 
   themeToggleBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    const menuLinks = menuDropdown.querySelectorAll('a');
+    const separator = menuDropdown.querySelector('hr');
+
     const isVisible = themeContainer.style.display === 'grid';
-    themeContainer.style.display = isVisible ? 'none' : 'grid';
-    // Add a visual indicator to the button
-    themeToggleBtn.classList.toggle('active', !isVisible);
+    if (isVisible) {
+        // Hide themes, show links
+        themeContainer.style.display = 'none';
+        themeToggleBtn.classList.remove('active');
+        menuLinks.forEach(link => link.style.display = 'block');
+        if (separator) separator.style.display = 'block';
+    } else {
+        // Show themes, hide links
+        themeContainer.style.display = 'grid';
+        themeToggleBtn.classList.add('active');
+        menuLinks.forEach(link => link.style.display = 'none');
+        if (separator) separator.style.display = 'none';
+    }
   });
 
   Object.entries(THEME_COLORS).forEach(([key, theme]) => themeContainer.appendChild(createThemeButton(key, theme)));

@@ -17,35 +17,51 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="styles.css">
     
-    <!-- --- FIX: Theme blocking script to prevent FOUC --- -->
+    <!-- 
+      Blocking script to prevent Flash of Unstyled Content (FOUC).
+      This script reads the saved theme from localStorage and applies the
+      core background color and theme variables before the page renders.
+    -->
     <script>
-        (function() {
-            const THEME_COLORS = {
-                mystical: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #1a2a45 0%, #0d152b 50%, #02041b 100%)', '--space-black': '#02041b', '--deep-purple': '#4a0e4e', '--gold': '#ffd700', '--gold-light': '#fff3c4', '--soft-violet': '#8a2be2', '--crimson': '#dc143c', '--jade': '#00a86b', '--text-primary': '#e6f1ff', '--text-secondary': '#8892b0', '--holoscreen-bg': 'rgba(10, 25, 47, 0.85)', '--highlight-glass': 'rgba(4, 24, 61, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.1)', '--glow-cyan': '#64ffda', '--glow-magenta': '#f779dd', '--shadow-color': 'rgba(0, 0, 0, 0.7)' },
-                ethereal: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #1a4a6b 0%, #0d2b45 50%, #0a1628 100%)', '--space-black': '#0a1628', '--deep-purple': '#0a2540', '--gold': '#64ffda', '--gold-light': '#a8ffff', '--soft-violet': '#5a7dbf', '--crimson': '#ff6b9d', '--jade': '#4ecdc4', '--text-primary': '#d4f1f9', '--text-secondary': '#7fb3d5', '--holoscreen-bg': 'rgba(10, 37, 64, 0.85)', '--highlight-glass': 'rgba(10, 60, 100, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.15)', '--glow-cyan': '#64ffda', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 10, 20, 0.8)' },
-                sunset: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #5c3a2a 0%, #3d2817 50%, #2c1810 100%)', '--space-black': '#2c1810', '--deep-purple': '#2c1e3e', '--gold': '#ff9f43', '--gold-light': '#ffc857', '--soft-violet': '#d94369', '--crimson': '#ff6348', '--jade': '#ffa500', '--text-primary': '#ffe8cc', '--text-secondary': '#d4a574', '--holoscreen-bg': 'rgba(44, 30, 62, 0.85)', '--highlight-glass': 'rgba(90, 40, 60, 0.6)', '--border-glass': 'rgba(255, 159, 67, 0.15)', '--glow-cyan': '#ffb347', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' },
-                forest: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #1a4a35 0%, #0f2917 50%, #0d1f16 100%)', '--space-black': '#0d1f16', '--deep-purple': '#1a3a2a', '--gold': '#2ecc71', '--gold-light': '#58d68d', '--soft-violet': '#27ae60', '--crimson': '#e74c3c', '--jade': '#16a085', '--text-primary': '#b8e6d5', '--text-secondary': '#7fb3a0', '--holoscreen-bg': 'rgba(26, 58, 42, 0.85)', '--highlight-glass': 'rgba(22, 80, 60, 0.6)', '--border-glass': 'rgba(46, 204, 113, 0.15)', '--glow-cyan': '#58d68d', '--glow-magenta': '#e74c3c', '--shadow-color': 'rgba(0, 0, 0, 0.85)' },
-                midnight: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #1a1a35 0%, #0f0f25 50%, #0f0f1e 100%)', '--space-black': '#0f0f1e', '--deep-purple': '#1a1a2e', '--gold': '#e0e0e0', '--gold-light': '#ffffff', '--soft-violet': '#6b5b95', '--crimson': '#c91f16', '--jade': '#88c540', '--text-primary': '#f0f0f0', '--text-secondary': '#b0b0b0', '--holoscreen-bg': 'rgba(26, 26, 46, 0.85)', '--highlight-glass': 'rgba(30, 30, 60, 0.6)', '--border-glass': 'rgba(200, 200, 200, 0.1)', '--glow-cyan': '#e0e0e0', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.95)' },
-                coral: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #5c2a35 0%, #3d1b24 50%, #2d1b24 100%)', '--space-black': '#2d1b24', '--deep-purple': '#2d1b3d', '--gold': '#ff7b54', '--gold-light': '#ffa270', '--soft-violet': '#ff6b9d', '--crimson': '#c0392b', '--jade': '#26c281', '--text-primary': '#ffd9c9', '--text-secondary': '#d4a5a0', '--holoscreen-bg': 'rgba(45, 27, 45, 0.85)', '--highlight-glass': 'rgba(70, 30, 50, 0.6)', '--border-glass': 'rgba(255, 123, 84, 0.15)', '--glow-cyan': '#ffa270', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' },
-                royal: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #402A50 0%, #2F2040 50%, #21182F 100%)', '--space-black': '#21182F', '--deep-purple': '#402A50', '--gold': '#FFD700', '--gold-light': '#FFF0B3', '--soft-violet': '#A978D0', '--crimson': '#e74c3c', '--jade': '#50C878', '--text-primary': '#EADCF8', '--text-secondary': '#A090B0', '--holoscreen-bg': 'rgba(33, 24, 47, 0.85)', '--highlight-glass': 'rgba(64, 42, 80, 0.6)', '--border-glass': 'rgba(255, 215, 0, 0.15)', '--glow-cyan': '#FFD700', '--glow-magenta': '#A978D0', '--shadow-color': 'rgba(0, 0, 0, 0.85)' },
-                ocean: { '--theme-bg-gradient': 'radial-gradient(ellipse at center, #1a4a6b 0%, #0d2b4a 50%, #001a33 100%)', '--space-black': '#001a33', '--deep-purple': '#003d66', '--gold': '#00d9ff', '--gold-light': '#66f2ff', '--soft-violet': '#0099cc', '--crimson': '#ff3366', '--jade': '#00cc99', '--text-primary': '#ccf2ff', '--text-secondary': '#66b3cc', '--holoscreen-bg': 'rgba(0, 61, 102, 0.85)', '--highlight-glass': 'rgba(0, 100, 150, 0.6)', '--border-glass': 'rgba(0, 217, 255, 0.15)', '--glow-cyan': '#00d9ff', '--glow-magenta': '#ff3366', '--shadow-color': 'rgba(0, 0, 0, 0.9)' }
-            };
+      (function() {
+        const THEMES = {
+          mystical: { bodyBg: '#02041b', colors: { '--space-black': '#02041b', '--deep-purple': '#4a0e4e', '--gold': '#ffd700', '--gold-light': '#fff3c4', '--soft-violet': '#8a2be2', '--crimson': '#dc143c', '--jade': '#00a86b', '--text-primary': '#e6f1ff', '--text-secondary': '#8892b0', '--holoscreen-bg': 'rgba(10, 25, 47, 0.85)', '--highlight-glass': 'rgba(4, 24, 61, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.1)', '--glow-cyan': '#64ffda', '--glow-magenta': '#f779dd', '--shadow-color': 'rgba(0, 0, 0, 0.7)' } },
+          ethereal: { bodyBg: '#0a1628', colors: { '--space-black': '#0a1628', '--deep-purple': '#0a2540', '--gold': '#64ffda', '--gold-light': '#a8ffff', '--soft-violet': '#5a7dbf', '--crimson': '#ff6b9d', '--jade': '#4ecdc4', '--text-primary': '#d4f1f9', '--text-secondary': '#7fb3d5', '--holoscreen-bg': 'rgba(10, 37, 64, 0.85)', '--highlight-glass': 'rgba(10, 60, 100, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.15)', '--glow-cyan': '#64ffda', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 10, 20, 0.8)' } },
+          sunset: { bodyBg: '#2c1810', colors: { '--space-black': '#2c1810', '--deep-purple': '#2c1e3e', '--gold': '#ff9f43', '--gold-light': '#ffc857', '--soft-violet': '#d94369', '--crimson': '#ff6348', '--jade': '#ffa500', '--text-primary': '#ffe8cc', '--text-secondary': '#d4a574', '--holoscreen-bg': 'rgba(44, 30, 62, 0.85)', '--highlight-glass': 'rgba(90, 40, 60, 0.6)', '--border-glass': 'rgba(255, 159, 67, 0.15)', '--glow-cyan': '#ffb347', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } },
+          forest: { bodyBg: '#0d1f16', colors: { '--space-black': '#0d1f16', '--deep-purple': '#1a3a2a', '--gold': '#2ecc71', '--gold-light': '#58d68d', '--soft-violet': '#27ae60', '--crimson': '#e74c3c', '--jade': '#16a085', '--text-primary': '#b8e6d5', '--text-secondary': '#7fb3a0', '--holoscreen-bg': 'rgba(26, 58, 42, 0.85)', '--highlight-glass': 'rgba(22, 80, 60, 0.6)', '--border-glass': 'rgba(46, 204, 113, 0.15)', '--glow-cyan': '#58d68d', '--glow-magenta': '#e74c3c', '--shadow-color': 'rgba(0, 0, 0, 0.85)' } },
+          midnight: { bodyBg: '#0f0f1e', colors: { '--space-black': '#0f0f1e', '--deep-purple': '#1a1a2e', '--gold': '#e0e0e0', '--gold-light': '#ffffff', '--soft-violet': '#6b5b95', '--crimson': '#c91f16', '--jade': '#88c540', '--text-primary': '#f0f0f0', '--text-secondary': '#b0b0b0', '--holoscreen-bg': 'rgba(26, 26, 46, 0.85)', '--highlight-glass': 'rgba(30, 30, 60, 0.6)', '--border-glass': 'rgba(200, 200, 200, 0.1)', '--glow-cyan': '#e0e0e0', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.95)' } },
+          coral: { bodyBg: '#2d1b24', colors: { '--space-black': '#2d1b24', '--deep-purple': '#2d1b3d', '--gold': '#ff7b54', '--gold-light': '#ffa270', '--soft-violet': '#ff6b9d', '--crimson': '#c0392b', '--jade': '#26c281', '--text-primary': '#ffd9c9', '--text-secondary': '#d4a5a0', '--holoscreen-bg': 'rgba(45, 27, 45, 0.85)', '--highlight-glass': 'rgba(70, 30, 50, 0.6)', '--border-glass': 'rgba(255, 123, 84, 0.15)', '--glow-cyan': '#ffa270', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } },
+          royal: { bodyBg: '#21182F', colors: { '--space-black': '#21182F', '--deep-purple': '#402A50', '--gold': '#FFD700', '--gold-light': '#FFF0B3', '--soft-violet': '#A978D0', '--crimson': '#e74c3c', '--jade': '#50C878', '--text-primary': '#EADCF8', '--text-secondary': '#A090B0', '--holoscreen-bg': 'rgba(33, 24, 47, 0.85)', '--highlight-glass': 'rgba(64, 42, 80, 0.6)', '--border-glass': 'rgba(255, 215, 0, 0.15)', '--glow-cyan': '#FFD700', '--glow-magenta': '#A978D0', '--shadow-color': 'rgba(0, 0, 0, 0.85)' } },
+          ocean: { bodyBg: '#001a33', colors: { '--space-black': '#001a33', '--deep-purple': '#003d66', '--gold': '#00d9ff', '--gold-light': '#66f2ff', '--soft-violet': '#0099cc', '--crimson': '#ff3366', '--jade': '#00cc99', '--text-primary': '#ccf2ff', '--text-secondary': '#66b3cc', '--holoscreen-bg': 'rgba(0, 61, 102, 0.85)', '--highlight-glass': 'rgba(0, 100, 150, 0.6)', '--border-glass': 'rgba(0, 217, 255, 0.15)', '--glow-cyan': '#00d9ff', '--glow-magenta': '#ff3366', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } }
+        };
 
-            try {
-                const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical';
-                const theme = THEME_COLORS[savedThemeName];
-                if (theme) {
-                    const root = document.documentElement;
-                    for (const [key, value] of Object.entries(theme)) {
-                        root.style.setProperty(key, value);
-                    }
-                }
-            } catch (e) {
-                console.error('Error applying blocking theme:', e);
+        try {
+          const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical'; // Default theme
+          const theme = THEMES[savedThemeName] || THEMES.mystical;
+          const root = document.documentElement;
+
+          // Set the background color directly on the body and the background container to prevent any flash.
+          // We use a <style> tag because the body/div elements don't exist yet.
+          const style = document.createElement('style');
+          style.textContent = `
+            body { background-color: ${theme.bodyBg}; }
+            .background-container { background: ${theme.bodyBg}; } /* Set a solid color first */
+          `;
+          document.head.appendChild(style);
+
+          // Set all the CSS variables for the rest of the page to use.
+          if (theme.colors) {
+            for (const [key, value] of Object.entries(theme.colors)) {
+              root.style.setProperty(key, value);
             }
-        })();
+          }
+        } catch (e) {
+          console.error('Error applying initial theme:', e);
+        }
+      })();
     </script>
-    <!-- End of theme script -->
+
+    <!-- Theme variables are now applied by control.js and initThemeSystem() -->
 
     <link rel="stylesheet" href="chinese_aesthetics.css">
 </head>
@@ -291,15 +307,16 @@
             if (menuDropdown) menuDropdown.classList.remove('visible');
             if (menuIcon) menuIcon.src = 'photos/favicon1.png';
 
-            // --- ADDED: Also hide the theme selector when the menu is closed ---
+            // Reset theme selector state when menu closes
             const themeContainer = document.querySelector('.theme-colors-grid');
             const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-            if (themeContainer) {
-                themeContainer.style.display = 'none';
-            }
-            if (themeToggleBtn) {
-                themeToggleBtn.classList.remove('active');
-            }
+            const menuLinks = menuDropdown ? menuDropdown.querySelectorAll('a') : [];
+            const separator = menuDropdown ? menuDropdown.querySelector('hr') : null;
+
+            if (themeContainer) themeContainer.style.display = 'none';
+            if (themeToggleBtn) themeToggleBtn.classList.remove('active');
+            menuLinks.forEach(link => link.style.display = 'block');
+            if (separator) separator.style.display = 'block';
         }
     </script>
     <script src="chinese_enhancements.js"></script>

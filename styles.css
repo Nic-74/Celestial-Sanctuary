@@ -65,11 +65,6 @@ hr {
 
 /* BACKGROUND */
 .background-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(ellipse at 50% 50%, #1a2a45 0%, #0d152b 50%, #02041b 100%); }
-.background-container {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    /* Use a CSS variable for the background, set by the blocking script */
-    background: var(--theme-bg-gradient);
-}
 .stars-bg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
@@ -306,13 +301,13 @@ hr {
 }
 #main-menu-dropdown a {
     display: block;
-    padding: 12px 15px;
+    padding: 8px 15px;
     color: var(--gold-light);
     text-decoration: none;
     font-family: var(--font-body);
     border-radius: 4px;
     transition: var(--transition-fast);
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 #main-menu-dropdown a:hover {
     background: rgba(255, 215, 0, 0.1);
@@ -957,7 +952,7 @@ hr {
 .love-calculator-container .calc-sub-header { font-family: 'Courier New', monospace; color: #30d5c8; border-bottom: 1px solid #30d5c8; padding-bottom: 0.5rem; margin-bottom: 1rem; }
 .love-calculator-container .calc-formula-box { background: rgba(0,0,0,0.2); padding: 1rem; }
 .love-calculator-container .calc-formula { font-size: 1.8rem; text-align: center; color: #f5f5f5; }
-.love-calculator-container .calc-formula-vars { font-family: 'Courier New', monospace; list-style-type: none; padding: 0; margin: 1rem 0; color: #8892b0; font-size: 0.85rem; }
+.love-calculator-container .calc-formula-vars { font-family: 'Courier New', monospace; list-style-type: none; padding: 0; margin: 1rem 0; color: #8892b0; font-size: 0.85rem; word-break: break-all; }
 .love-calculator-container .calc-result { font-family: 'Courier New', monospace; color: #30d5c8; text-align: center; font-weight: bold; }
 .love-calculator-container pre { background: #020c1b; color: #30d5c8; padding: 1rem; border-radius: 4px; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 0.9rem; text-shadow: 0 0 5px rgba(48, 213, 200, 0.5); }
 .love-calculator-container .calc-nav { margin-top: 1rem; text-align: center; font-family: 'Courier New', monospace; color: #8892b0; }
@@ -1002,7 +997,7 @@ hr {
 .status-ok { color: var(--jade); font-weight: bold; }
 .status-destined { color: var(--glow-magenta); font-weight: bold; }
 /* Radar Chart & Glitch Effects */
-.radar-chart-container { position: relative; width: 300px; height: 300px; margin: 1rem auto; background: url(./photos/radar_bg.png) center/cover; transition: transform 0.2s; }
+.radar-chart-container { position: relative; width: 100%; max-width: 300px; aspect-ratio: 1 / 1; margin: 1rem auto; background: url(./photos/radar_bg.png) center/cover; transition: transform 0.2s; }
 .system-failure .radar-chart-container { animation: glitch-shake 0.2s infinite; }
 .system-failure .radar-chart-container::before {
     content: '';
@@ -1692,7 +1687,7 @@ hr {
 .hub-choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem; /* Increased gap for better spacing */
+    gap: 1rem;
 }
 .hub-choice-btn {
     background: transparent;
@@ -1713,6 +1708,9 @@ hr {
     border-color: var(--gold);
     color: var(--gold);
     transform: translateY(-3px);
+}
+.hub-choice-btn:last-child {
+    grid-column: 1 / -1; /* Make last button span full width */
 }
 
 .realm { display: none; margin-bottom: 4rem; }
@@ -2094,7 +2092,8 @@ hr {
 @media (max-width: 768px) {
     .panel-header { font-size: 2.2rem; text-align: center; }
     .panel-subheader { text-align: center; }
-    .main-content { padding: 90px 20px 30px 20px; }
+    /* --- MODIFIED: Remove horizontal padding for full-width content on mobile --- */
+    .main-content:not(.observatory-active):not(.nebula-active) { padding: 90px 0 30px 0; }
     .planet-name-display { left: auto; right: 1rem; top: 1rem; transform: none; }
     .tome-title { font-size: 2.5rem; }
     .home-main-title { font-size: clamp(2.5em, 8vw, 4em); }
@@ -2136,16 +2135,26 @@ hr {
     #sanctuary-panel .section-title::before, #sanctuary-panel .section-title::after { display: none; }
     #sanctuary-panel .choice-button { flex-basis: 100%; }
     #sanctuary-panel .subtitle, #sanctuary-panel .prophecy-text { text-align: center; }
-    /* --- FIX: Make hub choices stack on mobile --- */
-    #sanctuary-panel .hub-choices {
-        grid-template-columns: 1fr;
-    }
-    #sanctuary-panel .question-box { text-align: center; } /* This rule seems to be a duplicate, but leaving it is harmless */
+    #sanctuary-panel .question-box { text-align: center; }
     #sanctuary-panel .sacred-scroll { padding: 30px; }
     #sanctuary-panel .enter-button:hover { transform: translate(-50%, -50%) scale(1.05); }
     #sanctuary-panel .modal-content { padding: 30px 20px; }
     #sanctuary-panel .modal-title { font-size: 2.2em; }
 }
+@media (max-width: 600px) {
+    .hub-choices { grid-template-columns: 1fr; }
+    .hub-question-box { padding: 1.5rem; }
+}
+@media (max-width: 500px) {
+    .candles { flex-wrap: wrap; }
+    .ritual-altar { padding: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    /* --- MODIFIED: Remove horizontal padding for full-width content on mobile --- */
+    .main-content:not(.observatory-active):not(.nebula-active) { padding: 80px 0 20px 0; }
+}
+
 /* --- ADD THIS: Responsive Menu Button --- */
 @media (max-width: 768px) {
     #main-menu-button {
@@ -5379,7 +5388,7 @@ hr {
 
 .universe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Reduced min-width */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
 }
@@ -6228,7 +6237,7 @@ input[type="range"] {
 
 .universe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Reduced min-width */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
 }
@@ -6706,4 +6715,85 @@ input[type="range"] {
         bottom: 10px;
         right: 10px;
     }
+}
+/* --- CORRECTED RULES: Add inside @media (max-width: 768px) --- */
+
+/* 1. Force all main panels to be full-width (edge-to-edge) */
+.content-panel:not(#nebula-of-solitude),
+#guide-panel,
+#sanctuary-panel {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 2. Force inner containers to also be full-width */
+#sanctuary-main-container,
+.love-calculator-container,
+.math-calculator-container,
+.halls-grid,
+.games-grid,
+.recipe-grid,
+.universe-grid,
+.map-stats,
+.book-shelf,
+.realm-grid,
+.hub-question-box {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+
+/* 3. Make all cards and content blocks flush to the edges */
+.game-card,
+.recipe-card,
+.universe-card,
+.theorem-card,
+.compat-category,
+.chapter-content,
+.recipe-story,
+.recipe-ingredients,
+.instruction-step,
+.recipe-rating-section,
+.sacred-scroll,
+.realm-portal,
+.hub-question-box,
+.stat-card,
+.map-stat-card,
+.memory-item,
+.breakdown-item,
+.calc-section, /* This is for the physics panel */
+.calc-formula-box,
+.love-calculator-container,
+.math-calculator-container {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* 4. Make card images flush as well */
+.recipe-card-image,
+.universe-illustration,
+.chapter-illustration,
+.recipe-main-photo,
+.graph-canvas {
+    border-radius: 0 !important;
+}
+
+/* 5. Special fix for the round hall cards (keep them centered) */
+.hall-card {
+    width: 90vw; /* Make them large */
+    max-width: 400px;
+    border-radius: 50% !important; /* Keep them round */
+    border-left: 4px solid rgba(255, 215, 0, 0.5) !important; 
+    border-right: 4px solid rgba(255, 215, 0, 0.5) !important;
+    margin-left: auto !important; /* Keep centered */
+    margin-right: auto !important; /* Keep centered */
 }

@@ -204,8 +204,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 12px 20px;
+    align-items: flex-start; /* Changed from center to left-align */
+    padding: 8px 20px; /* Adjusted padding to match styles.css */
 }
 
 #main-menu-dropdown a .chinese-subtitle {
@@ -291,6 +291,13 @@
     }
 }
 
+/* --- ADD THIS: Further reduce padding on very small screens --- */
+@media (max-width: 480px) {
+    #main-menu-dropdown a {
+        padding: 8px 10px; /* Tighter padding */
+    }
+}
+
 /* 17. Loading Screen Chinese */
 #loading::after {
     content: '初始化中...';
@@ -351,4 +358,11 @@
     opacity: 0.8;
     align-self: baseline; /* Align with the bottom of the text */
     padding-bottom: 0.2em; /* Adjust alignment relative to font size */
+}
+
+/* 16. Responsive Adjustments */
+@media (max-width: 768px) {
+    #main-menu-dropdown a {
+        padding: 10px 12px; /* Match padding from styles.css */
+    }
 }
