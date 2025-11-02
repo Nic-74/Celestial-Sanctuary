@@ -592,9 +592,9 @@ function initApp() {
     style.innerHTML = `
         @keyframes float-compliment {
             0% { opacity: 0; transform: translateY(20px) translateX(0) rotate(0); }
-            15% { opacity: 1; transform: translateY(0) translateX(0) rotate(0); }
-            90% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(var(--y-end, -250px)) translateX(var(--x-end, 0)) rotate(var(--rotation-end, 0)); }
+            10% { opacity: 1; transform: translateY(0) translateX(0) rotate(0); }
+            90% { opacity: 1; transform: translateY(0) translateX(0) rotate(0); }
+            100% { opacity: 0; transform: translateY(-20px) translateX(0) rotate(0); }
         }
         @media (max-width: 640px) {
             #gallery-grid {
@@ -818,6 +818,14 @@ function initApp() {
         if (menuDropdown) {
             menuDropdown.classList.remove('visible');
         }
+
+        // Special handling for observatory direct link
+        if (panelId === 'observatory-direct') {
+            renderPanel('guide');
+            showGuideSection('observatory', true);
+        } else {
+            renderPanel(panelId);
+        }
     };
 
     window.addEventListener('hashchange', handleHashNavigation, false);
@@ -841,7 +849,14 @@ function initApp() {
 
 function initLandingPage() {
     DOM.landingGate.addEventListener('click', enterSanctuary, { once: true });
-    
+    const heartPortal = $('heart-portal');
+    if (heartPortal) {
+        heartPortal.addEventListener('click', (e) => {
+            // The <a> tag handles the hash change, we just need to prevent
+            // the main gate's click event from firing immediately.
+            e.stopPropagation();
+        });
+    }
     const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     applyThemeToLanding(savedTheme);
     initWebBackground('web-canvas-landing', THEME_COLORS[savedTheme]);
@@ -929,7 +944,13 @@ function initSanctuary() {
     updateRelationshipCounter();
     setInterval(updateRelationshipCounter, 60000);
     const panelId = window.location.hash.substring(1) || 'home';
-    renderPanel(panelId);
+
+    if (panelId === 'observatory-direct') {
+        renderPanel('guide');
+        showGuideSection('observatory', true); // Pass true to bypass the password
+    } else {
+        renderPanel(panelId);
+    }
     
     const savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     initMainParticles(savedTheme);
@@ -976,6 +997,16 @@ function addEventListeners() {
            const isCollapsed = moodBar.classList.toggle('collapsed');
            const arrow = visibilityToggle.querySelector('span');
            arrow.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+       });
+
+       
+       document.addEventListener('click', (e) => {
+           
+           if (!moodBar.classList.contains('collapsed') && !moodBar.contains(e.target)) {
+               moodBar.classList.add('collapsed'); // ...then collapse it.
+               const arrow = visibilityToggle.querySelector('span');
+               if (arrow) arrow.style.transform = 'rotate(180deg)';
+           }
        });
     }
 
@@ -1044,7 +1075,59 @@ function addSanctuaryEventListeners() {
      if(menuButton && menuDropdown && menuIcon) {
         // This handles the main click on the button itself
         menuButton.addEventListener('click', (e) => {
+            // Prevent drag logic from interfering with the click
             e.stopPropagation();
+
+            // --- ADVANCED: Full Spatial & Size-Aware Logic ---
+            const containerRect = menuButton.parentElement.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            // Temporarily make dropdown visible to measure its dimensions
+            menuDropdown.classList.add('measuring');
+            const dropdownRect = menuDropdown.getBoundingClientRect();
+            menuDropdown.classList.remove('measuring');
+
+            // Reset all positioning styles before new calculation
+            menuDropdown.style.top = '';
+            menuDropdown.style.bottom = '';
+            menuDropdown.style.left = '';
+            menuDropdown.style.right = '';
+            menuDropdown.style.maxWidth = '';
+            menuDropdown.style.maxHeight = '';
+
+            const margin = 10; // 10px margin from viewport edges
+
+            // --- Vertical Placement ---
+            const spaceBelow = vh - containerRect.bottom - margin;
+            const spaceAbove = containerRect.top - margin;
+            menuDropdown.classList.remove('opens-up'); // Reset class
+
+            if (spaceBelow >= dropdownRect.height || spaceBelow >= spaceAbove) {
+                // Open downwards
+                menuDropdown.style.top = '100%';
+                menuDropdown.style.maxHeight = `${spaceBelow}px`;
+            } else {
+                // Open upwards
+                menuDropdown.classList.add('opens-up');
+                menuDropdown.style.bottom = '100%';
+                menuDropdown.style.maxHeight = `${spaceAbove}px`;
+            }
+
+            // --- Horizontal Placement ---
+            const spaceRight = vw - containerRect.left - margin;
+            const spaceLeft = containerRect.right - margin;
+
+            if (spaceRight >= dropdownRect.width || spaceRight >= spaceLeft) {
+                // Open towards the right
+                menuDropdown.style.left = '0';
+                menuDropdown.style.maxWidth = `${spaceRight}px`;
+            } else {
+                // Open towards the left
+                menuDropdown.style.right = '0';
+                menuDropdown.style.maxWidth = `${spaceLeft}px`;
+            }
+
             const isVisible = menuDropdown.classList.toggle('visible');
             menuIcon.src = isVisible ? 'photos/favicon2.png' : 'photos/favicon1.png';
         });
@@ -1072,6 +1155,9 @@ function addSanctuaryEventListeners() {
         combinedMood.addEventListener('click', (e) => { e.preventDefault(); if (!AppState.moodSyncEnabled) return; try { evaluateMoodAndRedirect(); } catch (err) { console.error(err); } });
     }
 
+    makeMenuDraggable();
+    window.addEventListener('hashchange', resetMenuButtonPosition);
+
     // Mood recommendation popup actions
     const moodPopupAction = document.querySelector('.mood-popup-action');
     const moodPopupClose = document.querySelector('.mood-popup-close');
@@ -1094,6 +1180,99 @@ function addSanctuaryEventListeners() {
          document.body.appendChild(heart);
          setTimeout(() => heart.remove(), 3000);
      });
+}
+
+function resetMenuButtonPosition() {
+    const menuContainer = document.getElementById('main-menu-container');
+    if (menuContainer) {
+        // Remove inline styles to revert to CSS-defined position
+        menuContainer.style.left = '';
+        menuContainer.style.top = '';
+    }
+}
+
+function makeMenuDraggable() {
+    const menuContainer = document.getElementById('main-menu-container');
+    const menuButton = document.getElementById('main-menu-button');
+    if (!menuContainer || !menuButton) return;
+
+    let isDragging = false;
+    let isReadyToDrag = false;
+    let offsetX, offsetY;
+    let longPressTimer;
+
+    const onDragStart = (e) => {
+        // Prevent default behaviors like text selection or page scrolling on touch
+        e.preventDefault();
+        
+        longPressTimer = setTimeout(() => {
+            isReadyToDrag = true;
+            menuContainer.classList.add('ready-to-drag');
+
+            // Now that we are ready, set up for the actual drag
+            const touch = e.touches ? e.touches[0] : e;
+            offsetX = touch.clientX - menuContainer.offsetLeft;
+            offsetY = touch.clientY - menuContainer.offsetTop;
+
+            menuContainer.classList.add('dragging');
+            
+            // A short vibration on mobile for haptic feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+
+        }, 1000); // 1-second long press
+
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchend', onDragEnd);
+    };
+
+    const onDragMove = (e) => {
+        if (!isReadyToDrag) {
+            // If the user moves the cursor too much before the timer fires, cancel the long press.
+            clearTimeout(longPressTimer);
+            return;
+        }
+        
+        // This is the actual dragging part
+        isDragging = true;
+        e.stopPropagation(); // Prevent menu click while dragging
+        
+        const touch = e.touches ? e.touches[0] : e;
+        let x = touch.clientX - offsetX;
+        let y = touch.clientY - offsetY;
+ 
+        // --- NEW: Constrain button within viewport ---
+        const containerRect = menuContainer.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+ 
+        x = Math.max(0, Math.min(x, vw - containerRect.width));
+        y = Math.max(0, Math.min(y, vh - containerRect.height));
+ 
+        menuContainer.style.left = `${x}px`;
+        menuContainer.style.top = `${y}px`;
+    };
+    
+    const onDragEnd = (e) => {
+        clearTimeout(longPressTimer);
+        if (isDragging) {
+            e.stopPropagation(); // Prevent click event after a drag
+        }
+        isDragging = false;
+        isReadyToDrag = false;
+        menuContainer.classList.remove('ready-to-drag');
+        menuContainer.classList.remove('dragging');
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('touchmove', onDragMove);
+        document.removeEventListener('mouseup', onDragEnd);
+        document.removeEventListener('touchend', onDragEnd);
+    };
+
+    menuButton.addEventListener('mousedown', onDragStart);
+    menuButton.addEventListener('touchstart', onDragStart, { passive: false });
 }
 
 function initWebBackground(canvasId, theme) {
@@ -1512,26 +1691,19 @@ function createFloatingCompliment() {
     complimentEl.className = 'floating-compliment';
     const compliment = COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)];
     complimentEl.textContent = compliment;
-    
+
     complimentEl.style.left = `${Math.random() * 60 + 20}vw`;
     complimentEl.style.top = `${Math.random() * 60 + 20}vh`;
 
-    const xEnd = (Math.random() - 0.5) * 400;
-    const yEnd = (Math.random() - 0.5) * 400;
-    const rotation = (Math.random() - 0.5) * 90;
-    const duration = (Math.random() * 2) + 3;
+    const duration = 6; // 6 seconds total duration
 
-    complimentEl.style.setProperty('--x-end', `${xEnd}px`);
-    complimentEl.style.setProperty('--y-end', `${yEnd}px`);
-    complimentEl.style.setProperty('--rotation-end', `${rotation}deg`);
-    
     complimentEl.style.animationName = 'float-compliment';
-    complimentEl.style.animationDuration = `${duration}s`;
-    
+    complimentEl.style.animationDuration = `${duration}s`; // Use fixed duration
+
     document.body.appendChild(complimentEl);
     setTimeout(() => {
         complimentEl.remove();
-    }, duration * 1000);
+    }, duration * 1000); // Remove after animation ends
 }
 
 function renderPanel(panelId) {
@@ -1553,16 +1725,10 @@ function renderPanel(panelId) {
         DOM.mainContent.style.padding = '100px 7vw 50px 7vw';
         DOM.mainContent.innerHTML = '';
         
-        const chantCompliments = () => {
-            const chantCount = Math.floor(Math.random() * 4) + 3;
-            for (let i = 0; i < chantCount; i++) {
-                setTimeout(() => {
-                    createFloatingCompliment();
-                }, i * (Math.random() * 300 + 200));
-            }
-        };
-
-        AppState.complimentInterval = setInterval(chantCompliments, 3000);
+        // Show one compliment at a time
+        AppState.complimentInterval = setInterval(() => {
+            createFloatingCompliment();
+        }, 7000); // Create a new one every 7 seconds (just after the old one disappears)
         return;
     }
     
@@ -3092,777 +3258,237 @@ const getChronicleOfUsHTML = () => `
 </div>`;
 
 const getGuidePanelHTML = () => `
-<div id="guide-panel" class="content-panel active">
-    <h2 class="panel-header">Constellation Guide</h2>
-    <p class="panel-subheader">Navigate the cosmic architecture of our shared universe. Each star, each connection, tells a story written in the language of the cosmos.</p>
-    
-    <div class="holodeck-interface">
-        <div class="holodeck-tabs">
-            <button class="holo-tab active" data-tab="constellation">⭐ Our Constellation</button>
-            <button class="holo-tab" data-tab="physics">⚛️ Relational Physics</button>
-            <button class="holo-tab" data-tab="anatomy">🫀 Anatomy of Us</button>
-            <button class="holo-tab" data-tab="artifacts">📿 Sacred Artifacts</button>
-            <button class="holo-tab" data-tab="lexicon">📖 Our Language</button>
-            <button class="holo-tab" data-tab="timeline-viz">🌌 Time Weaver</button>
+<div id="guide-panel">
+    <div id="guide-main-container">
+
+        <!-- 1. Threshold View -->
+        <div id="guide-threshold" class="sanctuary-view active">
+            <div class="threshold-content">
+                <p id="guide-typing-text" class="typing-text"></p>
+                <div id="guide-riddle-container" class="sanctuary-riddle" style="display: none;"></div>
+            </div>
         </div>
         
-        <div class="holodeck-content">
-            <div class="holo-pane active" id="tab-constellation">
-                <h3>The Constellation of Our Love</h3>
-                <p style="text-align: center; color: var(--text-secondary); font-style: italic; margin-bottom: 2rem;">
-                    Click any star to reveal the memory it holds. Watch how our moments connect across time and space.
-                </p>
-                
-                <div class="constellation-map-container">
-                    <canvas id="constellation-canvas"></canvas>
-                    <div id="constellation-legend">
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: #FFD700;"></span>
-                            <span>First Encounters</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: #FF69B4;"></span>
-                            <span>Romantic Moments</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: #87CEEB;"></span>
-                            <span>Shared Dreams</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: #98FB98;"></span>
-                            <span>Daily Magic</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="constellation-memory-display" class="memory-display-card">
-                    <div class="memory-icon">✨</div>
-                    <h4 id="memory-title">Select a star to begin your journey</h4>
-                    <p id="memory-description">Each point of light holds a precious moment from our story...</p>
-                    <div id="memory-date"></div>
+        <!-- 2. Entrance Animation View -->
+        <div id="guide-entrance-animation" class="sanctuary-view">
+             <img src="photos/open_nebula.png" class="door-image" alt="Astral Library Door opening">
+        </div>
+
+        <!-- 3. Hub View -->
+        <div id="guide-hub" class="sanctuary-view sanctuary-hub-view">
+            <h2 class="hub-title">ASTRAL LIBRARY OF MEMORIES</h2>
+            <p class="hub-subtitle">Welcome, Keeper of the Stars. The knowledge of your universe is cataloged within these sacred halls. Choose a wing to explore the fundamental truths of your connection.</p>
+            <div class="hub-question-box">
+                <h3>WHICH ASPECT OF YOUR UNIVERSE DO YOU WISH TO STUDY?</h3>
+                <div class="hub-choices">
+                    <button class="hub-choice-btn" onclick="showGuideSection('observatory')"><span>🔭</span> Cosmic Observatory</button>
+                    <button class="hub-choice-btn" onclick="showGuideSection('physics')"><span>⚛️</span> Relational Physics</button>
+                    <button class="hub-choice-btn" onclick="showGuideSection('anatomy')"><span>🫀</span> Anatomy of Us</button>
+                    <button class="hub-choice-btn" onclick="showGuideSection('artifacts')"><span>📿</span> Sacred Artifacts</button>
+                    <button class="hub-choice-btn" onclick="showGuideSection('lexicon')"><span>📖</span> Our Language</button>
                 </div>
             </div>
-            
-            <div class="holo-pane" id="tab-physics">
-                <div class="love-calculator-container">
-                    <h3 class="calc-title">MATHEMATICAL LOVE CALCULATOR 📐💕</h3>
-                    <p class="calc-subtitle">"Proving our love through mathematics" - By Nic, the mathematician who fell in love with more than just numbers.</p>
+        </div>
 
-                    <div class="calc-section">
-                        <h4 class="calc-sub-header">THE GRAND UNIFIED THEORY OF US</h4>
-                        <div class="calc-formula-box">
-                            <div class="calc-formula">
-                                L<sub>∞</sub> = <frac><span class="numerator">(N ⊗ Z)<sup>∞</sup></span><span class="denominator">d<sup>0</sup></span></frac> × Σ(moments) × e<sup>time</sup>
-                            </div>
-                            <ul class="calc-formula-vars">
-                                <li>L∞ = Infinite Love (our constant)</li>
-                                <li>N = Nicholas (mathematician)</li>
-                                <li>Z = Zoya (the artist)</li>
-                                <li>⊗ = Tensor product (deep connection)</li>
-                                <li>d = Distance (approaches 0)</li>
-                                <li>Σ(moments) = Sum of shared memories</li>
-                                <li>e^(time) = Exponential growth</li>
-                            </ul>
-                            <hr class="calc-divider">
-                            <div class="calc-result">Current Value: L∞ = ∞ (As predicted by the equation)</div>
-                        </div>
-                        <div class="calc-nav">
-                            Navigate: <a href="#comp-analysis">Compatibility</a> | <a href="#love-timeline">Timeline</a> | <a href="#love-theorems">Theorems</a> | <a href="#love-probability">Probability</a>
-                        </div>
-                    </div>
-
-                    <div id="comp-analysis" class="calc-section">
-                        <h4 class="calc-sub-header">🎯 Comprehensive Compatibility Analysis</h4>
-                        <div class="calc-compatibility-score">
-                            <div class="score">98.7%</div>
-                            <div>COSMICALLY DESTINED</div>
-                        </div>
-                        <p style="text-align:center; font-style:italic;">"Statistically impossible to find a better match. Trust the math."</p>
-                        <hr class="calc-divider">
-                        <pre>
-BREAKDOWN BY CATEGORY:
-
-1. EMOTIONAL RESONANCE                
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.3%          
-Based on: Mood sync rate, voice message sentiment, time capsule tone
-Calculation: ER = (Σ mood_matches / total_days) × sentiment_analysis_score
-             ER = (267/365) × 1.34 = 98.3%
-
-─────────────────────────────────
-
-2. INTELLECTUAL COMPATIBILITY         
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7%          
-Based on: Conversation depth, shared interests, learning together
-Factors:
-• Different strengths that complement 
-• Nic teaches math, Zoya teaches art  
-• Both curious learners               
-• Recipe creation collaboration       
-
-─────────────────────────────────
-
-3. COMMUNICATION EFFICIENCY           
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 99.1%          
-Based on: Response times, message frequency, voice garden activity
-Average Response Time: 14.3 minutes   
-Message Balance: 51% Nic / 49% Zoya   
-Perfectly balanced communication! ✓   
-
-─────────────────────────────────
-
-4. ADVENTURE COMPATIBILITY            
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.4%          
-Based on: Travel memories, world map heat signatures, spontaneity score
-Shared Adventures: 23 locations       
-Spontaneous Dates: 67% of outings     
-Bucket List Overlap: 78%              
-
-─────────────────────────────────
-
-5. CULINARY HARMONY                   
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%           
-Based on: Recipe ratings, cooking together frequency, food preferences
-Nic's Avg Rating: 4.8/5 stars         
-Times "Life or Death": 12             
-Dishes Cooked Together: 47            
-Food Fights: 0 (surprisingly!)        
-
-─────────────────────────────────
-
-6. DESTINY QUOTIENT                   
-▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%           
-Based on: Probability analysis, multiverse constant, fate algorithms
-Probability of meeting: 0.000047%     
-Probability of connecting: 0.12%      
-Probability of falling in love: ???   
-
-Yet here we are. Mathematics proves some things transcend probability.
-DQ = lim (fate → ∞) P(us) = 1.0 (100%) - It was meant to be.
-                        </pre>
-                    </div>
-
-                    <div id="love-timeline" class="calc-section">
-                        <h4 class="calc-sub-header">📈 Relationship Trajectory Analysis</h4>
-                        <pre>
-Love │                                  
-  ∞ │                        ╱──────    
-    │                     ╱─╱           
-    │                  ╱─╱              
- 100│               ╱─╱                 
-    │            ╱─╱                    
-    │         ╱─╱                       
-  50│      ╱─╱        *Confession       
-    │   ╱─╱          (Aug 25, 2021)     
-    │╱─╱                                
-   0│───────────────────────────────>   
-    2019  2020  2021  2022  2023  2024  
-    Sep   Jan   Aug   Aug   Now   Future
-
-KEY MOMENTS PLOTTED:                  
-○ First Meeting (Sep 15, 2019)        
-○ Friend Request (May 25, 2021)       
-○ First Date (Jul 27, 2021)           
-● Confession (Aug 25, 2021) ⚡ SPIKE  
-○ First Anniversary (Aug 25, 2022)    
-○ Today (Jan 15, 2025)                
-
-GROWTH RATE ANALYSIS:                 
-• Phase 1 (2019-2021): Exponential    
-  Growth rate: dL/dt = 2.3 units/mo   
-• Phase 2 (2021-2023): Rapid Rise     
-  Growth rate: dL/dt = 5.7 units/mo   
-• Phase 3 (2023-Now): Stable Infinity 
-  Growth rate: dL/dt → ∞              
-
-PREDICTION MODEL:                     
-Based on current trajectory, your love will continue to approach infinity asymptotically.
-Mathematical proof that love has no upper bound when it's real. ✓
-                        </pre>
-                    </div>
-
-                    <div id="love-theorems" class="calc-section">
-                        <h4 class="calc-sub-header">📜 Proven Mathematical Theorems of Love</h4>
-                        <pre>
-THEOREM 1: The Bicycle Axiom
-Statement: If Person A fixes Person B's bicycle, the probability of falling in love increases by a factor of e^π.
-Proof: Given the events of June 2021, the subsequent confession occurred 71 days later.
-P(love | bicycle_fixed) / P(love | no_bicycle) = 0.94 / 0.04 ≈ 23.5 ≈ e^π. Q.E.D. ✓
-
-─────────────────────────────────
-
-THEOREM 2: The Chicken Steak Constant
-Statement: There exists a universal constant K ≈ 47.3 joy_units per steak, where K = happiness_increase / chicken_steak_consumed.
-Empirical evidence shows the constant holds across all measurements. Q.E.D. ✓
-
-─────────────────────────────────
-
-THEOREM 3: Typhoon Determination Law
-Statement: The force of love (F_love) is greater than any natural disaster force (F_typhoon) when properly motivated.
-Case Study (Aug 10, 2021): F_love was unmeasurable (∞) while F_typhoon was finite. Nic flew successfully. Q.E.D. ✓
-
-─────────────────────────────────
-
-THEOREM 4: The Overthinking Paradox
-Statement: The amount of overthinking (O) is inversely proportional to confidence (C), but directly proportional to how much you care (H). O = H / C.
-Corollary: High overthinking is not a bug, it's a feature indicating deep care. Q.E.D. ✓
-
-─────────────────────────────────
-
-THEOREM 5: Voice Message Garden Law
-Statement: Emotional closeness (E) correlates with the number of voice messages (V) by E = log(V) × authenticity_factor.
-The more we communicate, the closer we become. The scale has no limit. Q.E.D. ✓
-                        </pre>
-                    </div>
-
-                    <div id="love-probability" class="calc-section">
-                        <h4 class="calc-sub-header">🎲 What Are The Odds?</h4>
-                        <pre>
-SCENARIO 1: Meeting Each Other
-P(meeting) = 0.0000057% or 1 in 17,543,860. Yet it happened. Destiny > Math. ✓
-
-─────────────────────────────────
-
-SCENARIO 2: Both Being Single
-P(both_ready) = 3.0%. A 97% chance we'd have missed each other. But we didn't. ✓
-
-─────────────────────────────────
-
-SCENARIO 3: Language Barrier
-Traditional probability: 23%. Actual outcome: Connected deeply.
-Conclusion: Love translates all languages. Probability irrelevant. ✓
-
-─────────────────────────────────
-
-SCENARIO 4: The Friend Request
-Without Zoya making the first move, there was only a 16.9% chance of connection.
-Conclusion: Sometimes the bravest person wins. ✓
-
-─────────────────────────────────
-
-MASTER PROBABILITY:
-P(us existing exactly as we do) = 0.0000000047% or 1 in 21,276,595,745.
-
-Twenty-one BILLION to one odds.
-
-♥️ Some things transcend probability.
-                        </pre>
-                    </div>
-
-                </div>
-            </div>
-            
-            <div class="holo-pane" id="tab-anatomy">
-                <h3>The Anatomy of Our Connection</h3>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                    A deeper look at what makes us, us. Every part plays a role in our cosmic dance.
-                </p>
-                
-                <div class="anatomy-visualization">
-                    <div class="anatomy-profiles">
-                        <div class="anatomy-profile" data-person="nic">
-                            <div class="profile-avatar">
-                                <div class="avatar-circle">
-                                    <span class="avatar-initial">N</span>
-                                </div>
-                                <div class="avatar-glow"></div>
-                            </div>
-                            <h4>Nicholas</h4>
-                            <p class="profile-subtitle">The Mathematician's Heart</p>
-                            
-                            <div class="anatomy-points-list">
-                                <div class="anatomy-point-enhanced" data-desc="A mind that finds beauty in equations and patterns, now learning to see beauty in the unpredictable magic of love.">
-                                    <span class="point-icon">🧠</span>
-                                    <span class="point-label">Analytical Mind</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="Once guarded and careful, now open and vulnerable. A heart that beats in rhythm with yours.">
-                                    <span class="point-icon">❤️</span>
-                                    <span class="point-label">Devoted Heart</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="Hands that can solve complex problems and fix bicycles, but most importantly, hold yours with infinite gentleness.">
-                                    <span class="point-icon">🤲</span>
-                                    <span class="point-label">Steady Hands</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="The deep, husky voice that first caught your attention - now speaks only words of love and understanding.">
-                                    <span class="point-icon">🗣️</span>
-                                    <span class="point-label">Resonant Voice</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="A spirit that traveled far from home and found its true home in you.">
-                                    <span class="point-icon">✨</span>
-                                    <span class="point-label">Wandering Soul</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="connection-bridge">
-                            <div class="bridge-line"></div>
-                            <div class="bridge-heart">💕</div>
-                            <div class="bridge-particles">
-                                <span>✨</span><span>💫</span><span>⭐</span>
-                            </div>
-                        </div>
-                        
-                        <div class="anatomy-profile" data-person="zoya">
-                            <div class="profile-avatar">
-                                <div class="avatar-circle">
-                                    <span class="avatar-initial">Z</span>
-                                </div>
-                                <div class="avatar-glow"></div>
-                            </div>
-                            <h4>Zoya</h4>
-                            <p class="profile-subtitle">The Artist's Grace</p>
-                            
-                            <div class="anatomy-points-list">
-                                <div class="anatomy-point-enhanced" data-desc="A creative mind that sees the world as a canvas of possibilities, painting our story with every moment.">
-                                    <span class="point-icon">🎨</span>
-                                    <span class="point-label">Creative Vision</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="A heart that is a quiet harbor - offering peace, understanding, and unconditional love in life's storms.">
-                                    <span class="point-icon">💖</span>
-                                    <span class="point-label">Compassionate Heart</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="Hands that create beautiful art and write the chapters of our story with grace and intention.">
-                                    <span class="point-icon">✍️</span>
-                                    <span class="point-label">Gentle Hands</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="Eyes like windows to heaven - oval and bright, showing kindness that saw through my shyness to the real me.">
-                                    <span class="point-icon">👁️</span>
-                                    <span class="point-label">Perceptive Eyes</span>
-                                </div>
-                                <div class="anatomy-point-enhanced" data-desc="A spirit that bridges cultures and languages, making every place feel like home.">
-                                    <span class="point-icon">🌸</span>
-                                    <span class="point-label">Bridging Spirit</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="compatibility-meter">
-                    <h4>Cosmic Compatibility Analysis</h4>
-                    <div class="compatibility-bars">
-                        <div class="compatibility-bar-item">
-                            <span class="bar-label">Emotional Resonance</span>
-                            <div class="bar-track">
-                                <div class="bar-fill" style="width: 98%;" data-value="98%"></div>
-                            </div>
-                        </div>
-                        <div class="compatibility-bar-item">
-                            <span class="bar-label">Intellectual Sync</span>
-                            <div class="bar-track">
-                                <div class="bar-fill" style="width: 95%;" data-value="95%"></div>
-                            </div>
-                        </div>
-                        <div class="compatibility-bar-item">
-                            <span class="bar-label">Spiritual Alignment</span>
-                            <div class="bar-track">
-                                <div class="bar-fill" style="width: 99%;" data-value="99%"></div>
-                            </div>
-                        </div>
-                        <div class="compatibility-bar-item">
-                            <span class="bar-label">Adventure Compatibility</span>
-                            <div class="bar-track">
-                                <div class="bar-fill" style="width: 92%;" data-value="92%"></div>
-                            </div>
-                        </div>
-                        <div class="compatibility-bar-item">
-                            <span class="bar-label">Destiny Quotient</span>
-                            <div class="bar-track">
-                                <div class="bar-fill" style="width: 100%;" data-value="100%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="anatomy-tooltip-enhanced"></div>
-            </div>
-            
-            <div class="holo-pane" id="tab-artifacts">
-                <h3>Sacred Artifacts of Our Journey</h3>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                    Objects that have gained celestial significance through the moments we've shared.
-                </p>
-                
-                <div class="artifacts-showcase">
-                    <div class="artifact-card" data-title="The Mathematics Book" data-story="A shield against loneliness that became a conversation starter. The book I held on September 15, 2019, unknowingly waiting for you to approach and change everything." data-icon="📖">
-                        <div class="artifact-icon">📖</div>
-                        <div class="artifact-name">The Mathematics Book</div>
-                        <div class="artifact-rarity">★★★★★ Legendary</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Broken Bicycle" data-story="Your bicycle that broke in June 2021, giving me the chance to show I cared through action. The first of many times I'd try to fix what was broken in your world." data-icon="🚲">
-                        <div class="artifact-icon">🚲</div>
-                        <div class="artifact-name">The Broken Bicycle</div>
-                        <div class="artifact-rarity">★★★★★ Legendary</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Dancing Drawing" data-story="Two people dancing - my first art class creation in January 2020. A prophecy drawn in pencil before we knew what we'd become." data-icon="🎨">
-                        <div class="artifact-icon">🎨</div>
-                        <div class="artifact-name">The Dancing Drawing</div>
-                        <div class="artifact-rarity">★★★★☆ Epic</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Joyful Chicken Steak" data-story="Our first meal together on July 27, 2021. Simple food that tasted like possibility. Now our tradition, our taste of beginnings." data-icon="🍗">
-                        <div class="artifact-icon">🍗</div>
-                        <div class="artifact-name">Joyful Chicken Steak</div>
-                        <div class="artifact-rarity">★★★★★ Legendary</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Typhoon Flight" data-story="August 10, 2021 - when nature itself couldn't stop me from reaching you. A journey through storms that proved the strength of my feelings." data-icon="✈️">
-                        <div class="artifact-icon">✈️</div>
-                        <div class="artifact-name">The Typhoon Flight</div>
-                        <div class="artifact-rarity">★★★★★ Legendary</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The First Photo" data-story="The night of July, 2021, when I sent you my first picture. Digital pixels that carried vulnerability and hope across the night." data-icon="📸">
-                        <div class="artifact-icon">📸</div>
-                        <div class="artifact-name">The First Photo</div>
-                        <div class="artifact-rarity">★★★★☆ Epic</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Sports Field" data-story="Where it all began. Sacred ground where two lonely souls found each other during the Taiku Taikai. Our genesis point." data-icon="⚽">
-                        <div class="artifact-icon">⚽</div>
-                        <div class="artifact-name">The Sports Field</div>
-                        <div class="artifact-rarity">★★★★★ Mythic</div>
-                    </div>
-                    
-                    <div class="artifact-card" data-title="The Birthday Poem" data-story="Your message at 11:35pm on July 17, 2021. Sweet words that made me realize I was remembered, cherished, seen." data-icon="💌">
-                        <div class="artifact-icon">💌</div>
-                        <div class="artifact-name">The Birthday Poem</div>
-                        <div class="artifact-rarity">★★★★☆ Epic</div>
-                    </div>
-                </div>
-                
-                <div id="artifact-modal" class="artifact-detail-modal">
-                    <div class="artifact-modal-content">
-                        <span class="artifact-modal-close">&times;</span>
-                        <div class="artifact-modal-icon" id="modal-artifact-icon">📖</div>
-                        <h3 id="modal-artifact-title">Artifact Name</h3>
-                        <div class="artifact-modal-story" id="modal-artifact-story">Story goes here...</div>
-                        <div class="artifact-acquisition">
-                            <span class="acquisition-label">Acquired:</span>
-                            <span class="acquisition-date" id="modal-artifact-date">2019 - 2021</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="holo-pane" id="tab-lexicon">
-                <h3>Our Shared Language</h3>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                    Every relationship creates its own dialect - words and phrases that carry meaning only we understand.
-                </p>
-                
-                <div class="lexicon-search">
-                    <input type="text" id="lexicon-search-input" class="text-input" placeholder="🔍 Search our dictionary...">
-                </div>
-                
-                <div class="lexicon-categories">
-                    <button class="lexicon-cat-btn active" data-category="all">All Terms</button>
-                    <button class="lexicon-cat-btn" data-category="food">Food & Treats</button>
-                    <button class="lexicon-cat-btn" data-category="activities">Activities</button>
-                    <button class="lexicon-cat-btn" data-category="emotions">Emotions</button>
-                    <button class="lexicon-cat-btn" data-category="places">Places</button>
-                </div>
-                
-                <dl class="lexicon-list-enhanced" id="lexicon-entries">
-                    <div class="lexicon-entry" data-category="activities">
-                        <dt>Night walk</dt>
-                        <dd>A small, spontaneous adventure, usually involving snacks and discovery. Examples: Exploring a random street, going to コンビニー.</dd>
-                        <div class="lexicon-usage">"Wanna go for a walk?"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="emotions">
-                        <dt>Hug</dt>
-                        <dd>The highest form of cozy comfort, requiring maximum fluffiness and zero movement for extended periods(octopus Nic). Saying no to a hug is a federal offense.</dd>
-                        <div class="lexicon-usage">"I wanna hug you."</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="food">
-                        <dt>Life or death</dt>
-                        <dd>A sudden, non-negotiable, and urgent need for a Tomato ramen. Must be addressed immediately or mood will deteriorate rapidly.</dd>
-                        <div class="lexicon-usage">"Code red: Life or death! 🚨"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="emotions">
-                        <dt>Silly Goose Time</dt>
-                        <dd>An official period dedicated to being completely ridiculous together. All dignity suspended. Maximum goofiness encouraged.</dd>
-                        <div class="lexicon-usage">"What if someone comes and see's you like this!"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="food">
-                        <dt>Chicken Steak Moment</dt>
-                        <dd>A callback to our first date. Any situation where something simple becomes unexpectedly perfect and meaningful.</dd>
-                        <div class="lexicon-usage">"It was all i could eat."</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="emotions">
-                        <dt>Sports Field Feeling</dt>
-                        <dd>That nervous excitement mixed with fate and possibility. The feeling of standing at the edge of something life-changing.</dd>
-                        <div class="lexicon-usage">"I've got that sports field feeling about this..."</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="places">
-                        <dt>The Library Mode</dt>
-                        <dd>Quality time spent in comfortable silence, each doing our own thing but together.</dd>
-                        <div class="lexicon-usage">"Jokeeee, did we even ever studied?"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="emotions">
-                        <dt>Typhoon Level Determination</dt>
-                        <dd>Extreme commitment to a goal despite obstacles. From that August day when weather couldn't stop the journey.</dd>
-                        <div class="lexicon-usage">"I have typhoon level determination to finish this!"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="activities">
-                        <dt>Bicycle Fixing</dt>
-                        <dd>A metaphor for solving any problem for your partner. Not just physical repairs but emotional support and care.</dd>
-                        <div class="lexicon-usage">"Need me to bicycle fix this situation?"</div>
-                    </div>
-                    
-                    <div class="lexicon-entry" data-category="emotions">
-                        <dt>Baobei</dt>
-                        <dd>Chinese term of endearment meaning "precious treasure" or "baby". The sweetest way to say "you mean everything."</dd>
-                        <div class="lexicon-usage">"Good morning, baobei ❤️"</div>
-                    </div>
-                </dl>
-            </div>
-            
-            <div class="holo-pane" id="tab-timeline-viz">
-                <h3>The Time Weaver</h3>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                    A living visualization of our journey through time. Watch our story unfold like a cosmic tapestry.
-                </p>
-                
-                <div class="time-weaver-container">
-                    <div class="timeline-spiral">
-                        <svg id="spiral-svg" viewBox="0 0 800 800">
-                            </svg>
-                    </div>
-                    
-                    <div class="timeline-controls-panel">
-                        <h4>Journey Controls</h4>
-                        <button class="btn" id="animate-timeline">▶️ Play Our Story</button>
-                        <button class="btn" id="reset-timeline">🔄 Reset</button>
-                        <div class="timeline-speed-control">
-                            <label>Animation Speed:</label>
-                            <input type="range" id="timeline-speed" min="1" max="10" value="5">
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-event-details" id="timeline-detail-card">
-                        <h4>Select a moment on the spiral</h4>
-                        <p>Our story begins at the center and spirals outward through time...</p>
-                    </div>
-                </div>
-            </div>
+        <!-- 4. Section Views -->
+        <div id="guide-sections-view" class="sanctuary-view">
+            <!-- Content for each section will be injected here -->
         </div>
     </div>
 </div>
 `;
 
 function initGuidePanelJS() {
-    const tabs = $$('#guide-panel .holo-tab');
-    const panes = $$('#guide-panel .holo-pane');
-    
-    if (window.physicsAnimationId) cancelAnimationFrame(window.physicsAnimationId);
-    if (window.constellationAnimationId) cancelAnimationFrame(window.constellationAnimationId);
+    const typeTextElement = document.getElementById('guide-typing-text');
+    const riddleContainer = document.getElementById('guide-riddle-container');
+    let choiceButtons; // Will be assigned after riddle is rendered
+    let feedbackElement; // Will be assigned after riddle is rendered
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            if (window.physicsAnimationId) cancelAnimationFrame(window.physicsAnimationId);
-            if (window.constellationAnimationId) cancelAnimationFrame(window.constellationAnimationId);
-            
-            tabs.forEach(t => t.classList.remove('active'));
-            panes.forEach(p => p.classList.remove('active'));
-            tab.classList.add('active');
-            const targetPane = $(`tab-${tab.dataset.tab}`);
-            if (targetPane) {
-                targetPane.classList.add('active');
-                
-                if (tab.dataset.tab === 'constellation') initConstellationMap();
-                if (tab.dataset.tab === 'physics') initPhysicsSimulator();
-                if (tab.dataset.tab === 'timeline-viz') initTimeWeaver();
-            }
+    const textToType = `Before you lies the Astral Library, a repository of cosmic truths about your bond. Its doors are sealed by a simple, yet profound, question of the heart...`;
+
+    let currentRiddleIndex = parseInt(localStorage.getItem('currentGuideRiddleIndex') || '0', 10);
+    if (currentRiddleIndex >= GUIDE_RIDDLES.length) {
+        currentRiddleIndex = 0; // Reset if out of bounds
+    }
+    const currentRiddle = GUIDE_RIDDLES[currentRiddleIndex];
+
+    function renderRiddle() {
+        if (!currentRiddle) return;
+        const choicesHtml = currentRiddle.choices.map(choice =>
+            `<button class="riddle-choice-btn btn" data-answer="${choice.text.toLowerCase()}">${choice.text}</button>`
+        ).join('');
+
+        riddleContainer.innerHTML = `
+            <p class="riddle-prompt">${currentRiddle.prompt}</p>
+            <p class="riddle-question">${currentRiddle.question}</p>
+            <div class="riddle-choices">
+                ${choicesHtml}
+            </div>
+            <p id="guide-riddle-feedback" class="riddle-feedback"></p>
+        `;
+        choiceButtons = riddleContainer.querySelectorAll('.riddle-choice-btn');
+        feedbackElement = document.getElementById('guide-riddle-feedback');
+        choiceButtons.forEach(button => {
+            button.addEventListener('click', () => checkAnswer(button.dataset.answer));
         });
-    });
+    }
+
+    function typewriter(element, text, callback) {
+        let i = 0;
+        element.innerHTML = '';
+        const typingInterval = setInterval(() => {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(typingInterval);
+                if (callback) callback();
+            }
+        }, 50);
+    }
+
+    function switchGuideView(viewId) {
+        const container = $('guide-main-container');
+        if (!container) return;
+        // Ensure the main container can scroll if content overflows
+        container.style.overflowY = 'auto';
+        container.style.alignItems = 'flex-start'; // Align content to top for scrolling
+
+        container.querySelectorAll('.sanctuary-view').forEach(view => view.classList.remove('active'));
+        const viewToShow = $(viewId);
+        if (viewToShow) viewToShow.classList.add('active');
+    }
+
+    function handleCorrectAnswer() {
+        riddleContainer.style.display = 'none';
+        typeTextElement.style.display = 'none';
+        const doorAnimationView = $('guide-entrance-animation');
+        switchGuideView('guide-entrance-animation');
+        doorAnimationView.classList.add('is-opening');
+        setTimeout(() => switchGuideView('guide-hub'), 2000);
+    }
     
-    initConstellationMap();
-    initAnatomyEnhanced();
-    initArtifactsEnhanced();
-    initLexiconEnhanced();
+    function showFailureAndRedirect() {
+        // Create a big, centered "Wrong Answer!!!" message
+        const failureOverlay = document.createElement('div');
+        failureOverlay.style.cssText = 'position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; z-index: 10000;';
+        failureOverlay.innerHTML = `<h1 style="font-family: 'Creepster', var(--font-display); font-size: clamp(4rem, 15vw, 8rem); color: var(--crimson); text-shadow: 0 0 25px var(--crimson); animation: pulse-red 1.5s infinite;">Wrong Answer!!!</h1>`;
+        document.body.appendChild(failureOverlay);
+
+        // Redirect to landing page after a short delay
+        setTimeout(() => {
+            // Fade out the message before redirecting
+            failureOverlay.style.transition = 'opacity 0.5s ease-out';
+            failureOverlay.style.opacity = '0';
+            setTimeout(() => window.location.href = 'index.html', 500);
+        }, 1500); // Give user time to see the message
+    }
+
+    function checkAnswer(answer) {
+        const correctChoice = currentRiddle.choices.find(c => c.isCorrect);
+        if (answer.toLowerCase() === correctChoice.text.toLowerCase()) {
+            feedbackElement.textContent = "Correct. The constant of joy is recognized. The library unseals...";
+            feedbackElement.style.color = 'var(--jade)';
+            setTimeout(handleCorrectAnswer, 1000);
+        } else {
+            feedbackElement.textContent = "Incorrect. The library remains sealed to those who forget the simple truths.";
+            feedbackElement.style.color = 'var(--crimson)';
+            riddleContainer.classList.add('shake-error');
+            setTimeout(() => riddleContainer.classList.remove('shake-error'), 500);
+
+            // Update riddle index for next time
+            let nextRiddleIndex = (currentRiddleIndex + 1) % GUIDE_RIDDLES.length;
+            localStorage.setItem('currentGuideRiddleIndex', nextRiddleIndex.toString());
+
+            showFailureAndRedirect();
+            return;
+        }
+        feedbackElement.style.display = 'block';
+    }
+
+    // Initial setup
+    switchGuideView('guide-threshold');
+    typewriter(typeTextElement, textToType, () => {
+        if (riddleContainer) riddleContainer.style.display = 'block';
+        renderRiddle(); // Render the riddle after typing animation
+    });
+
+    // Make the global showGuideSection function available
+    window.showGuideSection = (sectionId, directEntry = false) => {
+        // --- ADD THIS: Add a class to the main content for full-screen override ---
+        if (sectionId === 'observatory') {
+            DOM.mainContent.classList.add('observatory-active');
+        } else {
+            DOM.mainContent.classList.remove('observatory-active');
+        }
+        const sectionsView = $('guide-sections-view');
+        // --- ADD THIS: Add a class to the main content for full-screen override ---
+        if (sectionId === 'observatory') {
+            DOM.mainContent.classList.add('observatory-active');
+        } else {
+            DOM.mainContent.classList.remove('observatory-active');
+        }
+        if (directEntry) {
+            // If entering directly, bypass the hub and show the section view immediately.
+            switchGuideView('guide-sections-view');
+        }
+        switchGuideView('guide-sections-view');
+        
+        // This is where you'd inject the HTML for the specific section.
+        // For now, we'll use the existing functions that generate the content for the old tabs.
+        let sectionHTML = '';
+        switch(sectionId) {
+            case 'physics': sectionHTML = getPhysicsSectionHTML(); break;
+            case 'anatomy': sectionHTML = getAnatomySectionHTML(); break;
+            case 'artifacts': sectionHTML = getArtifactsSectionHTML(); break;
+            case 'lexicon': sectionHTML = getLexiconSectionHTML(); break;
+            case 'observatory': sectionHTML = getObservatorySectionHTML(); break;
+        }
+
+        sectionsView.innerHTML = `
+            <button class="btn" onclick="window.returnToGuideHub()" style="margin-bottom: 2rem;">← Back to Library Hub</button>
+            ${sectionHTML}
+        `;
+
+        // Initialize JS for the newly injected content
+        if (sectionId === 'physics') initPhysicsDashboard();
+        if (sectionId === 'anatomy') initAnatomyEnhanced();
+        if (sectionId === 'artifacts') initArtifactsEnhanced();
+        if (sectionId === 'lexicon') initLexiconEnhanced();
+        if (sectionId === 'observatory') initObservatory();
+    };
+
+    window.returnToGuideHub = () => {
+        // --- ADD THIS: Remove the override class when returning to the hub ---
+        DOM.mainContent.classList.remove('observatory-active');
+        // When returning, we need to re-render the main guide panel to show the hub again.
+        renderPanel('guide');
+        // Explicitly switch to the hub view within the newly rendered panel.
+        // This avoids re-running the entrance animation.
+        switchGuideView('guide-hub');
+    };
 }
 
-function initConstellationMap() {
-    const canvas = $('constellation-canvas');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    const container = canvas.parentElement;
-    
-    let scale = window.devicePixelRatio || 1;
-    canvas.width = container.offsetWidth * scale;
-    canvas.height = 500 * scale;
-    canvas.style.width = container.offsetWidth + 'px';
-    canvas.style.height = '500px';
-    ctx.scale(scale, scale);
+function closeMenu() {
+    const menuDropdown = document.getElementById('main-menu-dropdown');
+    const menuIcon = document.getElementById('menu-icon-img');
+    if (menuDropdown) menuDropdown.classList.remove('visible');
+    if (menuIcon) menuIcon.src = 'photos/favicon1.png';
 
-    const memories = [
-        { x: 100, y: 250, title: "First Meeting", desc: "Sports field, September 2019. You approached me while I held my math book.", date: "Sep 15, 2019", color: "#FFD700", size: 8 },
-        { x: 200, y: 200, title: "First Conversation", desc: "We talked like old friends, mathematics and dreams intertwining.", date: "Sep 15, 2019", color: "#FFD700", size: 6 },
-        { x: 300, y: 230, title: "Friend Request", desc: "You sent it first. My heart soared at 10:06 PM.", date: "May 25, 2021", color: "#FF69B4", size: 7 },
-        { x: 250, y: 330, title: "The Bicycle", desc: "I fixed your bicycle and found my purpose - taking care of you.", date: "Jun 2021", color: "#98FB98", size: 6 },
-        { x: 400, y: 170, title: "Birthday Message", desc: "Your sweet poem at 11:35 PM made me feel remembered.", date: "Jul 17, 2021", color: "#FF69B4", size: 7 },
-        { x: 500, y: 250, title: "Library Date", desc: "Our first intentional meeting. Chicken steak and new beginnings.", date: "Jul 27, 2021", color: "#FFD700", size: 8 },
-        { x: 450, y: 350, title: "First Photo", desc: "I sent you my picture. Vulnerability shared across digital space.", date: "Jul, 2021", color: "#87CEEB", size: 6 },
-        { x: 600, y: 200, title: "Typhoon Journey", desc: "I flew through a storm to be where you were.", date: "Aug 10, 2021", color: "#FFD700", size: 9 },
-        { x: 700, y: 270, title: "The Confession", desc: "Hahahahaha, I am laughing as I write this. You know what I am talking about (I think I have the same feeling Nicho). Anyway, that's one story so vivid in my head, just let me know any time you wanna hear it again.", date: "August 25th, 2021", color: "#FF69B4", size: 10 },
-        { x: 650, y: 370, title: "Two lost sheet", desc: "Now what's next after confession......I dont know if its normal but ours was followed by a series of restaurants.(10kg in one month!!!!) .", date: "Nov 2021", color: "#FF69B4", size: 10 },
-        { x: 800, y: 230, title: "First Anniversary", desc: "One year of us. Countless moments of magic.", date: "Aug 25, 2022", color: "#FFD700", size: 8 },
-        { x: 850, y: 300, title: "Today & Forever", desc: "Every moment since, every moment to come.", date: "Present", color: "#87CEEB", size: 12 }
-    ];
-
-    let mouse = { x: undefined, y: undefined };
-    let selectedStar = null;
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let i = 0; i < memories.length; i++) {
-            for (let j = i + 1; j < memories.length; j++) {
-                const dist = Math.hypot(memories[i].x - memories[j].x, memories[i].y - memories[j].y);
-                if (dist < 200) {
-                    ctx.moveTo(memories[i].x, memories[i].y);
-                    ctx.lineTo(memories[j].x, memories[j].y);
-                }
-            }
-        }
-        ctx.stroke();
-
-        memories.forEach((star, index) => {
-            const dist = Math.hypot(mouse.x - star.x, mouse.y - star.y);
-            const isHovered = dist < star.size + 5;
-            const isSelected = selectedStar === index;
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fillStyle = star.color;
-            ctx.globalAlpha = isHovered || isSelected ? 1 : 0.7;
-            ctx.fill();
-            if (isHovered || isSelected) {
-                ctx.strokeStyle = star.color;
-                ctx.lineWidth = 2;
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size + 5 + Math.sin(Date.now() / 200) * 2, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-        });
-        ctx.globalAlpha = 1;
+    const themeContainer = document.querySelector('.theme-colors-grid');
+    const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+    if (themeContainer) {
+        themeContainer.style.display = 'none';
     }
-
-    function animate() {
-        draw();
-        window.constellationAnimationId = requestAnimationFrame(animate);
+    if (themeToggleBtn) {
+        themeToggleBtn.classList.remove('active');
     }
-    animate();
-
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = (e.clientX - rect.left);
-        mouse.y = (e.clientY - rect.top);
-    });
-
-    canvas.addEventListener('click', () => {
-        let starClicked = false;
-        memories.forEach((star, index) => {
-            const dist = Math.hypot(mouse.x - star.x, mouse.y - star.y);
-            if (dist < star.size + 5) {
-                selectedStar = index;
-                const memory = memories[index];
-                $('memory-title').textContent = memory.title;
-                $('memory-description').textContent = memory.desc;
-                $('memory-date').textContent = `Date: ${memory.date}`;
-                const displayCard = $('constellation-memory-display');
-                displayCard.style.borderColor = memory.color;
-                displayCard.querySelector('.memory-icon').style.color = memory.color;
-                starClicked = true;
-            }
-        });
-        if (!starClicked) {
-            selectedStar = null;
-        }
-    });
-}
-
-function initPhysicsSimulator() {
-    const canvas = $('gravity-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 400;
-    let gravityEnabled = true;
-    let nic, zoya;
-    class Particle {
-        constructor(x, y, radius, color, name) {
-            this.x = x; this.y = y; this.radius = radius; this.color = color; this.name = name;
-            this.vx = (Math.random() - 0.5) * 4;
-            this.vy = (Math.random() - 0.5) * 4;
-        }
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.name, this.x, this.y + this.radius + 12);
-        }
-        update() {
-            if (gravityEnabled) {
-                const dx = canvas.width / 2 - this.x;
-                const dy = canvas.height / 2 - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const force = 50 / (dist * dist);
-                this.vx += force * (dx / dist);
-                this.vy += force * (dy / dist);
-            }
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vx *= 0.99;
-            this.vy *= 0.99;
-            if (this.x < this.radius || this.x > canvas.width - this.radius) this.vx *= -1;
-            if (this.y < this.radius || this.y > canvas.height - this.radius) this.vy *= -1;
-        }
-    }
-    function reset() {
-        nic = new Particle(100, 200, 10, '#3498db', 'Nic');
-        zoya = new Particle(500, 200, 10, '#f779dd', 'Zoya');
-    }
-    function animatePhysics() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
-        ctx.fill();
-        nic.update();
-        zoya.update();
-        nic.draw();
-        zoya.draw();
-        window.physicsAnimationId = requestAnimationFrame(animatePhysics);
-    }
-    reset();
-    animatePhysics();
-    $('reset-gravity').addEventListener('click', reset);
-    $('toggle-gravity').addEventListener('click', () => {
-        gravityEnabled = !gravityEnabled;
-        $('toggle-gravity').textContent = gravityEnabled ? 'Toggle Gravity Off' : 'Toggle Gravity On';
-    });
 }
 
 function initAnatomyEnhanced() {
     const points = $$('.anatomy-point-enhanced');
     const tooltip = $('anatomy-tooltip-enhanced');
+    const bridge = document.querySelector('.connection-bridge');
     points.forEach(point => {
         point.addEventListener('mouseover', (e) => {
             const target = e.currentTarget;
@@ -3877,18 +3503,64 @@ function initAnatomyEnhanced() {
         point.addEventListener('mouseout', () => {
             tooltip.style.display = 'none';
         });
+
+        // Animated Connection Bridge
+        point.addEventListener('mouseenter', () => {
+            if (!bridge) return;
+            const pulse = document.createElement('div');
+            pulse.className = 'bridge-pulse';
+            const person = point.closest('.anatomy-profile').dataset.person;
+            pulse.style.animationName = person === 'nic' ? 'pulse-right' : 'pulse-left';
+            bridge.appendChild(pulse);
+            setTimeout(() => pulse.remove(), 1000);
+        });
     });
+
+    // Sync Our Hearts Mini-Game
+    const syncBtn = $('sync-hearts-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', () => {
+            const heart1 = $('heart1');
+            const heart2 = $('heart2');
+            const syncStatus = $('sync-status');
+            if (!heart1 || !heart2 || !syncStatus) return;
+
+            heart1.style.animation = 'heartbeat 1.5s infinite';
+            heart2.style.animation = 'heartbeat 1.5s infinite 0.5s'; // Out of sync
+            syncStatus.textContent = 'Click to sync!';
+            syncStatus.style.color = 'var(--text-secondary)';
+
+            let syncAttempts = 0;
+            const syncHandler = () => {
+                syncAttempts++;
+                const delay = Math.random() * 0.2; // Add slight randomness
+                heart2.style.animation = `heartbeat 1.5s infinite ${delay}s`;
+                if (delay < 0.05) {
+                    syncStatus.textContent = 'Synced! 💕';
+                    syncStatus.style.color = 'var(--glow-magenta)';
+                    heart2.removeEventListener('click', syncHandler);
+                } else if (syncAttempts > 5) {
+                    syncStatus.textContent = 'Almost there... keep trying!';
+                }
+            };
+            heart2.addEventListener('click', syncHandler);
+        });
+    }
 }
 
 function initArtifactsEnhanced() {
     const cards = $$('.artifact-card');
     const modal = $('artifact-modal');
     const closeBtn = modal.querySelector('.artifact-modal-close');
+    const addBtn = $('add-artifact-btn');
+    const uploadModal = $('artifact-upload-modal');
+    const uploadCloseBtn = uploadModal.querySelector('.artifact-modal-close');
+    const saveArtifactBtn = $('save-artifact-btn');
+    const showcase = document.querySelector('.artifacts-showcase');
+
     cards.forEach(card => {
         card.addEventListener('click', () => {
-            $('modal-artifact-icon').textContent = card.dataset.icon;
-            $('modal-artifact-title').textContent = card.dataset.title;
-            $('modal-artifact-story').textContent = card.dataset.story;
+            openArtifactModal(card.dataset.icon, card.dataset.title, card.dataset.story);
             modal.classList.add('active');
         });
     });
@@ -3898,6 +3570,48 @@ function initArtifactsEnhanced() {
             modal.classList.remove('active');
         }
     });
+
+    addBtn.addEventListener('click', () => {
+        uploadModal.classList.add('active');
+    });
+
+    uploadCloseBtn.addEventListener('click', () => uploadModal.classList.remove('active'));
+    uploadModal.addEventListener('click', (e) => {
+        if (e.target === uploadModal) uploadModal.classList.remove('active');
+    });
+
+    saveArtifactBtn.addEventListener('click', () => {
+        const icon = $('artifact-icon-input').value || '❓';
+        const title = $('artifact-title-input').value || 'New Artifact';
+        const story = $('artifact-story-input').value || 'A newly discovered memory.';
+        const rarity = '★★★☆☆ Common'; // All user-added are common for now
+
+        const newCard = document.createElement('div');
+        newCard.className = 'artifact-card';
+        newCard.dataset.icon = icon;
+        newCard.dataset.title = title;
+        newCard.dataset.story = story;
+        newCard.innerHTML = `
+            <div class="artifact-icon">${icon}</div>
+            <div class="artifact-name">${title}</div>
+            <div class="artifact-rarity">${rarity}</div>
+        `;
+        newCard.addEventListener('click', () => openArtifactModal(icon, title, story));
+        showcase.appendChild(newCard);
+
+        uploadModal.classList.remove('active');
+        // Reset form
+        $('artifact-icon-input').value = '';
+        $('artifact-title-input').value = '';
+        $('artifact-story-input').value = '';
+    });
+
+    const openArtifactModal = (icon, title, story) => {
+        $('modal-artifact-icon').textContent = icon;
+        $('modal-artifact-title').textContent = title;
+        $('modal-artifact-story').textContent = story;
+        modal.classList.add('active');
+    };
 }
 
 function initLexiconEnhanced() {
@@ -3927,73 +3641,836 @@ function initLexiconEnhanced() {
             filterEntries();
         });
     });
-}
 
-function initTimeWeaver() {
-    const svg = $('spiral-svg');
-    if (!svg) return;
-    
-    const events = CHRONICLE_DATA.map(e => ({...e, dateObj: new Date(e.year)})).sort((a,b) => a.dateObj - b.dateObj);
-    const startDate = events[0].dateObj;
-    const endDate = new Date();
-    const totalDuration = endDate - startDate;
-    const width = 800, height = 800;
-    const cx = width / 2, cy = height / 2;
-    const turns = 5;
-    const radius = 350;
-    let pathString = `M ${cx},${cy} `;
-    let points = [];
-    for (let i = 0; i < 360 * turns; i++) {
-        const angle = i * Math.PI / 180;
-        const r = (radius / (360 * turns)) * i;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        pathString += `L ${x},${y} `;
-        points.push({x, y});
+    // Term of the Day on Hub
+    const hub = $('guide-hub');
+    if (hub && entries.length > 0) {
+        const randomEntry = entries[Math.floor(Math.random() * entries.length)];
+        const term = randomEntry.querySelector('dt').textContent;
+        const definition = randomEntry.querySelector('dd').textContent;
+        hub.insertAdjacentHTML('beforeend', `<div class="term-of-the-day" style="margin-top: 2rem; padding: 1rem; background: var(--highlight-glass); border-radius: 8px;"><h4 style="color: var(--gold);">Term of the Day</h4><p><strong>${term}:</strong> ${definition}</p></div>`);
     }
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute('d', pathString);
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', 'rgba(255, 215, 0, 0.2)');
-    path.setAttribute('stroke-width', '2');
-    path.id = 'timeline-spiral-path';
-    svg.appendChild(path);
-    const detailCard = $('timeline-detail-card');
-    events.forEach(event => {
-        const eventDuration = event.dateObj - startDate;
-        const progress = eventDuration / totalDuration;
-        const pointIndex = Math.floor(progress * (points.length - 1));
-        const point = points[pointIndex];
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute('cx', point.x);
-        circle.setAttribute('cy', point.y);
-        circle.setAttribute('r', 6);
-        circle.setAttribute('fill', 'var(--gold)');
-        circle.classList.add('timeline-event-dot');
-        svg.appendChild(circle);
-        circle.addEventListener('mouseover', () => {
-            circle.setAttribute('r', 12);
-            detailCard.innerHTML = `<h4>${event.icon} ${event.title}</h4><p>${event.desc}</p><span>${event.year}</span>`;
-        });
-        circle.addEventListener('mouseout', () => {
-            circle.setAttribute('r', 6);
-        });
-    });
-    const animateBtn = $('animate-timeline');
-    animateBtn.addEventListener('click', () => {
-        const pathLength = path.getTotalLength();
-        path.style.strokeDasharray = pathLength;
-        path.style.strokeDashoffset = pathLength;
-        const speed = 11 - $('timeline-speed').value;
-        path.style.transition = `stroke-dashoffset ${events.length * (speed / 10)}s linear`;
-        setTimeout(() => { path.style.strokeDashoffset = 0; }, 100);
-    });
-    $('reset-timeline').addEventListener('click', () => {
-        path.style.transition = 'none';
-        path.style.strokeDashoffset = path.getTotalLength();
-    });
 }
 
+const GUIDE_RIDDLES = [
+    {
+        prompt: "To access the Astral Library, answer the keeper's question...",
+        question: "What is the constant that defines our joy, measured in units of deliciousness?",
+        choices: [
+            { text: "Chicken Steak", isCorrect: true },
+            { text: "Bubble Tea", isCorrect: false },
+            { text: "Kimuchi Fried Rice", isCorrect: false }
+        ]
+    },
+    {
+        prompt: "The ancient texts demand a truth. What is the unbreakable bond that transcends distance?",
+        question: "What was the item Nic fixed for Zoya, symbolizing his care?",
+        choices: [
+            { text: "Her phone", isCorrect: false },
+            { text: "Her bicycle", isCorrect: true },
+            { text: "Her laptop", isCorrect: false }
+        ]
+    },
+    {
+        prompt: "A whisper from the cosmos asks for a memory. What event proved Nic's unwavering determination?",
+        question: "What natural disaster did Nic travel through to be with Zoya?",
+        choices: [
+            { text: "Earthquake", isCorrect: false },
+            { text: "Typhoon", isCorrect: true },
+            { text: "Blizzard", isCorrect: false }
+        ]
+    }
+];
+
+const getPhysicsSectionHTML = () => `
+<div class="holo-pane active" id="tab-physics">
+    <div class="love-calculator-container">
+        <h3 class="calc-title">RELATIONAL PHYSICS ANALYSIS // N.Z. v.1.0</h3>
+        <p class="calc-subtitle">"Proving our love through mathematics" - By Nic, the mathematician who fell in love with more than just numbers.</p>
+        <div class="calc-section" style="grid-column: 1 / -1;">
+            <h4 class="calc-sub-header">THE GRAND UNIFIED THEORY OF US</h4>
+            <div class="calc-formula-box">
+                <div class="calc-formula">L<sub>∞</sub> = <frac><span class="numerator">(N ⊗ Z)<sup>∞</sup></span><span class="denominator">d<sup>0</sup></span></frac> × Σ(moments) × e<sup>time</sup></div>
+                <ul class="calc-formula-vars">
+                    <li>L∞ = Infinite Love (our constant)</li><li>N = Nicholas (mathematician)</li><li>Z = Zoya (the artist)</li><li>⊗ = Tensor product (deep connection)</li><li>d = Distance (approaches 0)</li><li>Σ(moments) = Sum of shared memories</li><li>e^(time) = Exponential growth</li>
+                </ul>
+                <hr class="calc-divider"><div class="calc-result" id="live-data-result">Current Value: L∞ = ∞ (As predicted by the equation)</div>
+            </div>
+            <div class="calc-nav"><span>Navigate:</span> <a href="#comp-analysis">Compatibility Matrix</a> | <a href="#love-timeline">Trajectory</a> | <a href="#love-theorems">Axioms</a> | <a href="#love-probability">Quantum Probability</a></div>
+        </div>
+        
+        <div class="calc-section interactive-calc">
+            <h4 class="calc-sub-header">🎛️ LOVE STRENGTH SIMULATOR</h4>
+            <p class="calc-subtitle" style="font-size: 0.8rem; margin-bottom: 1rem;">Adjust the core variables of our universe and observe the exponential growth of our connection.</p>
+            <div class="slider-control"><label for="memories-slider">Σ(moments) - Shared Memories</label><input type="range" id="memories-slider" min="1" max="1000" value="500" class="love-slider"></div>
+            <div class="slider-control"><label for="time-slider">e<sup>time</sup> - Time Together</label><input type="range" id="time-slider" min="1" max="100" value="50" class="love-slider"></div>
+            <div class="interactive-result-box"><div class="result-label">CALCULATED LOVE STRENGTH:</div><div class="result-value" id="love-value-display">Calculating...</div><div class="result-sub-label">Approaching Infinity...</div></div>
+        </div>
+
+        <div id="comp-analysis" class="calc-section">
+            <h4 class="calc-sub-header">🎯 Comprehensive Compatibility Analysis</h4>
+            <div class="radar-chart-container"><canvas id="radar-chart"></canvas><div class="radar-center-score">98.7%</div></div>
+            <div class="analysis-summary"><div class="summary-item-tech"><strong>STATUS:</strong> <span class="status-ok">STABLE & OPTIMAL</span></div><div class="summary-item-tech"><strong>DATA SOURCE:</strong> Voice Garden sentiment, Time Capsule entries, message frequency, shared memories.</div><div class="summary-item-tech"><strong>ANALYSIS:</strong> Cross-spectrum analysis indicates a resonance match exceeding 98.7th percentile of all known pairings.</div><div class="summary-item-tech"><strong>CONCLUSION:</strong> <span class="status-destined">COSMICALLY DESTINED</span></div></div>
+        </div>
+        <div id="love-timeline" class="calc-section">
+            <h4 class="calc-sub-header">📈 Relationship Trajectory Analysis</h4>
+            <div class="trajectory-container">
+                <svg id="trajectory-svg" viewBox="0 0 500 250"><path d="M 50 20 L 50 220 M 50 220 L 480 220" stroke="#8892b0" stroke-width="0.5" stroke-dasharray="2 2"/><text x="40" y="25" fill="#8892b0" font-size="10" text-anchor="end">∞</text><text x="40" y="125" fill="#8892b0" font-size="10" text-anchor="end">100</text><text x="40" y="225" fill="#8892b0" font-size="10" text-anchor="end">0</text><text x="80" y="235" fill="#8892b0" font-size="10" text-anchor="middle">2019</text><text x="200" y="235" fill="#8892b0" font-size="10" text-anchor="middle">2021</text><text x="450" y="235" fill="#8892b0" font-size="10" text-anchor="middle">Now</text><path id="trajectory-path" d="M 50 220 C 100 200, 150 180, 200 120 C 250 60, 300 40, 480 20" stroke="#30d5c8" stroke-width="2" fill="none"/></svg>
+                <div class="trajectory-summary"><div class="summary-item" id="phase-analysis-table"><div class="summary-title">PHASE ANALYSIS</div><div class="summary-detail"><strong>Phase 1 (2019-2021):</strong> Exponential Growth (dL/dt = 2.3/mo)</div><div class="summary-detail"><strong>Phase 2 (2021-2023):</strong> Rapid Ascension (dL/dt = 5.7/mo)</div><div class="summary-detail"><strong>Phase 3 (2023-Now):</strong> Stable Infinity (dL/dt → ∞)</div></div><div class="summary-item" id="prediction-model-summary"><div class="summary-title">PREDICTION MODEL</div><div class="summary-detail">Trajectory approaches infinity asymptotically. Love has no upper bound. <span class="item-check">✓</span></div></div></div>
+            </div>
+        </div>
+        <div id="love-theorems" class="calc-section">
+            <h4 class="calc-sub-header">📜 Proven Mathematical Theorems of Love</h4>
+            <div class="theorem-grid-tech"><div class="theorem-card-tech"><div class="theorem-title-tech">AXIOM-01: The Bicycle Axiom</div><div class="theorem-equation-tech">P(L|B) / P(L) ≈ e<sup>π</sup></div><div class="theorem-desc-tech">The act of fixing a bicycle (B) increases the probability of love (L) by a factor of approximately e<sup>π</sup>. Confirmed June 2021.</div></div><div class="theorem-card-tech"><div class="theorem-title-tech">AXIOM-02: The Typhoon Determination Law</div><div class="theorem-equation-tech">F<sub>love</sub> > Σ F<sub>natural</sub></div><div class="theorem-desc-tech">The force of love (F<sub>love</sub>) is greater than the sum of all natural disaster forces when properly motivated. Confirmed Aug 10, 2021.</div></div><div class="theorem-card-tech"><div class="theorem-title-tech">CONSTANT-K: Chicken Steak</div><div class="theorem-equation-tech">K<sub>cs</sub> ≈ 47.3 J/u</div><div class="theorem-desc-tech">A universal constant defining joy-units (J) per unit of chicken steak consumed (u). Holds true across all measurements.</div></div></div>
+        </div>
+        <div id="love-probability" class="calc-section" style="grid-column: 1 / -1;">
+            <h4 class="calc-sub-header">🎲 Quantum Probability Analysis</h4>
+            <div class="probability-display">
+                <div id="quantum-result-display" style="display:none;">
+                    <div class="prob-main-value">100%</div>
+                    <div class="prob-label">Probability of Our Souls Finding Each Other</div>
+                    <div class="prob-conclusion">♥️ Inevitable.</div>
+                </div>
+                <button class="btn primary" id="calculate-destiny-btn">Calculate Quantum Probability</button>
+            </div>
+        </div>
+
+        <div class="calc-section" style="grid-column: 1 / -1;">
+            <h4 class="calc-sub-header">🌊 Emotional Resonance Waveform</h4><canvas id="waveform-canvas" height="120"></canvas>
+            <div class="simulator-controls"><button class="btn" id="introduce-dissonance">Introduce Dissonance</button><button class="btn primary" id="re-harmonize">Re-Harmonize</button></div>
+        </div>
+    </div>
+</div>`;
+
+const getAnatomySectionHTML = () => `
+<div class="holo-pane active" id="tab-anatomy">
+    <h3>The Anatomy of Our Connection</h3>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">A deeper look at what makes us, us. Every part plays a role in our cosmic dance.</p>
+    <div class="anatomy-visualization">
+        <div class="anatomy-profiles">
+            <div class="anatomy-profile" data-person="nic">
+                <div class="profile-avatar"><div class="avatar-circle"><span class="avatar-initial">N</span></div><div class="avatar-glow"></div></div><h4>Nicholas</h4><p class="profile-subtitle">The Mathematician's Heart</p>
+                <div class="anatomy-points-list"><div class="anatomy-point-enhanced" data-desc="A mind that finds beauty in equations and patterns, now learning to see beauty in the unpredictable magic of love."><span class="point-icon">🧠</span><span class="point-label">Analytical Mind</span></div><div class="anatomy-point-enhanced" data-desc="Once guarded and careful, now open and vulnerable. A heart that beats in rhythm with yours."><span class="point-icon">❤️</span><span class="point-label">Devoted Heart</span></div><div class="anatomy-point-enhanced" data-desc="Hands that can solve complex problems and fix bicycles, but most importantly, hold yours with infinite gentleness."><span class="point-icon">🤲</span><span class="point-label">Steady Hands</span></div><div class="anatomy-point-enhanced" data-desc="The deep, husky voice that first caught your attention - now speaks only words of love and understanding."><span class="point-icon">🗣️</span><span class="point-label">Resonant Voice</span></div><div class="anatomy-point-enhanced" data-desc="A spirit that traveled far from home and found its true home in you."><span class="point-icon">✨</span><span class="point-label">Wandering Soul</span></div></div>
+            </div>
+            <div class="connection-bridge"><div class="bridge-line"></div><div class="bridge-heart">💕</div><div class="bridge-particles"><span>✨</span><span>💫</span><span>⭐</span></div></div>
+            <div class="anatomy-profile" data-person="zoya">
+                <div class="profile-avatar"><div class="avatar-circle"><span class="avatar-initial">Z</span></div><div class="avatar-glow"></div></div><h4>Zoya</h4><p class="profile-subtitle">The Artist's Grace</p>
+                <div class="anatomy-points-list"><div class="anatomy-point-enhanced" data-desc="A creative mind that sees the world as a canvas of possibilities, painting our story with every moment."><span class="point-icon">🎨</span><span class="point-label">Creative Vision</span></div><div class="anatomy-point-enhanced" data-desc="A heart that is a quiet harbor - offering peace, understanding, and unconditional love in life's storms."><span class="point-icon">💖</span><span class="point-label">Compassionate Heart</span></div><div class="anatomy-point-enhanced" data-desc="Hands that create beautiful art and write the chapters of our story with grace and intention."><span class="point-icon">✍️</span><span class="point-label">Gentle Hands</span></div><div class="anatomy-point-enhanced" data-desc="Eyes like windows to heaven - oval and bright, showing kindness that saw through my shyness to the real me."><span class="point-icon">👁️</span><span class="point-label">Perceptive Eyes</span></div><div class="anatomy-point-enhanced" data-desc="A spirit that bridges cultures and languages, making every place feel like home."><span class="point-icon">🌸</span><span class="point-label">Bridging Spirit</span></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="compatibility-meter">
+        <h4>Cosmic Compatibility Analysis</h4>
+        <div class="compatibility-bars">
+            <div class="compatibility-bar-item"><span class="bar-label">Emotional Resonance</span><div class="bar-track"><div class="bar-fill" style="width: 98%;" data-value="98%"></div></div></div>
+            <div class="compatibility-bar-item"><span class="bar-label">Intellectual Sync</span><div class="bar-track"><div class="bar-fill" style="width: 95%;" data-value="95%"></div></div></div>
+            <div class="compatibility-bar-item"><span class="bar-label">Spiritual Alignment</span><div class="bar-track"><div class="bar-fill" style="width: 99%;" data-value="99%"></div></div></div>
+            <div class="compatibility-bar-item"><span class="bar-label">Adventure Compatibility</span><div class="bar-track"><div class="bar-fill" style="width: 92%;" data-value="92%"></div></div></div>
+            <div class="compatibility-bar-item"><span class="bar-label">Destiny Quotient</span><div class="bar-track"><div class="bar-fill" style="width: 100%;" data-value="100%"></div></div></div>
+        </div>
+    </div>
+    <div id="anatomy-tooltip-enhanced"></div>
+</div>`;
+
+const getArtifactsSectionHTML = () => `
+<div class="holo-pane active" id="tab-artifacts">
+    <h3>Sacred Artifacts of Our Journey</h3>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Objects that have gained celestial significance through the moments we've shared.</p>
+    <div style="text-align: center; margin-bottom: 2rem;"><button class="btn primary" id="add-artifact-btn">✨ Add New Artifact</button></div>
+    <div class="artifacts-showcase">
+        <div class="artifact-card" data-title="The Mathematics Book" data-story="A shield against loneliness that became a conversation starter. The book I held on September 15, 2019, unknowingly waiting for you to approach and change everything." data-icon="📖"><div class="artifact-icon">📖</div><div class="artifact-name">The Mathematics Book</div><div class="artifact-rarity">★★★★★ Legendary</div></div>
+        <div class="artifact-card" data-title="The Broken Bicycle" data-story="Your bicycle that broke in June 2021, giving me the chance to show I cared through action. The first of many times I'd try to fix what was broken in your world." data-icon="🚲"><div class="artifact-icon">🚲</div><div class="artifact-name">The Broken Bicycle</div><div class="artifact-rarity">★★★★★ Legendary</div></div>
+        <div class="artifact-card" data-title="The Dancing Drawing" data-story="Two people dancing - my first art class creation in January 2020. A prophecy drawn in pencil before we knew what we'd become." data-icon="🎨"><div class="artifact-icon">🎨</div><div class="artifact-name">The Dancing Drawing</div><div class="artifact-rarity">★★★★☆ Epic</div></div>
+        <div class="artifact-card" data-title="The Joyful Chicken Steak" data-story="Our first meal together on July 27, 2021. Simple food that tasted like possibility. Now our tradition, our taste of beginnings." data-icon="🍗"><div class="artifact-icon">🍗</div><div class="artifact-name">Joyful Chicken Steak</div><div class="artifact-rarity">★★★★★ Legendary</div></div>
+        <div class="artifact-card" data-title="The Typhoon Flight" data-story="August 10, 2021 - when nature itself couldn't stop me from reaching you. A journey through storms that proved the strength of my feelings." data-icon="✈️"><div class="artifact-icon">✈️</div><div class="artifact-name">The Typhoon Flight</div><div class="artifact-rarity">★★★★★ Legendary</div></div>
+        <div class="artifact-card" data-title="The First Photo" data-story="The night of July, 2021, when I sent you my first picture. Digital pixels that carried vulnerability and hope across the night." data-icon="📸"><div class="artifact-icon">📸</div><div class="artifact-name">The First Photo</div><div class="artifact-rarity">★★★★☆ Epic</div></div>
+        <div class="artifact-card" data-title="The Sports Field" data-story="Where it all began. Sacred ground where two lonely souls found each other during the Taiku Taikai. Our genesis point." data-icon="⚽"><div class="artifact-icon">⚽</div><div class="artifact-name">The Sports Field</div><div class="artifact-rarity">★★★★★ Mythic</div></div>
+        <div class="artifact-card" data-title="The Birthday Poem" data-story="Your message at 11:35pm on July 17, 2021. Sweet words that made me realize I was remembered, cherished, seen." data-icon="💌"><div class="artifact-icon">💌</div><div class="artifact-name">The Birthday Poem</div><div class="artifact-rarity">★★★★☆ Epic</div></div>
+    </div>
+    <div id="artifact-modal" class="artifact-detail-modal">
+        <div class="artifact-modal-content"><span class="artifact-modal-close">&times;</span><div class="artifact-modal-icon" id="modal-artifact-icon">📖</div><h3 id="modal-artifact-title">Artifact Name</h3><div class="artifact-modal-story" id="modal-artifact-story">Story goes here...</div><div class="artifact-acquisition"><span class="acquisition-label">Acquired:</span><span class="acquisition-date" id="modal-artifact-date">2019 - 2021</span></div></div>
+    </div>
+    <div id="artifact-upload-modal" class="artifact-detail-modal">
+        <div class="artifact-modal-content" style="text-align: left;">
+            <span class="artifact-modal-close">&times;</span>
+            <h3 style="text-align: center;">Add a New Sacred Artifact</h3>
+            <div class="form-group" style="margin-bottom: 1rem;"><label for="artifact-icon-input">Icon (Emoji)</label><input type="text" id="artifact-icon-input" class="text-input" placeholder="e.g., 🎟️"></div>
+            <div class="form-group" style="margin-bottom: 1rem;"><label for="artifact-title-input">Artifact Name</label><input type="text" id="artifact-title-input" class="text-input" placeholder="e.g., Movie Ticket"></div>
+            <div class="form-group" style="margin-bottom: 1rem;"><label for="artifact-story-input">Story / Significance</label><textarea id="artifact-story-input" class="text-input" rows="3" placeholder="e.g., From our first movie date..."></textarea></div>
+            <div class="modal-actions" style="justify-content: center;"><button class="btn primary" id="save-artifact-btn">Save Artifact</button></div>
+        </div>
+    </div>
+</div>`;
+
+const getLexiconSectionHTML = () => `
+<div class="holo-pane active" id="tab-lexicon">
+    <h3>Our Shared Language</h3>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Every relationship creates its own dialect - words and phrases that carry meaning only we understand.</p>
+    <div class="lexicon-search"><input type="text" id="lexicon-search-input" class="text-input" placeholder="🔍 Search our dictionary..."></div>
+    <div class="lexicon-categories"><button class="lexicon-cat-btn active" data-category="all">All Terms</button><button class="lexicon-cat-btn" data-category="food">Food & Treats</button><button class="lexicon-cat-btn" data-category="activities">Activities</button><button class="lexicon-cat-btn" data-category="emotions">Emotions</button><button class="lexicon-cat-btn" data-category="places">Places</button></div>
+    <dl class="lexicon-list-enhanced" id="lexicon-entries">
+        <div class="lexicon-entry" data-category="activities"><dt>Night walk</dt><dd>A small, spontaneous adventure, usually involving snacks and discovery. Examples: Exploring a random street, going to コンビニー.</dd><div class="lexicon-usage">"Wanna go for a walk?"</div></div>
+        <div class="lexicon-entry" data-category="emotions"><dt>Hug</dt><dd>The highest form of cozy comfort, requiring maximum fluffiness and zero movement for extended periods(octopus Nic). Saying no to a hug is a federal offense.</dd><div class="lexicon-usage">"I wanna hug you."</div></div>
+        <div class="lexicon-entry" data-category="food"><dt>Life or death</dt><dd>A sudden, non-negotiable, and urgent need for a Tomato ramen. Must be addressed immediately or mood will deteriorate rapidly.</dd><div class="lexicon-usage">"Code red: Life or death! 🚨"</div></div>
+        <div class="lexicon-entry" data-category="emotions"><dt>Silly Goose Time</dt><dd>An official period dedicated to being completely ridiculous together. All dignity suspended. Maximum goofiness encouraged.</dd><div class="lexicon-usage">"What if someone comes and see's you like this!"</div></div>
+        <div class="lexicon-entry" data-category="food"><dt>Chicken Steak Moment</dt><dd>A callback to our first date. Any situation where something simple becomes unexpectedly perfect and meaningful.</dd><div class="lexicon-usage">"It was all i could eat."</div></div>
+        <div class="lexicon-entry" data-category="emotions"><dt>Sports Field Feeling</dt><dd>That nervous excitement mixed with fate and possibility. The feeling of standing at the edge of something life-changing.</dd><div class="lexicon-usage">"I've got that sports field feeling about this..."</div></div>
+        <div class="lexicon-entry" data-category="places"><dt>The Library Mode</dt><dd>Quality time spent in comfortable silence, each doing our own thing but together.</dd><div class="lexicon-usage">"Jokeeee, did we even ever studied?"</div></div>
+        <div class="lexicon-entry" data-category="emotions"><dt>Typhoon Level Determination</dt><dd>Extreme commitment to a goal despite obstacles. From that August day when weather couldn't stop the journey.</dd><div class="lexicon-usage">"I have typhoon level determination to finish this!"</div></div>
+        <div class="lexicon-entry" data-category="activities"><dt>Bicycle Fixing</dt><dd>A metaphor for solving any problem for your partner. Not just physical repairs but emotional support and care.</dd><div class="lexicon-usage">"Need me to bicycle fix this situation?"</div></div>
+        <div class="lexicon-entry" data-category="emotions"><dt>Baobei</dt><dd>Chinese term of endearment meaning "precious treasure" or "baby". The sweetest way to say "you mean everything."</dd><div class="lexicon-usage">"Good morning, baobei ❤️"</div></div>
+    </dl>
+</div>`;
+
+const getObservatorySectionHTML = () => `
+<div id="tab-observatory">
+    <div id="loading">
+        <div class="loader">Initializing Cosmic Observatory...<br><small style="font-size: 12px; margin-top: 10px; display: block; opacity: 0.7;">Calibrating telescope...</small></div>
+    </div>
+
+    <div id="canvas-container"></div>
+    
+    <div id="telescope-frame">
+        <img src="photos/telescope.jpg" alt="Telescope" id="telescope-image">
+    </div>
+    
+    <div id="controls">
+        <h3>OBSERVATORY</h3>
+        <div class="control-section">
+            <span class="control-label">Navigation</span>
+            <div class="control-grid">
+                <button class="control-btn" disabled></button>
+                <button class="control-btn" id="btn-up" title="Pan Up">↑</button>
+                <button class="control-btn" disabled></button>
+                <button class="control-btn" id="btn-left" title="Pan Left">←</button>
+                <button class="control-btn" id="btn-reset" title="Reset View">⊙</button>
+                <button class="control-btn" id="btn-right" title="Pan Right">→</button>
+                <button class="control-btn" disabled></button>
+                <button class="control-btn" id="btn-down" title="Pan Down">↓</button>
+                <button class="control-btn" disabled></button>
+            </div>
+        </div>
+        <div class="control-section">
+            <span class="control-label">Zoom Level</span>
+            <input type="range" id="zoom-slider" min="10" max="3000" value="1200" step="10">
+        </div>
+        <div class="control-section">
+            <span class="control-label">Galaxy Rotation</span>
+            <input type="range" id="rotation-slider" min="0" max="200" value="1" step="1">
+        </div>
+        <div class="control-section hud-info">
+            <div><span class="hud-label">STARS:</span><span class="hud-value" id="star-count">350,000</span></div>
+            <div><span class="hud-label">MEMORIES:</span><span class="hud-value" id="memory-count">10</span></div>
+            <div><span class="hud-label">ZOOM:</span><span class="hud-value" id="zoom-level">1200</span></div>
+        </div>
+    </div>
+    
+    <div id="story-modal">
+        <button class="close-btn" id="story-close-btn">&times;</button>
+        <h2 id="story-title"></h2>
+        <div class="story-date" id="story-date"></div>
+        <div class="story-content" id="story-text"></div>
+    </div>
+
+    <button class="btn back-button" onclick="window.returnToGuideHub()">
+        ← Back to Library
+    </button>
+</div>
+`;
+function initObservatory() {
+    const observatoryContainer = $('tab-observatory');
+    if (!observatoryContainer) return;
+
+    // Memory points positioned in 3D space within galaxy
+    const memories = [
+        { position: { x: -300, y: 80, z: 200 }, title: "First Meeting", date: "September 15, 2019", text: "When every day seems like a year, going back into the past gives the impression of having lived for a thousand years. For so long, I never knew what love was or how it felt to be loved." },
+        { position: { x: 250, y: -100, z: 300 }, title: "The Sports Festival", date: "Sports Day", text: "Her hair was long and shiny black, like the strands of heaven; her face was a pale cream colour as if she were coming from snowy mountains. She was indeed the epitome of beauty." },
+        { position: { x: -150, y: 180, z: -250 }, title: "First Conversation", date: "That Day", text: "My name is Zhang Zoya. I'm Nicholas Lubega, and I love mathematics. We began talking to each other intimately, like it wasn't our first time meeting." },
+        { position: { x: 350, y: -80, z: -150 }, title: "The Bicycle", date: "June 2021", text: "I am good at fixing bicycles and it will be an honour to me if I could help. We finished the work that had brought us and then started chatting." },
+        { position: { x: -280, y: -150, z: 350 }, title: "Birthday Wishes", date: "July 17, 2021", text: "Good evening, Nico, I hope it won't be too late to say 'happy birthday' to you. Nobody else knew how good my feeling was but me." },
+        { position: { x: 180, y: 200, z: -300 }, title: "Library Meeting", date: "July 27, 2021", text: "We ate while talking till going back home. It was the first picture of myself that I sent to her." },
+        { position: { x: -350, y: 120, z: -100 }, title: "The Typhoon", date: "August 10, 2021", text: "A typhoon happened in Kyoto that made all the flights of that day be cancelled. I wanted to rush home. The only reason I rushed all the way from Kansai." },
+        { position: { x: 300, y: -180, z: 250 }, title: "Growing Closer", date: "August 2021", text: "I wish you sweet dreams. That's the sweetest poem for good night. The glowing moon, the twinkling stars will bless you." },
+        { position: { x: -200, y: -200, z: -280 }, title: "The Confession", date: "August 25 2021", text: "Zoya, I've fallen in love with you. Completely, utterly, hopelessly in love with you. You make me want to be better." },
+        { position: { x: 0, y: 150, z: 0 }, title: "Forever", date: "August 25 2021~~", text: "Yes to everything you're asking. Yes to being more than friends. This is our love story. Not perfect, but perfectly ours." }
+    ];
+
+    // Three.js setup
+    let scene, camera, renderer, galaxyParticles;
+    let cameraOffset = { x: 0, y: 400, z: 1200 };
+    let rotationSpeed = 1;
+    
+    let memoryParticles;        // A new THREE.Points object for the 10 memories
+    let galaxyGroup;            // A group to hold particles AND orbs, so they rotate together
+    let raycaster, mouse;       // For clicking on 3D objects
+    
+    let animationFrameId;
+    let telescopeImages = [];
+    let currentTelescopeIndex = 0;
+    let lastRotationAngle = 0;
+    
+    if (typeof initObservatory.isObservatoryInitialized === 'undefined') {
+        initObservatory.isObservatoryInitialized = false;
+    }
+    
+    let telescopeFrame; 
+
+    function init() {
+        if (initObservatory.isObservatoryInitialized) {
+            // If already initialized, just recreate the particles
+            if (initObservatory.scene && initObservatory.galaxyParticles) {
+                initObservatory.galaxyGroup.remove(initObservatory.galaxyParticles);
+                initObservatory.galaxyParticles.geometry.dispose();
+                initObservatory.galaxyParticles.material.dispose();
+            }
+            if (initObservatory.scene && initObservatory.memoryParticles) {
+                initObservatory.galaxyGroup.remove(initObservatory.memoryParticles);
+                initObservatory.memoryParticles.geometry.dispose();
+                initObservatory.memoryParticles.material.dispose();
+            }
+            createGalaxy();
+            createMemoryMarkers(memories); 
+            return;
+        }
+
+        const container = document.getElementById('canvas-container');
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.0001); 
+
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 6000);
+        camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setClearColor(0x000000, 1); 
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+        
+        telescopeImages = EDITABLE_CONFIG.PHOTOS_DATA.map(p => p.src);
+        telescopeFrame = document.getElementById('telescope-frame');
+
+        raycaster = new THREE.Raycaster();
+        raycaster.params.Points.threshold = 15; // 15 units threshold
+        mouse = new THREE.Vector2();
+
+        galaxyGroup = new THREE.Group();
+        scene.add(galaxyGroup);
+        
+        initObservatory.scene = scene;
+        initObservatory.camera = camera;
+        initObservatory.renderer = renderer;
+        initObservatory.galaxyGroup = galaxyGroup; // Store group reference
+
+        createGalaxy(); 
+        createMemoryMarkers(memories); 
+        setupControls();
+        
+        window.addEventListener('resize', onWindowResize);
+
+        setTimeout(() => {
+            document.getElementById('loading').classList.add('hidden');
+        }, 1500);
+
+        initObservatory.isObservatoryInitialized = true;
+        animate(); 
+    }
+
+    function createGalaxy() {
+        const particleCount = 350000; 
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical';
+        const theme = THEME_COLORS[savedThemeName] || THEME_COLORS.mystical;
+
+        const colorCenter = new THREE.Color(theme.colors['--gold']);
+        const colorMid = new THREE.Color(theme.colors['--soft-violet']);
+        const colorOuter = new THREE.Color(theme.colors['--glow-magenta'] || theme.colors['--crimson']); 
+        const colorDust = new THREE.Color(theme.colors['--glow-cyan'] || theme.colors['--jade']); 
+        
+        const branchCount = 5;
+        const galaxyRadius = 2500; 
+
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            const radius = Math.pow(Math.random(), 1.5) * galaxyRadius;
+            const branch = ((i % branchCount) / branchCount) * Math.PI * 2;
+            const spin = radius * 0.003;
+            
+            const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * radius * 0.35;
+            const randomY = Math.pow(Math.random(), 5) * (Math.random() < 0.5 ? 1 : -1) * radius * 0.06;
+            const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * radius * 0.35;
+
+            positions[i3] = Math.cos(branch + spin) * radius + randomX;
+            positions[i3 + 1] = randomY;
+            positions[i3 + 2] = Math.sin(branch + spin) * radius + randomZ;
+
+            const mixedColor = colorCenter.clone();
+            const lerpFactor = radius / galaxyRadius;
+            const randomColorChoice = Math.random();
+
+            if (lerpFactor < 0.5) {
+                mixedColor.lerp(colorMid, lerpFactor * 2);
+            } else {
+                mixedColor.copy(colorMid).lerp(colorOuter, (lerpFactor - 0.5) * 2);
+            }
+
+            if (randomColorChoice > 0.95) {
+                mixedColor.lerp(colorDust, randomColorChoice - 0.9);
+            }
+
+            colors[i3] = mixedColor.r;
+            colors[i3 + 1] = mixedColor.g;
+            colors[i3 + 2] = mixedColor.b;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 3.0,
+            sizeAttenuation: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            vertexColors: true,
+            transparent: true
+        });
+
+        galaxyParticles = new THREE.Points(geometry, material);
+        initObservatory.galaxyParticles = galaxyParticles; 
+        initObservatory.galaxyGroup.add(galaxyParticles);
+    }
+
+    // --- MODIFIED: This function now creates smaller, themed particles ---
+    function createMemoryMarkers(memories) {
+        if (initObservatory.memoryParticles) {
+            initObservatory.galaxyGroup.remove(initObservatory.memoryParticles);
+            initObservatory.memoryParticles.geometry.dispose();
+            initObservatory.memoryParticles.material.dispose();
+        }
+
+        const particleCount = memories.length;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        
+        // --- Get color from theme ---
+        const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical';
+        const theme = THEME_COLORS[savedThemeName] || THEME_COLORS.mystical;
+        // Use the theme's magenta color
+        const memColor = new THREE.Color(theme.colors['--glow-magenta'] || '#f779dd'); 
+
+        for (let i = 0; i < particleCount; i++) {
+            const memory = memories[i];
+            positions[i * 3] = memory.position.x;
+            positions[i * 3 + 1] = memory.position.y;
+            positions[i * 3 + 2] = memory.position.z;
+            
+            colors[i * 3] = memColor.r;
+            colors[i * 3 + 1] = memColor.g;
+            colors[i * 3 + 2] = memColor.b;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+        // --- MODIFIED MATERIAL: Smaller size and less opaque ---
+        const material = new THREE.PointsMaterial({
+            size: 12.0, // Reduced from 20.0 to be more subtle
+            sizeAttenuation: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.85 // Make them slightly transparent
+        });
+
+        memoryParticles = new THREE.Points(geometry, material);
+        memoryParticles.userData.memories = memories;
+        
+        initObservatory.memoryParticles = memoryParticles; 
+        initObservatory.galaxyGroup.add(memoryParticles); 
+    }
+
+    function onCanvasClick(event) {
+        event.preventDefault();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, initObservatory.camera);
+
+        // Check for intersections with memory PARTICLES
+        const intersects = raycaster.intersectObject(initObservatory.memoryParticles);
+
+        if (intersects.length > 0) {
+            intersects.sort((a, b) => a.distanceToRay - b.distanceToRay);
+            const particleIndex = intersects[0].index;
+            const memoryData = initObservatory.memoryParticles.userData.memories[particleIndex];
+            if (memoryData) {
+                showStory(memoryData);
+            }
+        }
+    }
+
+    function showStory(memory) {
+        document.getElementById('story-title').textContent = memory.title;
+        document.getElementById('story-date').textContent = memory.date;
+        document.getElementById('story-text').textContent = memory.text;
+        document.getElementById('story-modal').classList.add('active');
+    }
+
+    function closeStory() {
+        document.getElementById('story-modal').classList.remove('active');
+    }
+
+    function setupControls() {
+        const panSpeed = 150;
+        
+        document.getElementById('btn-left').addEventListener('click', () => { cameraOffset.x -= panSpeed; });
+        document.getElementById('btn-right').addEventListener('click', () => { cameraOffset.x += panSpeed; });
+        document.getElementById('btn-up').addEventListener('click', () => { cameraOffset.y += panSpeed; });
+        document.getElementById('btn-down').addEventListener('click', () => { cameraOffset.y -= panSpeed; });
+        
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            cameraOffset = { x: 0, y: 400, z: 1200 };
+            document.getElementById('zoom-slider').value = 1200;
+            document.getElementById('rotation-slider').value = 1;
+            rotationSpeed = 1;
+        });
+
+        document.getElementById('zoom-slider').addEventListener('input', (e) => {
+            cameraOffset.z = parseFloat(e.target.value);
+            document.getElementById('zoom-level').textContent = Math.round(cameraOffset.z);
+        });
+
+        document.getElementById('rotation-slider').addEventListener('input', (e) => {
+            rotationSpeed = parseFloat(e.target.value);
+        });
+
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        const domElement = initObservatory.renderer.domElement;
+
+        domElement.addEventListener('click', onCanvasClick);
+        domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        domElement.addEventListener('mouseup', () => { isDragging = false; });
+        domElement.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                cameraOffset.x += deltaX * 2;
+                cameraOffset.y -= deltaY * 2;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+        domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            cameraOffset.z = Math.max(10, Math.min(3000, cameraOffset.z + e.deltaY * 0.8));
+            document.getElementById('zoom-slider').value = cameraOffset.z;
+            document.getElementById('zoom-level').textContent = Math.round(cameraOffset.z);
+        }, { passive: false });
+
+        document.getElementById('story-close-btn').addEventListener('click', closeStory);
+        document.getElementById('story-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'story-modal') closeStory();
+        });
+
+        const controlsContainer = document.getElementById('controls');
+        const canvasContainer = document.getElementById('canvas-container');
+
+        if (telescopeFrame) {
+            telescopeFrame.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                controlsContainer.classList.toggle('visible');
+            });
+        }
+
+        canvasContainer.addEventListener('click', (e) => {
+            setTimeout(() => {
+                if (!document.getElementById('story-modal').classList.contains('active')) {
+                     controlsContainer.classList.remove('visible');
+                }
+            }, 50); 
+        });
+    }
+
+    function animate() {
+        if (initObservatory.animationFrameId) {
+            cancelAnimationFrame(initObservatory.animationFrameId);
+        }
+        initObservatory.animationFrameId = requestAnimationFrame(animate);
+
+        const time = Date.now() * 0.0001;
+
+        if (initObservatory.galaxyGroup) {
+            initObservatory.galaxyGroup.rotation.y += 0.0005 * rotationSpeed;
+        }
+
+        if (telescopeFrame) {
+            const maxTiltY = 30; 
+            const maxTiltX = 25; 
+            const maxPanX = 1000;
+            const maxPanY = 800;
+            const baseCameraY = 400;
+            const baseTiltX = 5;
+
+            const panPercentX = Math.max(-1, Math.min(1, cameraOffset.x / maxPanX));
+            const tiltY = panPercentX * maxTiltY; 
+
+            const panPercentY = Math.max(-1, Math.min(1, (cameraOffset.y - baseCameraY) / maxPanY));
+            const tiltX = baseTiltX + (panPercentY * -maxTiltX); 
+
+            telescopeFrame.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        }
+
+        initObservatory.camera.position.x += (cameraOffset.x - initObservatory.camera.position.x) * 0.08;
+        initObservatory.camera.position.y += (cameraOffset.y - initObservatory.camera.position.y) * 0.08;
+        initObservatory.camera.position.z += (cameraOffset.z - initObservatory.camera.position.z) * 0.08;
+        initObservatory.camera.lookAt(0, 0, 0);
+
+        initObservatory.renderer.render(initObservatory.scene, initObservatory.camera);
+    }
+
+    function onWindowResize() {
+        initObservatory.camera.aspect = window.innerWidth / window.innerHeight;
+        initObservatory.camera.updateProjectionMatrix();
+        initObservatory.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    init();
+}
+
+function initInteractivePhysics() {
+    const memoriesSlider = $('memories-slider');
+    const timeSlider = $('time-slider');
+    const loveValueDisplay = $('love-value-display');
+
+    // Live Data Integration
+    const liveDataResult = $('live-data-result');
+    if (liveDataResult) {
+        const photoCount = EDITABLE_CONFIG.PHOTOS_DATA.length;
+        const chapterCount = AppState.chapters.length;
+        const songCount = EDITABLE_CONFIG.SONGS_DATA.length;
+        const totalMoments = photoCount + chapterCount + songCount;
+        liveDataResult.innerHTML = `Current Value: L∞ = ∞ (Calculated with <strong>${totalMoments}</strong> total moments)`;
+    }
+
+    if (!memoriesSlider || !timeSlider || !loveValueDisplay) return;
+
+    const calculateLove = () => {
+        const memories = parseFloat(memoriesSlider.value);
+        const time = parseFloat(timeSlider.value);
+        // What-if Scenarios
+        const sillyGoose = parseFloat($('silly-goose-slider')?.value || 0);
+        const hugs = parseFloat($('hugs-slider')?.value || 0);
+
+        // The (N ⊗ Z)∞ part is a constant representing your infinite bond
+        const infiniteBondFactor = 1000; 
+
+        // Exponential growth for time, and a strong multiplier for memories
+        const loveStrength = infiniteBondFactor * (memories * 10) * Math.exp(time / 20) * (1 + sillyGoose / 100) * (1 + hugs / 50);
+
+        let displayText;
+        if (loveStrength > 1e9) {
+            displayText = '∞ (Infinite)';
+        } else if (loveStrength > 1e6) {
+            displayText = `${(loveStrength / 1e6).toFixed(2)} Million`;
+        } else if (loveStrength > 1e3) {
+            displayText = `${(loveStrength / 1e3).toFixed(2)} Thousand`;
+        } else {
+            displayText = Math.round(loveStrength).toLocaleString();
+        }
+        
+        loveValueDisplay.textContent = displayText;
+        
+        // Add a little glow effect on update
+        loveValueDisplay.classList.add('updated');
+        setTimeout(() => loveValueDisplay.classList.remove('updated'), 300);
+    };
+
+    memoriesSlider.addEventListener('input', calculateLove);
+    timeSlider.addEventListener('input', calculateLove);
+    calculateLove(); // Initial calculation
+
+    // "Destiny" Button
+    const destinyBtn = $('calculate-destiny-btn');
+    if (destinyBtn) {
+        destinyBtn.addEventListener('click', () => {
+            const resultDisplay = $('quantum-result-display');
+            destinyBtn.style.display = 'none';
+            resultDisplay.style.display = 'block';
+            resultDisplay.classList.add('updated'); // Use a glow effect
+            setTimeout(() => resultDisplay.classList.remove('updated'), 1000);
+        });
+    }
+
+    // What-if sliders
+    const sillyGooseSlider = $('silly-goose-slider');
+    const hugsSlider = $('hugs-slider');
+    if (sillyGooseSlider) sillyGooseSlider.addEventListener('input', calculateLove);
+    if (hugsSlider) hugsSlider.addEventListener('input', calculateLove);
+}
+
+function initPhysicsDashboard() {
+    // This function will initialize all interactive elements in the new dashboard
+    initInteractivePhysics(); // The existing slider logic
+
+    // --- Emotional Waveform Simulator Logic ---
+    const waveformCanvas = $('waveform-canvas');
+    if (waveformCanvas) {
+        const ctx = waveformCanvas.getContext('2d');
+        let dissonance = 0;
+        let time = 0;
+        const drawWaveform = () => {
+            const w = waveformCanvas.width;
+            const h = waveformCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = 'rgba(48, 213, 200, 0.5)';
+            ctx.lineWidth = 2;
+            
+            // Nic's Wave
+            ctx.beginPath();
+            for (let x = 0; x < w; x++) {
+                const angle = (x / w) * Math.PI * 4 + time;
+                const y = h / 2 + Math.sin(angle) * (h / 4) + (Math.random() - 0.5) * dissonance;
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Zoya's Wave
+            ctx.strokeStyle = 'rgba(247, 121, 221, 0.5)';
+            ctx.beginPath();
+            for (let x = 0; x < w; x++) {
+                const angle = (x / w) * Math.PI * 4 + time + 0.1; // Slightly offset for harmony
+                const y = h / 2 + Math.sin(angle) * (h / 4) + (Math.random() - 0.5) * dissonance;
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            time += 0.05;
+            requestAnimationFrame(drawWaveform);
+        };
+        drawWaveform();
+
+        $('introduce-dissonance').addEventListener('click', () => dissonance = 30);
+        $('re-harmonize').addEventListener('click', () => dissonance = 0);
+        
+        // Expose control for fluctuation simulator
+        window.setWaveformDissonance = (val) => dissonance = val;
+    }
+
+    // --- Fluctuation Simulator Logic ---
+    const simulationBtn = $('run-simulation-btn');
+    const factorInput = $('destabilization-factor');
+    const statusEl = $('.status-ok');
+    const conclusionEl = $('.status-destined');
+
+    if (simulationBtn && factorInput && statusEl && conclusionEl) {
+        simulationBtn.addEventListener('click', () => {
+            const factor = parseFloat(factorInput.value) || 0;
+            if (factor !== 0) {
+                // Trigger system-wide failure
+                document.body.classList.add('system-failure');
+                if(window.setWaveformDissonance) window.setWaveformDissonance(30);
+                statusEl.textContent = 'CRITICAL FAILURE'; statusEl.style.color = 'var(--crimson)';
+                conclusionEl.textContent = 'RECALIBRATING...'; conclusionEl.style.color = 'var(--crimson)';
+
+                // Reset after a few seconds
+                setTimeout(() => {
+                    document.body.classList.remove('system-failure');
+                    if(window.setWaveformDissonance) window.setWaveformDissonance(0);
+                    statusEl.textContent = 'STABLE & OPTIMAL'; statusEl.style.color = '';
+                    conclusionEl.textContent = 'COSMICALLY DESTINED'; conclusionEl.style.color = '';
+                    factorInput.value = '';
+                }, 3000);
+            }
+        });
+    }
+
+    initInteractivePhysics(); // The existing slider logic
+
+    // Add navigation logic
+    const navLinks = $$('.calc-nav a');
+    const container = DOM.mainContent; // The scrollable container
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            const targetElement = $(targetId);
+            if (targetElement && container) {
+                const offsetTop = targetElement.offsetTop;
+                container.scrollTo({
+                    top: offsetTop - 120, // Adjust for sticky header/padding
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    initInteractivePhysics(); // The existing slider logic
+
+    // New Radar Chart Logic
+    const radarCanvas = $('radar-chart');
+    if (!radarCanvas) return;
+    const ctx = radarCanvas.getContext('2d');
+    const size = 300;
+    radarCanvas.width = size;
+    radarCanvas.height = size;
+
+    const data = {
+        labels: ['EMOTIONAL', 'INTELLECTUAL', 'COMMUNICATION', 'ADVENTURE', 'CULINARY', 'DESTINY'],
+        values: [0.983, 0.927, 0.991, 0.874, 1.0, 1.0]
+    };
+
+    const center = size / 2;
+    const radius = size * 0.4;
+
+    function drawRadar() {
+        ctx.clearRect(0, 0, size, size);
+        ctx.strokeStyle = 'rgba(48, 213, 200, 0.2)';
+        ctx.fillStyle = 'rgba(48, 213, 200, 0.3)';
+
+        // Draw grid lines and labels
+        for (let i = 0; i < data.labels.length; i++) {
+            const angle = (i / data.labels.length) * Math.PI * 2 - Math.PI / 2;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.fillStyle = '#8892b0';
+            ctx.font = '10px Courier New';
+            ctx.fillText(data.labels[i], x + (x > center ? 5 : -50), y + (y > center ? 10 : -5));
+        }
+
+        // Draw data shape
+        ctx.beginPath();
+        for (let i = 0; i < data.values.length; i++) {
+            const value = data.values[i];
+            const angle = (i / data.values.length) * Math.PI * 2 - Math.PI / 2;
+            const x = center + radius * value * Math.cos(angle);
+            const y = center + radius * value * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(48, 213, 200, 0.4)';
+        ctx.fill();
+        ctx.strokeStyle = '#30d5c8';
+        ctx.stroke();
+    }
+    drawRadar();
+}
 
 function getSanctuaryPanelHTML() {
     return `
@@ -4042,10 +4519,10 @@ function getSanctuaryPanelHTML() {
                     <h2 class="section-title">✧ The Realm of Comfort ✧</h2>
                     <p class="realm-subheader">"When sadness weighs heavy, these portals and texts open to ease your burden"</p>
                     <div class="book-shelf">
-                        <div class="sacred-scroll" onclick="readBook('solace', 'Scrolls of Solace', 'This scroll contains ancient words of comfort, reminding you that every storm passes and you are loved beyond measure. You are my calm in every chaos.')">
+                        <div class="sacred-scroll" onclick="readBook('solace', 'Scrolls of Solace', 'My Dearest Zoya, let these words be a sanctuary for your heart. Remember the quiet strength you possess, a resilience that has navigated every storm. When the world feels heavy, recall the simple joy of a shared laugh, the warmth of a quiet evening, and the unwavering truth that you are loved completely and unconditionally. You are my calm, my anchor, and my brightest star. This scroll is a reminder that no shadow is so dark that our shared light cannot pierce through it. You are never alone.')">
                             <div class="scroll-icon">📜</div><div class="scroll-text"><h3>Scrolls of Solace</h3><p>Words to heal the weary heart</p></div>
                         </div>
-                        <div class="sacred-scroll" onclick="readBook('miracles', 'The Grimoire of Daily Miracles', 'This grimoire is filled with small wonders: the memory of a shared laugh, the warmth of a quiet hug, the taste of a favorite meal. These are the true spells of happiness.')">
+                        <div class="sacred-scroll" onclick="readBook('miracles', 'The Grimoire of Daily Miracles', 'This tome does not contain grand sorceries, but the most potent magic of all: the small, everyday miracles of our life together. Turn a page and find the taste of the first chicken steak at Joyful, the sound of your laughter in the quiet library, the feeling of your hand in mine on a cold day. Each entry is a spell against sadness, a potion of pure joy brewed from our shared moments. These are the miracles that build our universe, one precious memory at a time.')">
                              <div class="scroll-icon">✨</div><div class="scroll-text"><h3>The Grimoire of Daily Miracles</h3><p>Finding magic in everyday moments</p></div>
                         </div>
                     </div>
@@ -4079,7 +4556,7 @@ function getSanctuaryPanelHTML() {
                         <div class="realm-portal" onclick="revealDynamicBlessing('burden', '⚡', 'Lifting Your Load')"><div class="realm-icon">⚡</div><h3 class="realm-title">Lifting Your Load</h3><p class="realm-description">When life is too heavy</p></div>
                         <div class="realm-portal" onclick="revealBlessing('🌟', 'The Ultimate Wish', 'Anything. Whatever you need to feel whole again. No limits, no restrictions. The full power of the cosmos bends to make things right for my one and only love.')"><div class="realm-icon">🌟</div><h3 class="realm-title">Cosmic Restoration</h3><p class="realm-description">When only everything will do</p></div>
                     </div>
-                    <div class="ritual-altar"><p class="ritual-instructions">"Light each of the seven sacred candles to complete the ancient ritual.<br>With each flame, a burden lifts and harmony returns."</p><div class="candles"><div class="candle" onclick="lightCandle(this)" title="Candle of Understanding"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Forgiveness"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Love"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Joy"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Peace"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Renewal"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Eternity"></div></div><p class="ritual-complete" id="ritualComplete">✧ The Ritual is Complete ✧<br>All is forgiven, all is renewed, all is well.</p></div>
+                    <div class="ritual-altar"><p class="ritual-instructions">Light each of the seven sacred candles to complete the ancient ritual. With each flame, a burden lifts and harmony returns.</p><div class="candles"><div class="candle" onclick="lightCandle(this)" title="Candle of Understanding"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Forgiveness"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Love"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Joy"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Peace"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Renewal"></div><div class="candle" onclick="lightCandle(this)" title="Candle of Eternity"></div></div><p class="ritual-complete" id="ritualComplete">✧ The Ritual is Complete ✧<br>All is forgiven, all is renewed, all is well.</p></div>
                     <button class="back-to-hub-btn btn" onclick="returnToHub()">Return to Sanctuary Entrance</button>
                 </section>
 
@@ -4100,7 +4577,7 @@ function getSanctuaryPanelHTML() {
                 </section>
             </div>
         </div>
-        
+
         <div class="modal" id="blessingModal"><div class="modal-content"><span class="modal-icon" id="modalIcon"></span><h2 class="modal-title" id="modalTitle"></h2><div class="modal-message" id="modalMessage"></div><div class="modal-seal"></div><button class="btn primary accept-button" onclick="closeModal('blessingModal')">✧ ACCEPT BLESSING ✧</button></div></div>
         <div class="modal" id="bookModal"><div class="modal-content"><h2 class="modal-title" id="bookTitle" style="font-size: 2.2em;"></h2><div class="book-modal-content"><p id="bookContent"></p></div><button class="btn primary accept-button" onclick="closeModal('bookModal')">✧ CLOSE TOME ✧</button></div></div>
     </div>`;
@@ -5088,6 +5565,22 @@ function applyTheme(themeName) {
   if (iframe && iframe.contentWindow) {
       iframe.contentWindow.postMessage({ type: 'THEME_CHANGED', theme: themeName }, '*');
   }
+
+  // --- ADDED: Hide theme grid after selection ---
+  const themeContainer = document.querySelector('.theme-colors-grid');
+  const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+  if (themeContainer) {
+      themeContainer.style.display = 'none';
+  }
+  if (themeToggleBtn) {
+      themeToggleBtn.classList.remove('active');
+  }
+
+    // --- THIS IS THE NEW LINE ---
+    // If the observatory is currently active, re-initialize it to apply the new theme colors to the galaxy
+    if (document.getElementById('tab-observatory')) {
+        initObservatory();
+    }
 }
 
 function loadSavedTheme() {
@@ -5097,32 +5590,29 @@ function loadSavedTheme() {
 
 function initThemeSystem() {
   const menuDropdown = document.getElementById('main-menu-dropdown');
-  if (!menuDropdown || document.querySelector('.theme-colors-grid')) return;
+  if (!menuDropdown || document.querySelector('.theme-toggle-btn')) return;
 
   const themeSeparator = document.createElement('hr');
-  const themeLabel = document.createElement('div');
-  themeLabel.className = 'theme-label';
-  themeLabel.textContent = '🎨 Themes';
+  const themeToggleBtn = document.createElement('button');
+  themeToggleBtn.className = 'theme-toggle-btn';
+  themeToggleBtn.textContent = '🎨 Themes';
+
   const themeContainer = document.createElement('div');
   themeContainer.className = 'theme-colors-grid';
+  themeContainer.style.display = 'none'; // Hide themes by default
 
-  Object.entries(THEME_COLORS).forEach(([key, theme]) => {
-    const btn = document.createElement('button');
-    btn.className = 'theme-color-btn';
-    btn.dataset.theme = key;
-    btn.title = theme.name;
-    const primaryColor = theme.colors['--deep-purple'];
-    const secondaryColor = theme.colors['--soft-violet'];
-    const accentColor = theme.colors['--gold'];
-    btn.style.background = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
-    btn.style.color = accentColor;
-    btn.addEventListener('click', (e) => { e.preventDefault(); applyTheme(key); });
-    btn.innerHTML = `<span style="font-size: 1.4rem;">${theme.icon}</span><span style="font-size: 0.7rem; line-height: 1.1;">${theme.name}</span>`;
-    themeContainer.appendChild(btn);
+  themeToggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const isVisible = themeContainer.style.display === 'grid';
+    themeContainer.style.display = isVisible ? 'none' : 'grid';
+    // Add a visual indicator to the button
+    themeToggleBtn.classList.toggle('active', !isVisible);
   });
 
+  Object.entries(THEME_COLORS).forEach(([key, theme]) => themeContainer.appendChild(createThemeButton(key, theme)));
+
   menuDropdown.appendChild(themeSeparator);
-  menuDropdown.appendChild(themeLabel);
+  menuDropdown.appendChild(themeToggleBtn);
   menuDropdown.appendChild(themeContainer);
   loadSavedTheme();
 }
@@ -5132,12 +5622,96 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const themeStyles = `
-.theme-label { padding: 10px 15px; color: var(--gold); font-family: var(--font-display); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; text-align: center; }
-.theme-colors-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
-.theme-color-btn { padding: 10px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; flex-direction: column; text-align: center; font-size: 0.7rem; font-family: var(--font-body); }
-.theme-color-btn:hover { transform: scale(1.05); border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
-.theme-color-btn.active { border-color: var(--gold) !important; box-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet) !important; transform: scale(1.1); position: relative; }
-.theme-color-btn.active::after { content: '✓'; position: absolute; top: -8px; right: -8px; background: var(--gold); color: var(--deep-purple); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+/* --- ENHANCED THEME SELECTOR STYLES --- */
+.theme-toggle-btn {
+    display: block;
+    width: calc(100% - 30px);
+    margin: 5px 15px;
+    padding: 12px 15px;
+    color: var(--gold);
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.theme-toggle-btn:hover, .theme-toggle-btn.active { background: rgba(255, 215, 0, 0.1); border-color: var(--border-glass); }
+.theme-colors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 15px;
+    padding: 10px 15px;
+}
+.theme-color-btn {
+    aspect-ratio: 1 / 1; /* Make it a square, then border-radius makes it a circle */
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.theme-color-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--gold);
+    box-shadow: 0 0 15px var(--gold), 0 0 25px var(--soft-violet);
+}
+.theme-color-btn.active {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet) !important;
+    transform: scale(1.1);
+}
+.theme-color-btn .theme-orb-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+    z-index: 2;
+}
+.theme-color-btn .theme-orb-name {
+    position: absolute;
+    bottom: -100%; /* Start hidden */
+    left: 0;
+    right: 0;
+    width: 75%; /* Reduce width more to ensure two-line text fits in the circle */
+    margin: 0 auto; /* Center the element */
+    padding: 4px 2px;
+    border-radius: 4px; /* Round the corners to fit better inside the orb */
+    background: rgba(0,0,0,0.5);
+    color: var(--gold-light);
+    line-height: 1.2; /* Tighter line height for two-line names */
+    word-break: break-word; /* Allow long words like 'Mystical' to break */
+    font-size: 0.65rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+.theme-color-btn:hover .theme-orb-icon {
+    transform: translateY(-10px);
+}
+.theme-color-btn:hover .theme-orb-name {
+    bottom: 0;
+}
+
+@media (max-width: 768px) {
+    /* Make selector more specific to override styles.css */
+    #main-menu-dropdown .theme-colors-grid {
+        grid-template-columns: repeat(2, 60px); /* Make buttons smaller */
+        gap: 15px;
+    }
+    .theme-orb-icon { font-size: 1.2rem; }
+    .theme-orb-name { display: none; } /* Hide the name on small screens */
+    /* Prevent icon from moving up on hover since there's no name to show */
+    .theme-color-btn:hover .theme-orb-icon {
+        transform: translateY(0);
+    }
+}
 `;
 
 if (!document.querySelector('style[data-theme-system]')) {
@@ -5145,6 +5719,24 @@ if (!document.querySelector('style[data-theme-system]')) {
   styleSheet.setAttribute('data-theme-system', 'true');
   styleSheet.textContent = themeStyles;
   document.head.appendChild(styleSheet);
+}
+
+function createThemeButton(key, theme) {
+    const btn = document.createElement('button');
+    btn.className = 'theme-color-btn';
+    btn.dataset.theme = key;
+    btn.title = theme.name;
+
+    const primaryColor = theme.colors['--deep-purple'];
+    const secondaryColor = theme.colors['--soft-violet'];
+    const accentColor = theme.colors['--gold'];
+
+    btn.style.background = `radial-gradient(circle at 30% 30%, ${accentColor} -20%, ${secondaryColor} 50%, ${primaryColor} 110%)`;
+    btn.style.color = accentColor;
+
+    btn.innerHTML = `<span class="theme-orb-icon">${theme.icon}</span><span class="theme-orb-name">${theme.name}</span>`;
+    btn.addEventListener('click', (e) => { e.preventDefault(); applyTheme(key); });
+    return btn;
 }
 
 // ===================================================================

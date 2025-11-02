@@ -62,10 +62,11 @@ hr {
     box-shadow: 0 0 10px var(--gold);
 }
 
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--space-black); }
-::-webkit-scrollbar-thumb { background: var(--deep-purple); border-radius: 5px; border: 2px solid var(--space-black); }
-::-webkit-scrollbar-thumb:hover { background: var(--soft-violet); }
+/* --- HIDE SCROLLBARS --- */
+/* For Chrome, Safari, and Opera */
+*::-webkit-scrollbar { display: none; }
+/* For IE, Edge, and Firefox */
+* { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ANIMATIONS */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -142,18 +143,19 @@ hr {
     inset: 0;
     z-index: 9999;
     cursor: pointer;
+    overflow-y: auto; /* Allows the whole page to scroll if content is tall */
 }
 .gate-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+    /* Flex properties removed to allow top-alignment */
     text-align: center;
-    padding: 2rem;
+    padding: 8vh 2rem; /* Use vertical padding to create space from the top */
     animation: fade-in 3s ease-out forwards;
+    width: 100%;
+    min-height: 100%; /* Ensures it fills at least the viewport */
 }
 .gate-content {
     max-width: 800px;
+    margin: 0 auto; /* Horizontally centers the content block */
 }
 #landing-gate .main-title {
     font-family: var(--font-display);
@@ -229,12 +231,44 @@ hr {
     animation: float 4s ease-in-out infinite;
     padding: 8px; /* Add padding to create a border effect */
 }
+/* --- MODIFIED RULE FOR THE DRAGGING STATE --- */
+#main-menu-container.dragging {
+    animation: none; /* Pause the float animation while dragging */
+    cursor: grabbing;
+}
+/* --- ADD THESE NEW RULES FOR LONG PRESS FEEDBACK --- */
+#main-menu-container.ready-to-drag {
+    animation: none; /* Pause float animation */
+    cursor: grab;
+}
+/* --- ENHANCED: Make "Ready to move" text spatially aware --- */
+#main-menu-container.ready-to-drag::after {
+    content: 'Ready to move';
+    position: absolute;
+    left: 50%;
+    background: var(--gold);
+    color: var(--deep-purple);
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 1rem;
+    white-space: nowrap;
+    box-shadow: 0 0 10px var(--gold), 0 0 20px var(--soft-violet);
+    z-index: 2001; /* Ensure it's on top */
+
+    /* Default to bottom, but allow override */
+    bottom: -40px; 
+    transform: translateX(-50%);
+    /* If the button is at the bottom, show the tooltip on top */
+    top: var(--tooltip-top, auto);
+    bottom: var(--tooltip-bottom, -40px);
+}
 /* --- ADD THIS NEW RULE FOR THE FAVICON IMAGE --- */
 #main-menu-button img {
-    width: 100%;
-    height: 100%;
+    width: 90%; /* Make the icon slightly smaller than the button */
+    height: 90%;
     object-fit: cover; /* This ensures the image fills the space */
-    border-radius: 50%; /* Make the image circular */
+    border-radius: 50%;
 }
 #main-menu-button:hover {
     transform: scale(1.1);
@@ -243,23 +277,35 @@ hr {
 }
 #main-menu-dropdown {
     position: absolute;
-    top: 110px;
-    left: 0;
     background: var(--holoscreen-bg);
     border: 1px solid var(--border-glass);
     backdrop-filter: blur(12px);
-    border-radius: 8px;
-    width: 250px;
+    border-radius: 8px; 
+    width: 220px;
     padding: 10px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(-10px) scale(0.95);
+    transform-origin: top; /* Animate from the top edge by default */
     transition: var(--transition-fast);
     box-shadow: 0 10px 30px var(--shadow-color);
     max-height: 80vh; /* Set a max height (80% of viewport height) */
     overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
 }
+/* --- ADD THIS: Adjust animation for opening upwards --- */
+#main-menu-dropdown.opens-up {
+    transform: translateY(10px) scale(0.95);
+    transform-origin: bottom; /* Animate from the bottom edge */
+}
 #main-menu-dropdown.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+/* --- ADD THIS: Helper class for JS to measure dimensions off-screen --- */
+.main-menu-dropdown.measuring {
+    visibility: hidden;
+    position: absolute;
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -890,9 +936,6 @@ hr {
     background: rgba(255, 215, 0, 0.1);
     text-shadow: 0 0 10px var(--gold);
 }
-#guide-panel .holodeck-content { padding: 2rem; }
-#guide-panel .holo-pane { display: none; }
-#guide-panel .holo-pane.active { display: block; animation: fade-in 0.8s ease-out; }
 #guide-panel .holo-pane h3 { 
     color: var(--gold); margin-bottom: 1rem;
     text-shadow: 0 0 15px var(--gold), 0 0 20px var(--soft-violet);
@@ -900,13 +943,172 @@ hr {
     font-family: var(--font-display);
     text-align: center;
 }
-/* Then vs Now Slider styles */
-.comparison-slider { position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid var(--gold); }
-.comparison-slider img { position: absolute; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.comparison-slider .img-top { clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%); }
-.comparison-slider .slider-handle { position: absolute; top: 0; left: 50%; transform: translateX(-50%); height: 100%; width: 4px; background-color: white; cursor: ew-resize; z-index: 10; }
-.comparison-slider .slider-handle .handle-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: space-evenly; color: var(--deep-purple); box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-.comparison-slider .handle-icon i { width: 20px; height: 20px; }
+
+/* --- GUIDE PANEL (REDESIGN V3 - Content Styling) --- */
+#guide-panel .holodeck-content { padding: 2rem; }
+#guide-panel .holo-pane { display: none; }
+#guide-panel .holo-pane.active { display: block; animation: fade-in 0.8s ease-out; }
+
+/* --- Love Calculator (Physics Tab) Redesign --- */
+.love-calculator-container { 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    background: #0a192f; border: 1px solid #30d5c8; border-radius: 8px; padding: 1.5rem; 
+    box-shadow: 0 0 20px rgba(48, 213, 200, 0.2), inset 0 0 15px rgba(48, 213, 200, 0.1); 
+}
+.love-calculator-container .calc-title { font-family: 'Courier New', monospace; color: #30d5c8; text-shadow: 0 0 10px #30d5c8; text-align: center; font-size: 1.5rem; letter-spacing: 2px; grid-column: 1 / -1; }
+.love-calculator-container .calc-subtitle { font-family: 'Courier New', monospace; color: #8892b0; text-align: center; font-size: 0.9rem; margin-bottom: 2rem; }
+.love-calculator-container .calc-section { padding: 1rem; border: 1px dashed rgba(48, 213, 200, 0.3); border-radius: 4px; display: flex; flex-direction: column; }
+.love-calculator-container .calc-sub-header { font-family: 'Courier New', monospace; color: #30d5c8; border-bottom: 1px solid #30d5c8; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.love-calculator-container .calc-formula-box { background: rgba(0,0,0,0.2); padding: 1rem; }
+.love-calculator-container .calc-formula { font-size: 1.8rem; text-align: center; color: #f5f5f5; }
+.love-calculator-container .calc-formula-vars { font-family: 'Courier New', monospace; list-style-type: none; padding: 0; margin: 1rem 0; color: #8892b0; font-size: 0.85rem; }
+.love-calculator-container .calc-result { font-family: 'Courier New', monospace; color: #30d5c8; text-align: center; font-weight: bold; }
+.love-calculator-container pre { background: #020c1b; color: #30d5c8; padding: 1rem; border-radius: 4px; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 0.9rem; text-shadow: 0 0 5px rgba(48, 213, 200, 0.5); }
+.love-calculator-container .calc-nav { margin-top: 1rem; text-align: center; font-family: 'Courier New', monospace; color: #8892b0; }
+.love-calculator-container .calc-nav a { color: #30d5c8; text-decoration: none; }
+.love-calculator-container .calc-nav a:hover { text-decoration: underline; text-shadow: 0 0 5px #30d5c8; }
+
+
+/* --- V4 Content Styling --- */
+.item-check { color: var(--jade); }
+
+/* Compatibility Analysis */
+.compat-analysis-grid { display: grid; gap: 1rem; }
+.compat-item { font-family: 'Courier New', monospace; }
+.compat-header { display: flex; justify-content: space-between; color: #8892b0; font-size: 0.8rem; margin-bottom: 0.25rem; }
+.compat-bar-track { background: #020c1b; height: 10px; border-radius: 5px; overflow: hidden; }
+.compat-bar-fill { height: 100%; background: #30d5c8; width: 0; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+
+/* Trajectory Analysis */
+.trajectory-container { display: flex; flex-direction: column; height: 100%; }
+#trajectory-svg { width: 100%; height: auto; background: #020c1b; border-radius: 4px; padding: 1rem; }
+#trajectory-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw-path 3s ease-out forwards; }
+@keyframes draw-path { to { stroke-dashoffset: 0; } }
+.trajectory-summary { display: grid; gap: 1rem; margin-top: 1rem; }
+.summary-item { background: #020c1b; padding: 0.75rem; border-radius: 4px; border-left: 2px solid #30d5c8; }
+.summary-title { font-family: 'Courier New', monospace; color: #ccd6f6; font-size: 0.9rem; margin-bottom: 0.5rem; }
+.summary-detail { font-family: 'Courier New', monospace; color: #8892b0; font-size: 0.8rem; line-height: 1.5; }
+
+/* Theorem Grid */
+.theorem-grid-tech { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.theorem-card-tech { background: #020c1b; padding: 1rem; border-radius: 4px; border-left: 2px solid #30d5c8; }
+.theorem-title-tech { font-family: 'Courier New', monospace; color: #ccd6f6; font-weight: bold; font-size: 0.9rem; }
+.theorem-equation-tech { font-family: 'Times New Roman', serif; font-size: 1.5rem; color: #f5f5f5; margin: 0.5rem 0; }
+.theorem-desc-tech { font-family: 'Courier New', monospace; color: #8892b0; font-size: 0.8rem; }
+
+/* Probability Display */
+.probability-display { text-align: center; background: #020c1b; padding: 1.5rem; border-radius: 4px; }
+.prob-main-value { font-family: 'Courier New', monospace; font-size: 2.5rem; color: #30d5c8; text-shadow: 0 0 15px #30d5c8; font-weight: bold; }
+.prob-label { color: #8892b0; margin: 0.5rem 0 1rem 0; }
+.prob-conclusion { color: #f779dd; font-size: 1.1rem; font-style: italic; margin-bottom: 1.5rem; }
+.prob-sub-items { display: flex; justify-content: center; gap: 1.5rem; font-size: 0.8rem; color: #8892b0; border-top: 1px dashed rgba(48, 213, 200, 0.3); padding-top: 1rem; }
+
+.status-ok { color: var(--jade); font-weight: bold; }
+.status-destined { color: var(--glow-magenta); font-weight: bold; }
+/* Radar Chart & Glitch Effects */
+.radar-chart-container { position: relative; width: 300px; height: 300px; margin: 1rem auto; background: url(./photos/radar_bg.png) center/cover; transition: transform 0.2s; }
+.system-failure .radar-chart-container { animation: glitch-shake 0.2s infinite; }
+.system-failure .radar-chart-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    z-index: 2;
+    animation: glitch-color 0.5s infinite;
+    left: 2px;
+    mix-blend-mode: color-dodge;
+}
+.radar-chart-container.glitching { animation: glitch-shake 0.2s infinite; }
+.radar-chart-container.glitching::before, .radar-chart-container.glitching::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    z-index: 2;
+}
+.radar-chart-container.glitching::before {
+    animation: glitch-color 0.5s infinite;
+    left: 2px;
+    mix-blend-mode: color-dodge;
+}
+.radar-chart-container.glitching::after {
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+    background-size: 100% 4px;
+    animation: scanlines 0.2s linear infinite;
+    z-index: 3;
+    pointer-events: none;
+}
+#radar-chart { width: 100%; height: 100%; }
+.radar-center-score { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Courier New', monospace; font-size: 2.5rem; font-weight: bold; color: #30d5c8; text-shadow: 0 0 15px #30d5c8; }
+.analysis-summary { margin-top: 1rem; text-align: center; }
+.summary-item-tech { font-family: 'Courier New', monospace; color: #8892b0; margin-bottom: 0.5rem; }
+
+/* Fluctuation Simulator Styles */
+#fluctuation-simulator {
+    grid-column: 2 / 3; /* Place it next to the radar chart */
+}
+.simulator-input-group { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+.simulator-input-group label { font-family: 'Courier New', monospace; color: #8892b0; }
+.simulator-input-group .text-input { background: #020c1b; border-color: #30d5c8; text-align: center; font-size: 1.2rem; }
+
+.simulator-controls { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+#waveform-canvas { background: #020c1b; border-radius: 4px; width: 100%; }
+
+
+@media (min-width: 768px) {
+    /* No change needed, grid handles it */
+}
+
+@media (max-width: 900px) {
+    .love-calculator-container {
+        grid-template-columns: 1fr;
+    }
+    #fluctuation-simulator {
+        grid-column: 1 / -1; /* Stack on mobile */
+    }
+}
+
+/* --- Interactive Physics Calculator Styles --- */
+.interactive-calc {
+    border-style: solid;
+    border-color: #30d5c8;
+    background: rgba(48, 213, 200, 0.05);
+}
+.slider-control {
+    margin-bottom: 1.5rem;
+}
+.slider-control label {
+    display: block;
+    font-family: 'Courier New', monospace;
+    color: #8892b0;
+    margin-bottom: 0.5rem;
+}
+.love-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #020c1b;
+    border: 1px solid #30d5c8;
+    border-radius: 4px;
+    outline: none;
+}
+.love-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #30d5c8;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #30d5c8;
+}
+.interactive-result-box { text-align: center; margin-top: 2rem; padding: 1rem; background: #020c1b; }
+.result-label { font-family: 'Courier New', monospace; color: #8892b0; font-size: 0.9rem; }
+.result-value { font-family: 'Courier New', monospace; color: #30d5c8; font-size: 2.5rem; font-weight: bold; text-shadow: 0 0 15px #30d5c8; margin: 0.5rem 0; transition: text-shadow 0.3s ease; }
+.result-value.updated { text-shadow: 0 0 25px #30d5c8, 0 0 40px #fff; }
+.result-sub-label { font-family: 'Courier New', monospace; color: #8892b0; font-size: 0.8rem; font-style: italic; }
 
 
 #guide-panel .physics-formula {
@@ -919,30 +1121,59 @@ hr {
     animation: pulse-glow 2s infinite alternate;
 }
 #guide-panel .anatomy-display { 
-    display: flex; justify-content: space-around; margin-top: 2rem; 
-    border: 1px dashed rgba(255, 215, 0, 0.3);
-    padding: 1.5rem;
-    border-radius: 10px;
+    display: flex; justify-content: space-around; margin-top: 2rem; padding: 1.5rem; border-radius: 10px;
+    border: 1px solid var(--border-glass); background: var(--highlight-glass);
 }
-#guide-panel .anatomy-figure h4 { color: var(--gold); font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 1rem; }
-#guide-panel .anatomy-point { 
-    margin: 1.2rem 0; cursor: pointer; color: var(--gold-light); font-size: 1.1em;
-    position: relative;
-    padding: 5px 0;
-    transition: all 0.3s ease;
+
+/* --- Anatomy of Us Redesign --- */
+.anatomy-visualization { border: 1px solid var(--border-glass); background: var(--highlight-glass); padding: 2rem; border-radius: 12px; }
+.anatomy-profiles { gap: 2rem; }
+.profile-avatar { transition: transform 0.4s ease; }
+.anatomy-profile:hover .profile-avatar { transform: scale(1.1); }
+.avatar-glow { animation: pulse-glow 4s infinite ease-in-out; }
+.anatomy-point-enhanced { border: 1px solid transparent; transition: var(--transition-fast); }
+.anatomy-point-enhanced:hover { border-color: var(--gold); background: rgba(255, 215, 0, 0.05); transform: translateX(5px); }
+.connection-bridge { flex: 0.5; } /* Give it less space */
+.bridge-heart { animation: pulse-glow 2s infinite, float 4s infinite ease-in-out; }
+.bridge-pulse { position: absolute; width: 15px; height: 15px; background: var(--gold); border-radius: 50%; box-shadow: 0 0 10px var(--gold); opacity: 0; }
+@keyframes pulse-right { 0% { left: 0; opacity: 1; } 100% { left: 100%; opacity: 0; transform: scale(0.5); } }
+@keyframes pulse-left { 0% { right: 0; opacity: 1; } 100% { right: 100%; opacity: 0; transform: scale(0.5); } }
+
+.sync-hearts-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
-#guide-panel .anatomy-point:hover { 
-    color: var(--gold); 
-    text-shadow: 0 0 10px var(--gold);
-    transform: translateX(10px);
+.hearts-to-sync { display: flex; gap: 1rem; font-size: 2rem; }
+.heart-to-sync { cursor: pointer; transition: transform 0.2s; }
+.heart-to-sync:hover { transform: scale(1.2); }
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
 }
-#guide-panel #anatomy-tooltip, #guide-panel #artifact-tooltip { 
-    position: absolute; background: rgba(17, 12, 31, 0.9); padding: 0.8rem 1.2rem; border-radius: 8px; 
-    border: 2px solid var(--gold); display: none; z-index: 100; max-width: 280px; pointer-events: none;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); color: var(--gold-light); line-height: 1.5;
-    font-size: 0.95em;
+
+/* --- Artifacts Redesign --- */
+.artifact-card {
+    background: linear-gradient(145deg, rgba(74,14,78,0.5), rgba(2,4,27,0.7));
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-#guide-panel #anatomy-tooltip strong, #guide-panel #artifact-tooltip strong { color: var(--gold); display: block; margin-bottom: 0.3rem; font-family: var(--font-display); }
+.artifact-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--soft-violet);
+}
+.artifact-rarity { font-family: var(--font-display); letter-spacing: 1px; }
+.artifact-detail-modal .artifact-modal-content { background: linear-gradient(145deg, var(--deep-purple), var(--space-black)); }
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); }
+
 
 #guide-panel .artifact-grid { 
     display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1.5rem; text-align: center; margin-top: 2rem; 
@@ -958,12 +1189,19 @@ hr {
     transform: scale(1.3); color: var(--gold); 
     text-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet); 
 }
-#guide-panel .lexicon-list dt { 
-    font-family: var(--font-display); color: var(--gold); font-size: 1.3rem; margin-top: 1.5rem;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-}
-#guide-panel .lexicon-list dd { color: var(--gold-light); margin-left: 1.5rem; margin-bottom: 1rem; line-height: 1.6; }
 
+/* --- Lexicon Redesign --- */
+.lexicon-list-enhanced .lexicon-entry {
+    border-left: 3px solid var(--glow-cyan);
+    transition: var(--transition-fast);
+}
+.lexicon-list-enhanced .lexicon-entry:hover {
+    background: rgba(100, 255, 218, 0.05);
+    transform: scale(1.02);
+}
+.lexicon-list-enhanced dt { text-shadow: 0 0 5px var(--gold); }
+.lexicon-list-enhanced dd { color: var(--text-primary); }
+.lexicon-usage { background: rgba(100, 255, 218, 0.05); }
 
 /* --- SANCTUARY PANEL --- */
 #nebula-of-solitude {
@@ -1308,11 +1546,12 @@ hr {
 /* =================================================================== */
 
 /* --- Keyframe Animations --- */
-@keyframes sanctuary-glow { 
-    0%, 100% { text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-light), 0 0 5px var(--deep-purple); } 
-    50% { text-shadow: 0 0 25px var(--gold), 0 0 45px var(--soft-violet), 0 0 10px var(--deep-purple); } 
+@keyframes sanctuary-glow {
+    0%, 100% { text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-light), 0 0 5px var(--deep-purple); }
+    50% { text-shadow: 0 0 25px var(--gold), 0 0 45px var(--soft-violet), 0 0 10px var(--deep-purple); }
 }
-@keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; }
+}
 @keyframes pulse-red { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
 
@@ -1336,13 +1575,13 @@ hr {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-#sanctuary-main-container.scrollable-content {
-    align-items: flex-start;
+    /* --- FIX: Allow scrolling for tall content --- */
     overflow-y: auto;
-    padding-top: 80px;
-    padding-bottom: 40px;
+    /* --- FIX: Align content to the top when it overflows --- */
+    align-items: flex-start;
+    padding-top: 4rem;
 }
+/* --- ADD THIS: Ensure parent flex containers allow for scrolling content --- */
 .sanctuary-view {
     display: none;
     width: 100%;
@@ -1350,6 +1589,19 @@ hr {
 }
 .sanctuary-view.active {
     display: block;
+}
+
+/* --- FIX: Center the Guide's threshold content vertically and horizontally --- */
+#guide-threshold.sanctuary-view.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Ensure it takes full height to center vertically */
+}
+
+/* --- ADD THIS: Center the Guide's threshold content like the Sanctuary's --- */
+#guide-threshold .threshold-content {
+    text-align: center;
 }
 
 /* --- 1. Threshold/Riddle View --- */
@@ -1417,6 +1669,7 @@ hr {
     font-family: var(--font-display);
     font-size: clamp(2.5em, 5vw, 3.5em);
     color: var(--gold-light);
+    text-align: center; /* Ensure title is centered */
     margin-bottom: 1.5rem;
     animation: sanctuary-glow 4s infinite;
 }
@@ -1490,26 +1743,150 @@ hr {
 .realm-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem; /* Increased gap for better spacing */
     justify-content: center;
+    margin-bottom: 4rem; /* Added margin to separate grid from back button */
 }
 .realm-portal {
     background: var(--highlight-glass);
     border: 2px solid var(--border-glass);
-    padding: 2rem 1.5rem;
+    padding: 2.5rem 1.5rem; /* Increased padding for more internal space */
     border-radius: 12px;
     cursor: pointer;
     transition: var(--transition-fast);
     aspect-ratio: 1 / 1;
+    position: relative; /* For pseudo-elements */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 .realm-portal:hover {
+    background: rgba(138, 43, 226, 0.15); /* Slightly more pronounced background on hover */
     transform: translateY(-8px) scale(1.03);
     border-color: var(--gold);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px var(--soft-violet);
+}
+.realm-icon { font-size: 3em; margin-bottom: 1rem; }
+.realm-title { font-family: var(--font-display); font-size: 1.5em; color: var(--gold-light); margin-bottom: 0.5rem; }
+.realm-description { color: var(--text-secondary); font-size: 0.9em; }
+
+.book-shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+.sacred-scroll {
+    background: var(--highlight-glass);
+    border: 2px solid var(--border-glass);
+    padding: 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: left;
+}
+.sacred-scroll:hover {
+    background: rgba(138, 43, 226, 0.1); /* Add a subtle background color on hover */
+    transform: translateY(-5px);
+    border-color: var(--gold);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.scroll-icon { font-size: 2.5em; color: var(--gold); flex-shrink: 0; }
+.scroll-text h3 { font-size: 1.2em; color: var(--gold-light); margin: 0 0 0.25rem 0; }
+.scroll-text p { font-size: 0.9em; color: var(--text-secondary); margin: 0; }
+
+/* --- ORNATE SANCTUARY MODAL STYLES --- */
+#blessingModal .modal-content, #bookModal .modal-content {
+    background: linear-gradient(145deg, var(--deep-purple), var(--space-black));
+    border-width: 3px;
+    box-shadow: 0 0 60px var(--soft-violet), 0 0 30px var(--gold), inset 0 0 25px rgba(74, 14, 78, 0.8);
+    max-width: 650px;
+    position: relative;
+    padding-top: 3rem; /* Add padding for corner decorations */
+    padding-bottom: 3rem;
+}
+
+/* Decorative Corners */
+#blessingModal .modal-content::before,
+#blessingModal .modal-content::after,
+#bookModal .modal-content::before,
+#bookModal .modal-content::after {
+    content: '✧';
+    position: absolute;
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-shadow: 0 0 15px var(--gold);
+    line-height: 1;
+    opacity: 0.8;
+}
+#blessingModal .modal-content::before { top: 10px; left: 15px; }
+#blessingModal .modal-content::after { top: 10px; right: 15px; transform: rotate(90deg); }
+#bookModal .modal-content::before { top: 10px; left: 15px; }
+#bookModal .modal-content::after { top: 10px; right: 15px; transform: rotate(90deg); }
+
+/* Bottom Corners */
+.modal-seal::before, .modal-seal::after {
+    content: '✧';
+    position: absolute;
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-shadow: 0 0 15px var(--gold);
+    line-height: 1;
+    opacity: 0.8;
+    bottom: 10px;
+}
+.modal-seal::before { left: 15px; transform: rotate(-90deg); }
+.modal-seal::after { right: 15px; transform: rotate(180deg); }
+
+.modal-seal {
+    width: 60px; height: 60px;
+    margin: 1.5rem auto -1rem auto;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--gold), inset 0 0 10px rgba(255,215,0,0.3);
+    animation: pulse-glow 3s infinite;
+}
+.modal-icon {
+    font-size: 4rem;
+    text-shadow: 0 0 20px var(--gold), 0 0 35px var(--soft-violet);
+    margin-bottom: 1rem;
+}
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 2.5em;
+    text-shadow: 0 0 15px var(--gold);
+}
+.modal-message {
+    font-family: var(--font-body);
+    font-size: 1.2em;
+    line-height: 1.8;
+    color: var(--gold-light);
+    margin: 1.5rem 0;
+}
+.modal-message .promise {
+    font-family: var(--font-body); /* Ensure consistent font */
+    display: block;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 215, 0, 0.05);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    font-size: 1em; /* Make it slightly larger */
+}
+.accept-button {
+    margin-top: 2rem; /* Add space above the accept button */
+}
+.book-modal-content p {
+    font-size: 1.2em; line-height: 1.8; color: var(--gold-light);
+}
+
+.back-to-hub-btn {
+    margin-top: 0; /* Removed top margin as it's now on the grid */
+    margin-bottom: 2rem; /* Add space at the very bottom */
 }
 .realm-icon { font-size: 3em; margin-bottom: 1rem; }
 .realm-title { font-family: var(--font-display); font-size: 1.5em; color: var(--gold-light); margin-bottom: 0.5rem; }
@@ -1546,8 +1923,15 @@ hr {
 .ritual-altar {
     background: var(--highlight-glass);
     border-radius: 8px;
-    padding: 2rem;
+    padding: 2.5rem; /* Increased padding */
     margin-top: 3rem;
+    text-align: center; /* Center align content */
+}
+.ritual-instructions {
+    color: var(--text-secondary);
+    font-style: italic;
+    max-width: 500px; /* Constrain width for better readability */
+    margin: 0 auto 1.5rem auto; /* Center the text block */
 }
 .candles { display: flex; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; }
 .candle { width: 20px; height: 80px; background: #ccc; border-radius: 5px 5px 0 0; position: relative; cursor: pointer; }
@@ -1557,7 +1941,18 @@ hr {
 .oracle-chamber { margin: 2rem 0; }
 .crystal-ball { width: 150px; height: 150px; background: radial-gradient(circle at 30% 30%, #fff, var(--soft-violet)); border-radius: 50%; margin: 0 auto; cursor: pointer; box-shadow: 0 0 30px var(--soft-violet), inset 0 0 20px rgba(255,255,255,0.5); }
 .oracle-prompt { color: var(--text-secondary); margin-top: 1rem; }
-.oracle-text { font-size: 1.4em; color: var(--gold-light); font-family: var(--font-handwriting); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 5px rgba(0, 0, 0, 0.8); min-height: 4em; transition: opacity 0.5s; line-height: 1.6; margin-top: 1rem; }
+.oracle-text {
+    font-family: var(--font-body); /* Use a more readable serif font */
+    font-size: 1.3em;
+    font-style: italic; /* Retain a mystical, spoken feel */
+    color: var(--gold-light);
+    /* Cleaner shadow for better contrast and readability */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6), 0 1px 3px rgba(0,0,0,0.7); 
+    min-height: 4em;
+    transition: opacity 1s ease-in-out;
+    line-height: 1.7;
+    margin-top: 1rem;
+}
 .astral-map { margin-top: 3rem; }
 .astral-map-title { font-size: 1.5rem; margin-bottom: 1rem; color: var(--gold-light); }
 .constellation-canvas { background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border-glass); }
@@ -1688,6 +2083,17 @@ hr {
 /* =================================================================== */
 /* END: REORGANIZED & RESPONSIVE INNER SANCTUM STYLES V2               */
 /* =================================================================== */
+/* --- ADD THIS: Guide Panel Layout --- */
+#guide-panel {
+    width: 100%;
+    /* height: 100%; */ /* REMOVED: This was preventing the panel from scrolling. */
+}
+#guide-main-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the container like other panels. */
+}
+
 
 @media (max-width: 992px) {
     .main-content { padding: 100px 5vw 50px 5vw; } /* ALIGNMENT FIX: Symmetrical padding */
@@ -1745,25 +2151,120 @@ hr {
     #sanctuary-panel .modal-content { padding: 30px 20px; }
     #sanctuary-panel .modal-title { font-size: 2.2em; }
 }
+/* --- ADD THIS: Responsive Menu Button --- */
+@media (max-width: 768px) {
+    #main-menu-button {
+        width: 60px;
+        height: 60px;
+        padding: 4px; /* Adjust padding for smaller button */
+    }
+    #main-menu-container.ready-to-drag::after {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        bottom: -30px; /* Adjust position for smaller button */
+        bottom: var(--tooltip-bottom, -30px);
+    }
+    /* --- ADD THIS: Make dropdown content smaller on mobile --- */
+    #main-menu-dropdown {
+        width: 190px; /* Further reduce width to better fit content */
+        padding: 8px;
+    }
+    #main-menu-dropdown a {
+        font-size: 1rem; /* Reduce font size from 1.1rem */
+        padding: 10px 12px; /* Reduce padding */
+    }
+    /* --- ADD THIS: Make  buttons smaller on mobile --- */
+    .theme-colors-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 8px;
+    }
+}
+
+/* --- ADD THIS: Further reduce menu button size on very small screens --- */
+@media (max-width: 480px) {
+    #main-menu-container {
+        top: 70px;
+        left: 10px;
+    }
+    #main-menu-button {
+        width: 44px;
+        height: 44px;
+        padding: 3px;
+    }
+    /* --- ADD THIS: Further reduce theme button size on very small screens --- */
+    .theme-colors-grid {
+        grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+        gap: 6px;
+    }
+}
 
 #sanctuary-main-container.scrollable-content {
-    align-items: flex-start;
-    /* The max-height and overflow-y properties have been removed */
-    padding-top: 80px;
-    padding-bottom: 40px;
+    align-items: flex-start; /* Align content to the top */
+    padding-top: 80px; /* Add top padding to push content down */
+    padding-bottom: 40px; /* Add bottom padding */
+}
+/* --- ADD THIS: Center Guide Panel content like Sanctuary Panel --- */
+
+/* =================================================================== */
+/* START: CONSTELLATION GUIDE REDESIGN - ASTRAL LIBRARY OF MEMORIES    */
+/* =================================================================== */
+/* Shuffling Animations */
+@keyframes shuffle1 {
+    0%, 100% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    25% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    50% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    75% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
 }
 
-/* Fix: Make the Oracle's text more readable */
-.oracle-text { 
-    font-size: 1.4em; 
-    color: var(--gold-light); 
-    font-family: var(--font-handwriting);
-    /* Enhanced text-shadow for better contrast against the background */
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 5px rgba(0, 0, 0, 0.8); 
-    min-height: 4em;
-    transition: opacity 0.5s;
-    line-height: 1.6;
+@keyframes shuffle2 {
+    0%, 100% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    25% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    50% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    75% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
 }
+
+@keyframes shuffle3 {
+    0%, 100% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    25% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    50% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    75% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+}
+
+@keyframes shuffle4 {
+    0%, 100% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    25% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    50% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    75% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+}
+
+@keyframes shuffle5 {
+    0%, 100% { top: 40%; left: 5%; transform: rotate(8deg) scale(0.85); z-index: 0; }
+    25% { top: 10%; left: 45%; transform: rotate(-8deg) scale(1); z-index: 3; }
+    50% { top: 55%; left: 75%; transform: rotate(12deg) scale(0.9); z-index: 1; }
+    75% { top: 70%; left: 40%; transform: rotate(-12deg) scale(0.95); z-index: 2; }
+}
+
+@keyframes shuffle6 {
+    0%, 100% { top: 10%; left: 45%; transform: rotate(-8deg) scale(1); z-index: 3; }
+    25% { top: 55%; left: 75%; transform: rotate(12deg) scale(0.9); z-index: 1; }
+    50% { top: 70%; left: 40%; transform: rotate(-12deg) scale(0.95); z-index: 2; }
+    75% { top: 40%; left: 5%; transform: rotate(8deg) scale(0.85); z-index: 0; }
+}
+
+/* --- ADD THIS: Guide Entrance Animation --- */
+#guide-entrance-animation .door-image {
+    width: clamp(250px, 40vw, 400px);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 15px var(--gold)) drop-shadow(0 0 25px var(--soft-violet));
+    transition: transform 1.5s ease-in-out, opacity 1.5s ease-in-out;
+}
+#guide-entrance-animation.is-opening .door-image { transform: scale(5); opacity: 0; }
+/* =================================================================== */
+/* =================================================================== */
+/* END: CONSTELLATION GUIDE REDESIGN                                   */
+/* =================================================================== */
+
 /* ADD these styles to the Inner Sanctum section of styles.css */
 
 /* --- Keyframe for Blinking Cursor and Shaking --- */
@@ -2007,7 +2508,7 @@ hr {
     border-radius: 6px;
     cursor: pointer;
     transition: var(--transition-fast);
-    color: black;
+    color: var(--text-primary);
     font-size: 1rem;
 }
 
@@ -2382,6 +2883,7 @@ hr {
     min-width: 160px;
     z-index: 9001;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    
 }
 
 .mood-options.active {
@@ -2389,6 +2891,7 @@ hr {
 }
 
 .mood-option {
+    background: var(--deep-purple);
     padding: 10px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -2706,6 +3209,181 @@ hr {
     background: rgba(138, 43, 226, 0.2);
     border-color: var(--gold);
 }
+
+/* =================================================================== */
+/* START: CONSTELLATION GUIDE REDESIGN - ASTRAL LIBRARY OF MEMORIES    */
+/* =================================================================== */
+
+/* --- Main Guide Panel Container --- */
+#guide-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+/* --- Portal Hub View --- */
+.portal-hub-view {
+    width: 100%;
+    max-width: 1400px;
+    text-align: center;
+}
+
+.celestial-card-shrine {
+    position: relative;
+    width: 100%;
+    height: 550px;
+    margin-top: 3rem;
+    perspective: 1500px;
+}
+
+.celestial-card {
+    position: relative;
+    width: 220px;
+    height: 320px;
+    background: rgba(138, 43, 226, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: transform 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+    transform-style: preserve-3d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4), inset 0 0 15px rgba(138, 43, 226, 0.2);
+    position: absolute;
+    animation-duration: 20s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+.celestial-card:hover {
+    transform: translateY(-15px) scale(1.1) rotateY(5deg) !important; /* Use important to override animation transform */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 25px var(--gold);
+    border-color: var(--gold);
+    animation-play-state: paused;
+}
+
+.celestial-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.card-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 15px var(--gold);
+    transition: text-shadow 0.5s ease;
+}
+
+.celestial-card:hover .card-icon {
+    text-shadow: 0 0 25px var(--gold), 0 0 40px var(--soft-violet);
+}
+
+.card-label {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--gold-light);
+    transition: color 0.5s ease;
+}
+
+.celestial-card:hover .card-label {
+    color: var(--gold);
+}
+
+/* Shuffling Animations */
+@keyframes shuffle1 {
+    0%, 100% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    25% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    50% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    75% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+}
+
+@keyframes shuffle2 {
+    0%, 100% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    25% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    50% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    75% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+}
+
+@keyframes shuffle3 {
+    0%, 100% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    25% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+    50% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    75% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+}
+
+@keyframes shuffle4 {
+    0%, 100% { top: 60%; left: 20%; transform: rotate(5deg) scale(0.95); z-index: 2; }
+    25% { top: 10%; left: 15%; transform: rotate(-5deg) scale(0.9); z-index: 1; }
+    50% { top: 50%; left: 60%; transform: rotate(10deg) scale(1); z-index: 3; }
+    75% { top: 20%; left: 80%; transform: rotate(-10deg) scale(0.8); z-index: 0; }
+}
+
+@keyframes shuffle5 {
+    0%, 100% { top: 40%; left: 5%; transform: rotate(8deg) scale(0.85); z-index: 0; }
+    25% { top: 10%; left: 45%; transform: rotate(-8deg) scale(1); z-index: 3; }
+    50% { top: 55%; left: 75%; transform: rotate(12deg) scale(0.9); z-index: 1; }
+    75% { top: 70%; left: 40%; transform: rotate(-12deg) scale(0.95); z-index: 2; }
+}
+
+@keyframes shuffle6 {
+    0%, 100% { top: 10%; left: 45%; transform: rotate(-8deg) scale(1); z-index: 3; }
+    25% { top: 55%; left: 75%; transform: rotate(12deg) scale(0.9); z-index: 1; }
+    50% { top: 70%; left: 40%; transform: rotate(-12deg) scale(0.95); z-index: 2; }
+    75% { top: 40%; left: 5%; transform: rotate(8deg) scale(0.85); z-index: 0; }
+}
+
+/* --- Individual Section Views (Placeholder) --- */
+.guide-section-view {
+    display: none; /* Hidden by default */
+    width: 100%;
+    animation: fade-in-up 0.8s ease;
+}
+.guide-section-view.active {
+    display: block;
+}
+.back-to-hub-btn {
+    display: block;
+    margin: 0 auto 2rem auto;
+    width: fit-content;
+}
+
+@media (max-width: 992px) {
+    .celestial-card-shrine {
+        height: 700px; /* More vertical space on tablets */
+    }
+}
+
+@media (max-width: 600px) {
+    .celestial-card-shrine {
+        height: 800px; /* Even more vertical space on mobile */
+        margin-top: 1rem;
+    }
+    .celestial-card {
+        width: 180px;
+        height: 260px;
+        margin: 0 auto;
+    }
+}
+
+/* =================================================================== */
+/* END: CONSTELLATION GUIDE REDESIGN                                   */
+/* =================================================================== */
+
 
 .option-btn.selected {
     background: rgba(255, 215, 0, 0.2);
@@ -3558,6 +4236,14 @@ hr {
     padding: 2rem;
     border-radius: 12px;
     border-left: 4px solid var(--soft-violet);
+}
+
+.universe-reading-view .chapter-title {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 1rem;
 }
 
 .chapter-text {
@@ -5113,6 +5799,431 @@ hr {
     font-size: 3rem;
     animation: spin 20s linear infinite;
 }
+/* --- OBSERVATORY STYLES (INTEGRATED) --- */
+#tab-observatory {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    perspective: 1500px; /* Added for 3D transforms */
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    cursor: grab;
+}
+
+/* When the observatory is active, force its containers to be full-screen. */
+.main-content.observatory-active,
+.main-content.observatory-active #guide-panel,
+.main-content.observatory-active #guide-main-container,
+.main-content.observatory-active #guide-sections-view {
+    padding: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+}
+
+/* Telescope Frame - Top Right */
+#telescope-frame {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    width: 200px; /* Made smaller */
+    height: 200px; /* Made smaller */
+    z-index: 10;
+    filter: drop-shadow(0 0 15px var(--soft-violet)); /* Changed from filter */
+    pointer-events: all; /* Make it clickable */
+    cursor: pointer; /* Show pointer on hover */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s ease;
+    
+    /* 3D Frame Styles */
+    transform: rotateX(5deg); /* Changed for 'well-oriented' 3D look */
+    border: 8px solid var(--deep-purple);
+    /* box-shadow: 0 10px 30px var(--shadow-color), inset 0 0 10px var(--shadow-color); */ /* Removed shadow */
+    background: var(--space-black);
+    border-radius: 10px;
+}
+
+#telescope-frame:hover {
+    transform: scale(1.05) rotateX(0deg); /* Flattens on hover */
+}
+
+#telescope-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ensure the image scales correctly */
+    border-radius: 2px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+
+/* Memory Markers in 3D Space */
+.memory-marker {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 5;
+    pointer-events: all;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s;
+}
+
+.memory-marker:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+}
+
+.memory-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    animation: ringPulse 2s ease-in-out infinite;
+}
+
+.memory-ring::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--gold);
+}
+
+@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.5); opacity: 1; }
+}
+
+.memory-label {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--holoscreen-bg);
+    color: var(--gold);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    border: 1px solid var(--border-glass);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.memory-marker:hover .memory-label {
+    opacity: 1;
+}
+
+/* Controls */
+#controls {
+    position: fixed;
+    top: 20px;
+    right: 30px; /* Moved to top-right */
+    background: var(--holoscreen-bg);
+    border: 2px solid var(--border-glass);
+    border-radius: 15px;
+    padding: 20px;
+    z-index: 11; /* Changed to be ON TOP of telescope */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px var(--border-glass);
+    width: 220px; /* Set fixed width */
+    
+    /* 3D Card & Hidden State */
+    opacity: 0;
+    visibility: hidden;
+    transform: rotateY(-30deg) scale(0.9);
+    transform-origin: top right; /* Changed transform origin */
+    transition: all 0.4s ease-out;
+}
+
+#controls.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: rotateY(0deg) scale(1);
+    /* REMOVED right: 240px; to make it appear on top of telescope */
+}
+
+
+/* --- ADDED: Full Observatory Control Styling --- */
+#controls h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: var(--glow-cyan);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.control-section {
+    margin-bottom: 15px;
+}
+
+.control-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.control-btn {
+    background: var(--highlight-glass);
+    border: 1px solid var(--border-glass);
+    color: var(--glow-cyan);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: var(--highlight-glass);
+    box-shadow: 0 0 15px var(--glow-cyan);
+    color: var(--gold-light);
+    transform: scale(1.05);
+}
+
+.control-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(0,0,0,0.1);
+    border-color: rgba(255,255,255,0.1);
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.hud-info {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.hud-info div {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.hud-label {
+    color: var(--text-secondary);
+}
+
+.hud-value {
+    color: var(--glow-cyan);
+    font-weight: 600;
+}
+
+/* Story Modal */
+#story-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    background: var(--space-black);
+    border: 3px solid var(--gold);
+    border-radius: 20px;
+    padding: 50px;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 0 0 80px var(--gold);
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#story-modal.active {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+#story-modal h2 {
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 0 0 20px var(--gold);
+}
+
+.story-date {
+    color: var(--glow-cyan);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 25px;
+    font-style: italic;
+    letter-spacing: 2px;
+}
+
+.story-content {
+    color: var(--text-primary);
+    line-height: 1.9;
+    font-size: 15px;
+    text-align: justify;
+    font-family: 'Georgia', serif;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.3s, color 0.3s;
+    font-weight: 300;
+}
+
+.close-btn:hover {
+    transform: rotate(90deg);
+    color: var(--gold-light);
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--space-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.5s;
+}
+
+#loading.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader {
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+/* Made selector more specific */
+#tab-observatory .back-button {
+    position: fixed;
+    top: 235px; /* Positioned below telescope (20px top + 200px height + 15px margin) */
+    left: auto; /* Remove left positioning */
+    right: 30px; /* Align with telescope's right edge */
+    transform: none; /* Removed translateX */
+    bottom: auto; /* Removed bottom positioning */
+    z-index: 10;
+    padding: 14px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    background: var(--holoscreen-bg);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 0 15px var(--gold);
+    backdrop-filter: blur(10px);
+}
+
+/* Made selector more specific */
+#tab-observatory .back-button:hover {
+    background: var(--highlight-glass);
+    box-shadow: 0 0 25px var(--gold);
+    transform: translateY(-2px); /* Removed translateX */
+}
+
+@media (max-width: 768px) {
+    #controls {
+        width: 180px;
+        max-width: calc(100% - 20px);
+        left: auto; /* Removed 50% */
+        top: 10px; /* Align with telescope */
+        right: 10px; /* Align with telescope */
+        transform: rotateY(-30deg) scale(0.9); /* Use 3D transform */
+        transform-origin: top right; /* Set origin */
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease-out;
+    }
+
+    #controls.visible {
+        transform: rotateY(0deg) scale(1); /* Animate in */
+        opacity: 1;
+        visibility: visible;
+        right: 10px;
+    }
+    
+    #telescope-frame {
+        display: flex; /* Changed from none */
+        width: 100px; /* Smaller for mobile */
+        height: 100px;
+        top: 10px;
+        right: 10px;
+        /* 3D Frame Styles for Mobile */
+        transform: none; /* Changed for 'well-oriented' 3D look */
+        border: 6px solid var(--deep-purple);
+        /* box-shadow: 0 5px 20px var(--shadow-color), inset 0 0 8px var(--shadow-color); */ /* Removed shadow */
+        background: var(--space-black);
+        border-radius: 8px;
+    }
+    
+    #story-modal {
+        padding: 35px 25px;
+    }
+
+    /* Made selector more specific */
+    #tab-observatory .back-button {
+        bbottom: auto; /* Removed bottom positioning */
+        left: auto; /* Remove left positioning */
+        right: 10px; /* Align with telescope's right edge */
+        top: 120px; /* Position below telescope (10px top + 100px height + 10px margin) */
+        transform: none; /* Removed transform */
+        padding: 6px 1px;
+        font-size: 0.6rem;
+    }
+}
+
+
 
 /* --- ADD THIS --- */
 #portal-particles {

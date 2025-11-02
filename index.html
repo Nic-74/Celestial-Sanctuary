@@ -11,9 +11,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&family=Orbitron:wght@400;700&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cinzel&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="chinese_aesthetics.css">
 </head>
 <body>
     <div id="landing-gate">
@@ -26,10 +29,10 @@
         </div>
         <div class="gate-container">
             <div class="gate-content">
-                <h1 class="main-title">NINI & ZOYA</h1>
+                <h1 class="main-title">NINI & 卓雅</h1>
                 <h2 class="subtitle">THE CELESTIAL SANCTUARY</h2>
                 <p class="description">Two souls from different corners of the world, brought together in Japan, finding love in the most unexpected way. A whisper of fate in the quiet alleys of Kyoto, a chance encounter under the Sakura trees, blooming into a love that transcends borders and time.</p>
-                <p class="countries">Uganda <span class="heart-icon">❤</span> China</p>
+                <p class="countries">Uganda <a href="#observatory-direct" id="heart-portal" class="heart-icon" style="text-decoration: none;">❤</a> China</p>
                 <p class="prophecy">IN A UNIVERSE OF INFINITE POSSIBILITIES, OUR SOULS FOUND EACH OTHER. THAT'S NOT COINCIDENCE—IT'S DESTINY.</p>
                 <p class="prompt">Click anywhere to enter the sanctuary...</p>
             </div>
@@ -171,15 +174,14 @@
             <img id="menu-icon-img" src="photos/favicon1.png" alt="Open Menu">
         </button>
         <div id="main-menu-dropdown">
-            <a href="#home" onclick="closeMenu()">Home (Solar System)</a>
+            <a href="#home" onclick="closeMenu()">Solar System</a>
             <a href="#games" onclick="closeMenu()">Orion's Challenges</a>
-            <hr>
             <a href="#timeline" onclick="closeMenu()">Our Chronicle</a>
             <a href="#book" onclick="closeMenu()">The Stardust Tome</a>
             <a href="#gallery" onclick="closeMenu()">Gallery of Ages</a>
-            <a href="#guide" onclick="closeMenu()">Constellation Guide</a>
+            <a href="#guide" onclick="closeMenu(); returnToGuideHub();">Constellation Guide</a>
             <a href="#universes" onclick="closeMenu()">Alternate Chronicles</a>
-            <a href="#voicegarden" onclick="closeMenu()">⭐ Voice Garden</a>
+            <a href="#voicegarden" onclick="closeMenu()">Voice Garden</a>
             <a href="#sanctuary" onclick="closeMenu()">Inner Sanctum</a>
         </div>
     </div>
@@ -257,7 +259,18 @@
             const menuIcon = document.getElementById('menu-icon-img');
             if (menuDropdown) menuDropdown.classList.remove('visible');
             if (menuIcon) menuIcon.src = 'photos/favicon1.png';
+
+            // --- ADDED: Also hide the theme selector when the menu is closed ---
+            const themeContainer = document.querySelector('.theme-colors-grid');
+            const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+            if (themeContainer) {
+                themeContainer.style.display = 'none';
+            }
+            if (themeToggleBtn) {
+                themeToggleBtn.classList.remove('active');
+            }
         }
     </script>
+    <script src="chinese_enhancements.js"></script>
 </body>
 </html>
