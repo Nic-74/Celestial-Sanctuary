@@ -1557,6 +1557,13 @@ function initSpiralAnimation(canvasId, options = {}) {
     if (isMain && AppState.spiralAnimationMainId) cancelAnimationFrame(AppState.spiralAnimationMainId);
     if (!isMain && AppState.spiralAnimationLandingId) cancelAnimationFrame(AppState.spiralAnimationLandingId);
 
+    // --- PERFORMANCE: Respect reduced motion preference ---
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // Clear the canvas and do not start the animation
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        return;
+    }
+
     // Respect reduced motion
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1578,7 +1585,7 @@ function initSpiralAnimation(canvasId, options = {}) {
     let cx = center().x, cy = center().y;
 
     const intensity = options.intensity || 'subtle';
-    const counts = { subtle: 60, moderate: 110, strong: 180 };
+    const counts = { subtle: 40, moderate: 80, strong: 150 }; // Reduced particle counts
     const baseCount = counts[intensity] || 60;
 
     const colors = options.colors || ['rgba(255,215,0,0.95)', 'rgba(138,43,226,0.9)', 'rgba(100,255,218,0.9)'];
@@ -1593,7 +1600,7 @@ function initSpiralAnimation(canvasId, options = {}) {
         reset(initial = false) {
             this.t = (Math.random() * 6) - 3; // parameter along spiral
             this.offset = Math.random() * Math.PI * 2;
-            this.speed = (0.002 + Math.random() * 0.006) * (initial ? 0.6 : 1);
+            this.speed = (0.0015 + Math.random() * 0.005) * (initial ? 0.6 : 1); // Slightly slower
             this.size = 0.6 + Math.random() * 3.2;
             this.color = colors[Math.floor(Math.random() * colors.length)];
             this.alpha = 0.06 + Math.random() * 0.6;
@@ -1630,12 +1637,6 @@ function initSpiralAnimation(canvasId, options = {}) {
     function animate(now) {
         const dt = Math.min(40, now - last); last = now;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // subtle radial vignette to soften edges
-        const grad = ctx.createRadialGradient(cx, cy, Math.min(cx, cy) * 0.2, cx, cy, Math.max(cx, cy));
-        grad.addColorStop(0, 'rgba(0,0,0,0)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.35)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
 
         particles.forEach(p => { p.update(dt); p.draw(); });
 
@@ -5538,10 +5539,6 @@ function applyTheme(themeName) {
   const theme = THEME_COLORS[themeName];
   if (!theme) return;
 
-  Object.entries(theme.colors).forEach(([key, value]) => {
-    document.documentElement.style.setProperty(key, value, 'important');
-  });
-
   const bgContainers = document.querySelectorAll('.background-container');
   bgContainers.forEach(container => {
     container.style.background = theme.bgGradient;
@@ -5826,7 +5823,7 @@ function openUniverse(universeId) {
     const universe = ALTERNATE_UNIVERSES.find(u => u.id === universeId);
     if (!universe) return;
 
-    const panel = document.querySelector('#universe-panel');
+    const panel = document.getElementById('universe-panel');
     if (!panel) return;
 
     if (universe.chapters.length === 0) {
@@ -5842,19 +5839,19 @@ function openUniverse(universeId) {
                 <h2 class="panel-header">${universe.icon} ${universe.title}</h2>
                 <h3 style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">${universe.era}</h3>
                 
-                <div class="universe-premise-full" style="background: var(--highlight-glass); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--gold); margin-bottom: 2rem;">
-                    <h4 style="color: var(--gold); margin-bottom: 1rem;">The Premise</h4>
-                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">${universe.premise}</p>
+                <div class="universe-premise-full">
+                    <h4>The Premise</h4>
+                    <p>${universe.premise}</p>
                 </div>
 
-                <div class="universe-characters" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.nic.name}</h4>
-                        <p style="color: var(--text-secondary);">${universe.characters.nic.role}</p>
+                <div class="universe-characters">
+                    <div class="character-card">
+                        <h4>${universe.characters.nic.name}</h4>
+                        <p>${universe.characters.nic.role}</p>
                     </div>
-                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.zoya.name}</h4>
-                        <p style="color: var(--text-secondary);">${universe.characters.zoya.role}</p>
+                    <div class="character-card">
+                        <h4>${universe.characters.zoya.name}</h4>
+                        <p>${universe.characters.zoya.role}</p>
                     </div>
                 </div>
             </div>`;
@@ -5880,14 +5877,14 @@ function openUniverse(universeId) {
                 <h2 class="panel-header">${universe.icon} ${universe.title}</h2>
                 <h3 style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">${universe.era}</h3>
 
-                <div class="universe-characters" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.nic.name}</h4>
-                        <p style="color: var(--text-secondary);">${universe.characters.nic.role}</p>
+                <div class="universe-characters">
+                    <div class="character-card">
+                        <h4>${universe.characters.nic.name}</h4>
+                        <p>${universe.characters.nic.role}</p>
                     </div>
-                    <div style="background: var(--highlight-glass); padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${universe.characters.zoya.name}</h4>
-                        <p style="color: var(--text-secondary);">${universe.characters.zoya.role}</p>
+                    <div class="character-card">
+                        <h4>${universe.characters.zoya.name}</h4>
+                        <p>${universe.characters.zoya.role}</p>
                     </div>
                 </div>
 

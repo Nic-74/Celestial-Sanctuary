@@ -312,7 +312,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5em;
+    gap: 0.2em 0.5em; /* Add row-gap for wrapping */
     flex-wrap: wrap; /* Allow wrapping on small screens */
     
     /* Override text styles, as they are now on the spans */
@@ -349,6 +349,6 @@
     color: var(--crimson);
     text-shadow: 0 0 15px var(--crimson);
     opacity: 0.8;
-    align-self: center; /* Vertically center the ampersand */
-    padding-bottom: 1rem; /* Adjust alignment */
+    align-self: baseline; /* Align with the bottom of the text */
+    padding-bottom: 0.2em; /* Adjust alignment relative to font size */
 }

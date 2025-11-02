@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const heartLink = countries.querySelector('a');
             if (heartLink) {
                 const heartHTML = heartLink.outerHTML;
-                countries.innerHTML = `乌干达共和国 <span class='portal-character'>缘</span> ${heartHTML} <span class='portal-character'>爱</span> 中国`;
+                countries.innerHTML = `乌干达共和国 <span class='portal-character'>缘</span> ${heartHTML} <span class='portal-character'>爱</span> <span style="white-space: nowrap;">中国</span>`;
             }
         }
 
