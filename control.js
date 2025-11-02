@@ -1202,9 +1202,6 @@ function makeMenuDraggable() {
     let longPressTimer;
 
     const onDragStart = (e) => {
-        // Prevent default behaviors like text selection or page scrolling on touch
-        e.preventDefault();
-        
         longPressTimer = setTimeout(() => {
             isReadyToDrag = true;
             menuContainer.classList.add('ready-to-drag');
@@ -1236,6 +1233,9 @@ function makeMenuDraggable() {
             return;
         }
         
+        // Prevent default behaviors (like scrolling) ONLY when dragging starts.
+        e.preventDefault();
+
         // This is the actual dragging part
         isDragging = true;
         e.stopPropagation(); // Prevent menu click while dragging

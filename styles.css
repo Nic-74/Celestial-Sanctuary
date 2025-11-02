@@ -1692,7 +1692,7 @@ hr {
 .hub-choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 1.5rem; /* Increased gap for better spacing */
 }
 .hub-choice-btn {
     background: transparent;
@@ -1713,9 +1713,6 @@ hr {
     border-color: var(--gold);
     color: var(--gold);
     transform: translateY(-3px);
-}
-.hub-choice-btn:last-child {
-    grid-column: 1 / -1; /* Make last button span full width */
 }
 
 .realm { display: none; margin-bottom: 4rem; }
@@ -2139,7 +2136,11 @@ hr {
     #sanctuary-panel .section-title::before, #sanctuary-panel .section-title::after { display: none; }
     #sanctuary-panel .choice-button { flex-basis: 100%; }
     #sanctuary-panel .subtitle, #sanctuary-panel .prophecy-text { text-align: center; }
-    #sanctuary-panel .question-box { text-align: center; }
+    /* --- FIX: Make hub choices stack on mobile --- */
+    #sanctuary-panel .hub-choices {
+        grid-template-columns: 1fr;
+    }
+    #sanctuary-panel .question-box { text-align: center; } /* This rule seems to be a duplicate, but leaving it is harmless */
     #sanctuary-panel .sacred-scroll { padding: 30px; }
     #sanctuary-panel .enter-button:hover { transform: translate(-50%, -50%) scale(1.05); }
     #sanctuary-panel .modal-content { padding: 30px 20px; }
@@ -5378,7 +5379,7 @@ hr {
 
 .universe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Reduced min-width */
     gap: 2rem;
     margin-top: 2rem;
 }
@@ -6227,7 +6228,7 @@ input[type="range"] {
 
 .universe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Reduced min-width */
     gap: 2rem;
     margin-top: 2rem;
 }
