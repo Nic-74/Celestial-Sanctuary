@@ -1,0 +1,195 @@
+/* =================================================================== */
+/* MODULE: DISCOVER
+/* (css/modules/discover.css)
+/* =================================================================== */
+
+.discover-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.discover-filters {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.discover-card {
+    background: var(--highlight-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: var(--transition-fast);
+}
+
+.discover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border-color: var(--gold);
+}
+
+.discover-card-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--gold);
+}
+
+.discover-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.discover-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.discover-card-title {
+    font-family: var(--font-display);
+    color: var(--gold);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.discover-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.status-planned { background-color: rgba(9, 132, 227, 0.2); color: #74b9ff; border: 1px solid #74b9ff; }
+.status-wishlist { background-color: rgba(162, 155, 254, 0.2); color: #a29bfe; border: 1px solid #a29bfe; }
+.status-visited { background-color: rgba(85, 239, 196, 0.2); color: #55efc4; border: 1px solid #55efc4; }
+
+.discover-status-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px currentColor;
+}
+.discover-status-badge.cycling {
+    animation: pulse-glow 0.5s ease-out;
+}
+
+
+.discover-card-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.discover-card-description {
+    flex-grow: 1;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+    overflow-wrap: break-word; 
+}
+
+.discover-card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.discover-card-actions .btn {
+    flex-grow: 1;
+}
+
+.discover-card-actions .btn-icon {
+    margin-right: 8px;
+}
+
+.discover-card-actions .btn-icon-only {
+    flex-grow: 0; 
+    flex-basis: 40px;
+    padding: 8px;
+    min-width: 40px;
+}
+
+.discover-card-actions .btn-icon-only .btn-icon {
+    margin-right: 0;
+}
+
+/* Styles for Photo Upload in Discover Modal */
+.discover-photo-upload-area {
+    margin-top: 1rem;
+    background: rgba(0,0,0,0.2);
+    border: 2px dashed var(--border-glass);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.discover-photo-upload-area:hover {
+    border-color: var(--gold);
+    background: rgba(0,0,0,0.3);
+}
+.discover-photo-upload-area.has-photo {
+    background-size: cover;
+    background-position: center;
+}
+
+.discover-photo-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 1rem;
+    min-height: 50px; /* Reserve space */
+}
+
+.discover-preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.discover-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.discover-preview-delete {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--crimson);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Responsive Modal Layout */
+@media (max-width: 768px) {
+    .discover-modal-layout {
+        grid-template-columns: 1fr;
+    }
+}

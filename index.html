@@ -3,112 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nini & Zoya - The Celestial Sanctuary</title>
-    
-    <link rel="icon" type="image/png" href="photos/favicon1.png">
+    <title>Nini & Zoya's Celestial Sanctuary</title>
+    <link rel="icon" href="photos/favicon1.png" type="image/png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&family=Orbitron:wght@400;700&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cinzel&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Dancing+Script:wght@400;700&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
     
-    <!-- 
-      Blocking script to prevent Flash of Unstyled Content (FOUC).
-      This script reads the saved theme from localStorage and applies the
-      core background color and theme variables before the page renders.
-    -->
-    <script>
-      (function() {
-        const THEMES = {
-          mystical: { bodyBg: '#02041b', colors: { '--space-black': '#02041b', '--deep-purple': '#4a0e4e', '--gold': '#ffd700', '--gold-light': '#fff3c4', '--soft-violet': '#8a2be2', '--crimson': '#dc143c', '--jade': '#00a86b', '--text-primary': '#e6f1ff', '--text-secondary': '#8892b0', '--holoscreen-bg': 'rgba(10, 25, 47, 0.85)', '--highlight-glass': 'rgba(4, 24, 61, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.1)', '--glow-cyan': '#64ffda', '--glow-magenta': '#f779dd', '--shadow-color': 'rgba(0, 0, 0, 0.7)' } },
-          ethereal: { bodyBg: '#0a1628', colors: { '--space-black': '#0a1628', '--deep-purple': '#0a2540', '--gold': '#64ffda', '--gold-light': '#a8ffff', '--soft-violet': '#5a7dbf', '--crimson': '#ff6b9d', '--jade': '#4ecdc4', '--text-primary': '#d4f1f9', '--text-secondary': '#7fb3d5', '--holoscreen-bg': 'rgba(10, 37, 64, 0.85)', '--highlight-glass': 'rgba(10, 60, 100, 0.6)', '--border-glass': 'rgba(100, 255, 218, 0.15)', '--glow-cyan': '#64ffda', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 10, 20, 0.8)' } },
-          sunset: { bodyBg: '#2c1810', colors: { '--space-black': '#2c1810', '--deep-purple': '#2c1e3e', '--gold': '#ff9f43', '--gold-light': '#ffc857', '--soft-violet': '#d94369', '--crimson': '#ff6348', '--jade': '#ffa500', '--text-primary': '#ffe8cc', '--text-secondary': '#d4a574', '--holoscreen-bg': 'rgba(44, 30, 62, 0.85)', '--highlight-glass': 'rgba(90, 40, 60, 0.6)', '--border-glass': 'rgba(255, 159, 67, 0.15)', '--glow-cyan': '#ffb347', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } },
-          forest: { bodyBg: '#0d1f16', colors: { '--space-black': '#0d1f16', '--deep-purple': '#1a3a2a', '--gold': '#2ecc71', '--gold-light': '#58d68d', '--soft-violet': '#27ae60', '--crimson': '#e74c3c', '--jade': '#16a085', '--text-primary': '#b8e6d5', '--text-secondary': '#7fb3a0', '--holoscreen-bg': 'rgba(26, 58, 42, 0.85)', '--highlight-glass': 'rgba(22, 80, 60, 0.6)', '--border-glass': 'rgba(46, 204, 113, 0.15)', '--glow-cyan': '#58d68d', '--glow-magenta': '#e74c3c', '--shadow-color': 'rgba(0, 0, 0, 0.85)' } },
-          midnight: { bodyBg: '#0f0f1e', colors: { '--space-black': '#0f0f1e', '--deep-purple': '#1a1a2e', '--gold': '#e0e0e0', '--gold-light': '#ffffff', '--soft-violet': '#6b5b95', '--crimson': '#c91f16', '--jade': '#88c540', '--text-primary': '#f0f0f0', '--text-secondary': '#b0b0b0', '--holoscreen-bg': 'rgba(26, 26, 46, 0.85)', '--highlight-glass': 'rgba(30, 30, 60, 0.6)', '--border-glass': 'rgba(200, 200, 200, 0.1)', '--glow-cyan': '#e0e0e0', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.95)' } },
-          coral: { bodyBg: '#2d1b24', colors: { '--space-black': '#2d1b24', '--deep-purple': '#2d1b3d', '--gold': '#ff7b54', '--gold-light': '#ffa270', '--soft-violet': '#ff6b9d', '--crimson': '#c0392b', '--jade': '#26c281', '--text-primary': '#ffd9c9', '--text-secondary': '#d4a5a0', '--holoscreen-bg': 'rgba(45, 27, 45, 0.85)', '--highlight-glass': 'rgba(70, 30, 50, 0.6)', '--border-glass': 'rgba(255, 123, 84, 0.15)', '--glow-cyan': '#ffa270', '--glow-magenta': '#ff6b9d', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } },
-          royal: { bodyBg: '#21182F', colors: { '--space-black': '#21182F', '--deep-purple': '#402A50', '--gold': '#FFD700', '--gold-light': '#FFF0B3', '--soft-violet': '#A978D0', '--crimson': '#e74c3c', '--jade': '#50C878', '--text-primary': '#EADCF8', '--text-secondary': '#A090B0', '--holoscreen-bg': 'rgba(33, 24, 47, 0.85)', '--highlight-glass': 'rgba(64, 42, 80, 0.6)', '--border-glass': 'rgba(255, 215, 0, 0.15)', '--glow-cyan': '#FFD700', '--glow-magenta': '#A978D0', '--shadow-color': 'rgba(0, 0, 0, 0.85)' } },
-          ocean: { bodyBg: '#001a33', colors: { '--space-black': '#001a33', '--deep-purple': '#003d66', '--gold': '#00d9ff', '--gold-light': '#66f2ff', '--soft-violet': '#0099cc', '--crimson': '#ff3366', '--jade': '#00cc99', '--text-primary': '#ccf2ff', '--text-secondary': '#66b3cc', '--holoscreen-bg': 'rgba(0, 61, 102, 0.85)', '--highlight-glass': 'rgba(0, 100, 150, 0.6)', '--border-glass': 'rgba(0, 217, 255, 0.15)', '--glow-cyan': '#00d9ff', '--glow-magenta': '#ff3366', '--shadow-color': 'rgba(0, 0, 0, 0.9)' } }
-        };
-
-        try {
-          const savedThemeName = localStorage.getItem('selectedTheme') || 'mystical'; // Default theme
-          const theme = THEMES[savedThemeName] || THEMES.mystical;
-          const root = document.documentElement;
-
-          // Set the background color directly on the body and the background container to prevent any flash.
-          // We use a <style> tag because the body/div elements don't exist yet.
-          const style = document.createElement('style');
-          style.textContent = `
-            body { background-color: ${theme.bodyBg}; }
-            .background-container { background: ${theme.bodyBg}; } /* Set a solid color first */
-          `;
-          document.head.appendChild(style);
-
-          // Set all the CSS variables for the rest of the page to use.
-          if (theme.colors) {
-            for (const [key, value] of Object.entries(theme.colors)) {
-              root.style.setProperty(key, value);
-            }
-          }
-        } catch (e) {
-          console.error('Error applying initial theme:', e);
-        }
-      })();
-    </script>
-
-    <!-- Theme variables are now applied by control.js and initThemeSystem() -->
-
-    <link rel="stylesheet" href="chinese_aesthetics.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/common.css">
+    
+    <link rel="stylesheet" href="css/chinese_aesthetics.css">
 </head>
 <body>
-    <div id="landing-gate">
-        <div class="background-container">
-            <div class="stars-bg"></div>
-            <div class="chinese-pattern"></div>
-            <canvas id="web-canvas-landing"></canvas>
-            <canvas id="landing-particles-canvas"></canvas>
-            <canvas id="spiral-canvas-landing" aria-hidden="true"></canvas>
-        </div>
+
+    <div class="background-container">
+        <canvas id="web-canvas-landing"></canvas>
+        <canvas id="spiral-canvas-landing"></canvas>
+        <canvas id="landing-particles-canvas"></canvas>
+    </div>
+
+    <section id="landing-gate">
         <div class="gate-container">
             <div class="gate-content">
-                <h1 class="main-title">NINI & 卓雅</h1>
-                <h2 class="subtitle">THE CELESTIAL SANCTUARY</h2>
-                <p class="description">Two souls from different corners of the world, brought together in Japan, finding love in the most unexpected way. A whisper of fate in the quiet alleys of Kyoto, a chance encounter under the Sakura trees, blooming into a love that transcends borders and time.</p>
-                <p class="countries">Uganda <a href="#observatory-direct" id="heart-portal" class="heart-icon" style="text-decoration: none;">❤</a> China</p>
-                <p class="prophecy">IN A UNIVERSE OF INFINITE POSSIBILITIES, OUR SOULS FOUND EACH OTHER. THAT'S NOT COINCIDENCE—IT'S DESTINY.</p>
-                <p class="prompt">Click anywhere to enter the sanctuary...</p>
+                <h1 class="main-title">Nini & Zoya</h1>
+                <p class="subtitle">A Celestial Sanctuary</p>
+                <p class="description">
+                    "From the moment our paths crossed at that sports festival, a new universe was born. This is a living archive of that universe—a world built on shared memories, quiet understanding, and a love that spans across time and space."
+                </p>
+                <div class="countries">
+                    Uganda <span class="heart-icon">💖</span> China
+                </div>
+                <p class="prophecy">
+                    "Two souls, one orbit, bound by a gravity stronger than any star."
+                </p>
+                <p class="prompt">[ Click anywhere to Enter ]</p>
+                
+                <a href="#observatory-direct" id="heart-portal" style="text-decoration: none; color: var(--gold); margin-top: 2rem; display: inline-block; font-family: var(--font-display);">
+                    Or, journey directly to the 🔭 Observatory
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 
     <main id="celestial-sanctuary" style="display: none;">
         <div class="background-container">
-            <div class="stars-bg"></div>
-            <div class="chinese-pattern"></div>
             <canvas id="web-canvas-main"></canvas>
+            <canvas id="spiral-canvas-main"></canvas>
             <canvas id="particles-canvas"></canvas>
-            <canvas id="spiral-canvas-main" aria-hidden="true"></canvas>
         </div>
+
+        <div id="mood-sync-bar">
+            <div id="mood-sync-content">
+                
+                <div class="mood-selector">
+                    <span class="mood-label">Nic:</span>
+                    <div class="mood-picker-dropdown">
+                        <button id="nic-current-mood" class="current-mood-btn">
+                            <span class="mood-emoji">✨</span>
+                            <span class="mood-name">Neutral</span>
+                        </button>
+                        <div id="nic-mood-options" class="mood-options"></div>
+                    </div>
+                </div>
+                
+                <div class="mood-center">
+                    <div class="combined-mood-display">
+                        <span class="combined-icon">💕</span>
+                        <span class="combined-text">Neutral / Neutral</span>
+                    </div>
+                    <canvas id="mood-particles"></canvas>
+                </div>
+
+                <div class="mood-settings">
+                    <label class="switch" title="Toggle Mood Sync">
+                        <input type="checkbox" id="mood-sync-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="mood-selector">
+                    
+                    <div class="mood-picker-dropdown">
+                        <button id="zoya-current-mood" class="current-mood-btn">
+                            <span class="mood-emoji">✨</span>
+                            <span class="mood-name">Neutral</span>
+                        </button>
+                        <div id="zoya-mood-options" class="mood-options"></div>
+                    </div>
+                    <span class="mood-label">Zoya:</span>
+                </div>
+
+            </div>
+            </div>
         
-        <div id="book-password-gate" class="modal">
-            <div class="modal-content" style="max-width: 500px; text-align: center;">
-                <div class="tome-lock-icon"></div>
-                <h2 class="tome-title">Protected Memory Vault</h2>
-                <p class="tome-subtitle">This sacred tome requires our secret key to unlock.</p>
-                <label class="speak-words-label">Speak the Words</label>
-                <input type="password" id="book-password-input" class="text-input tome-input" placeholder="Enter Secret Key">
-                <button class="btn primary tome-unlock-btn" id="unlock-book-btn">
-                    <span class="btn-icon">🔑</span>Unlock Tome
-                </button>
-                <p class="hint-text">Hint: The four words that define our love, all lowercase, no spaces.</p>
+        <button id="mood-sync-visibility-toggle" title="Toggle Mood Bar">
+            <span>▼</span>
+        </button>
+        <div id="mood-recommendation-popup" class="mood-popup">
+            <div class="mood-popup-content">
+                <button class="mood-popup-close">×</button>
+                <div class="mood-popup-icon">✨</div>
+                <h4 class="mood-popup-title">Cosmic Guidance</h4>
+                <p class="mood-popup-message">The stars sense your combined mood. Would you like to be guided?</p>
+                <button class="btn primary mood-popup-action" data-target="home">Guide Me</button>
             </div>
         </div>
-        
+
+        <div id="main-menu-container">
+            <div id="main-menu-button">
+                <img id="menu-icon-img" src="photos/favicon1.png" alt="Menu">
+            </div>
+            <nav id="main-menu-dropdown">
+                <a href="#home" onclick="closeMenu()">Home</a>
+                <a href="#chronicle" onclick="closeMenu()">Our Chronicle</a>
+                <a href="#tome" onclick="closeMenu()">The Stardust Tome</a>
+                <a href="#gallery" onclick="closeMenu()">Gallery of Ages</a>
+                <a href="#discover" onclick="closeMenu()">Realms of Discovery</a>
+                <a href="#guide" onclick="closeMenu()">Constellation Guide</a>
+                <a href="#games" onclick="closeMenu()">Orion's Challenges</a>
+                <a href="#universes" onclick="closeMenu()">Alternate Chronicles</a>
+                <a href="#voice-garden" onclick="closeMenu()">Voice Garden</a>
+                <a href="#sanctum" onclick="closeMenu()">Inner Sanctum</a>
+            </nav>
+        </div>
+
         <div id="solar-system-container">
             <div id="music-player-sun">
                 <div class="sun-surface">
@@ -116,10 +137,10 @@
                 </div>
                 <div id="music-player-panel">
                     <div id="player-view-now-playing" class="player-view active">
-                        <img id="panel-album-art" src="photos/photo1.jpg" alt="Album Art in player">
+                        <img id="panel-album-art" src="photos/photo1.jpg" alt="Album Art">
                         <div id="song-info">
-                            <div id="song-title">Select a Song</div>
-                            <div id="song-artist">Our Soundtrack</div>
+                            <div id="song-title">Song Title</div>
+                            <div id="song-artist">Artist</div>
                         </div>
                         <div id="progress-bar-container"><div id="progress-bar"></div></div>
                         <div id="time-container">
@@ -127,10 +148,10 @@
                             <span id="total-duration">0:00</span>
                         </div>
                         <div id="music-controls">
-                            <button class="control-btn" id="shuffle-btn" title="Shuffle">🔀</button>
-                            <button class="control-btn" id="prev-btn" title="Previous">⮜</button>
-                            <button class="control-btn" id="play-pause-btn" title="Play/Pause" style="font-size: 2rem;">▶️</button>
-                            <button class="control-btn" id="next-btn" title="Next">⮞</button>
+                            <button id="prev-btn" class="control-btn">⏮</button>
+                            <button id="play-pause-btn" class="control-btn">▶️</button>
+                            <button id="next-btn" class="control-btn">⏭</button>
+                            <button id="shuffle-btn" class="control-btn">🔀</button>
                         </div>
                         <div id="volume-container">
                             <span>🔈</span>
@@ -139,7 +160,7 @@
                         </div>
                     </div>
                     <div id="player-view-playlist" class="player-view">
-                        <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; font-family: var(--font-display);">Playlist</h4>
+                        <h4>Playlist</h4>
                         <div>
                             <button class="btn" id="upload-music-btn">Upload Song</button>
                             <input type="file" id="music-upload-input" hidden accept="audio/*">
@@ -152,96 +173,38 @@
                     </div>
                 </div>
             </div>
+            <div id="planet-name-display"></div>
         </div>
-        
-        <div id="planet-name-display" class="planet-name-display"></div>
 
-        <div class="main-content"></div>
-        
+        <main class="main-content"></main>
+
+        <button id="scroll-to-top" title="Go to top">↑</button>
+
     </main>
 
-    <!-- MOOD SYNC BAR - Always visible -->
-    <div id="mood-sync-bar">
-        <div id="mood-sync-content">
-            <div class="mood-selector left-selector">
-                <span class="mood-label">Nic's Mood</span>
-                <div class="mood-picker-dropdown">
-                    <button class="current-mood-btn" id="nic-current-mood" data-person="nic">
-                        <span class="mood-emoji">😊</span>
-                        <span class="mood-name">Happy</span>
-                    </button>
-                    <div class="mood-options" id="nic-mood-options">
-                        <!-- Mood options will be populated by JS -->
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mood-center">
-                <div class="combined-mood-display">
-                    <span class="combined-icon">💕</span>
-                    <span class="combined-text">In Sync</span>
-                </div>
-                <canvas id="mood-particles"></canvas>
-                <!-- Mood Sync toggle (off by default) -->
-                <div class="mood-toggle-container" style="position: absolute; bottom: -6px; right: 8px; font-size: 0.9rem; color: var(--gold-light); display:flex; align-items:center; gap:8px;">
-                    <label for="mood-sync-toggle" style="cursor:pointer;">Mood Sync</label>
-                    <input type="checkbox" id="mood-sync-toggle" aria-label="Enable Mood Sync">
-                </div>
-            </div>
-            
-            <div class="mood-selector right-selector">
-                <span class="mood-label">Zoya's Mood</span>
-                <div class="mood-picker-dropdown">
-                    <button class="current-mood-btn" id="zoya-current-mood" data-person="zoya">
-                        <span class="mood-emoji">💕</span>
-                        <span class="mood-name">Loving</span>
-                    </button>
-                    <div class="mood-options" id="zoya-mood-options">
-                        <!-- Mood options will be populated by JS -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button id="mood-sync-visibility-toggle" title="Toggle Mood Bar"><span>▲</span></button>
-    </div>
-
-    <!-- Mood Recommendation Popup -->
-    <div id="mood-recommendation-popup" class="mood-popup">
-        <div class="mood-popup-content">
-            <button class="mood-popup-close">&times;</button>
-            <div class="mood-popup-icon">💡</div>
-            <h3 class="mood-popup-title">Cosmic Suggestion</h3>
-            <p class="mood-popup-message"></p>
-            <button class="btn primary mood-popup-action">Take Me There</button>
+    <div id="book-password-gate" class="modal">
+        <div class="modal-content">
+            <div class="tome-lock-icon"></div>
+            <h2 class="tome-title">The Stardust Tome</h2>
+            <p class="tome-subtitle">This chronicle is sealed by a password known only to its authors.</p>
+            <label class="speak-words-label">Speak the words to unseal the tome:</label>
+            <input type="password" id="book-password-input" class="text-input tome-input" placeholder="Password...">
+            <button id="unlock-book-btn" class="btn primary tome-unlock-btn">
+                <span class="btn-icon">✨</span> Unseal
+            </button>
+            <p class="hint-text">Hint: What is Nini's simple nickname?</p>
         </div>
     </div>
 
-    <div id="main-menu-container">
-        <button id="main-menu-button" title="Open Menu">
-            <img id="menu-icon-img" src="photos/favicon1.png" alt="Open Menu">
-        </button>
-        <div id="main-menu-dropdown">
-            <a href="#home" onclick="closeMenu()">Solar System</a>
-            <a href="#games" onclick="closeMenu()">Orion's Challenges</a>
-            <a href="#timeline" onclick="closeMenu()">Our Chronicle</a>
-            <a href="#book" onclick="closeMenu()">The Stardust Tome</a>
-            <a href="#gallery" onclick="closeMenu()">Gallery of Ages</a>
-            <a href="#guide" onclick="closeMenu(); returnToGuideHub();">Constellation Guide</a>
-            <a href="#universes" onclick="closeMenu()">Alternate Chronicles</a>
-            <a href="#voicegarden" onclick="closeMenu()">Voice Garden</a>
-            <a href="#sanctuary" onclick="closeMenu()">Inner Sanctum</a>
-        </div>
-    </div>
-    
     <div id="chapter-meta-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
-            <h3 class="panel-header" style="margin-bottom: 1.5rem;">A New Chapter</h3>
+            <h3 class="panel-header">New Chapter Details</h3>
             <div class="form-group">
                 <label for="new-chapter-title">Chapter Title</label>
-                <input type="text" id="new-chapter-title" class="text-input">
+                <input type="text" id="new-chapter-title" class="text-input" placeholder="e.g., The Day We Met">
             </div>
             <div class="form-group">
-                <label for="new-chapter-author">Author</label>
+                <label for="new-chapter-author">Author(s)</label>
                 <input type="text" id="new-chapter-author" class="text-input" value="Nini & Zoya">
             </div>
             <div class="form-group">
@@ -250,14 +213,18 @@
             </div>
             <div class="modal-actions">
                 <button class="btn" id="cancel-meta-btn">Cancel</button>
-                <button class="btn primary" id="continue-meta-btn">Continue</button>
+                <button class="btn primary" id="continue-meta-btn">Continue to Editor</button>
             </div>
         </div>
     </div>
-    
+
     <div id="editor-modal" class="modal">
-        <div class="modal-content" style="max-width: 900px; width: 95%;">
-            <h3 id="editor-title" class="panel-header" style="margin-bottom: 1.5rem;">Edit Entry</h3>
+        <div class="modal-content" style="max-width: 900px;">
+            <h3 id="editor-title">Edit Chapter</h3>
+            <div class="form-group" id="universe-chapter-title-group" style="display: none; margin-bottom: 1rem;">
+                <label for="universe-new-chapter-title">Chapter Title</label>
+                <input type="text" id="universe-new-chapter-title" class="text-input" placeholder="Enter the title for your new chapter...">
+            </div>
             <div id="quill-editor-container">
                 <div id="quill-editor"></div>
             </div>
@@ -267,58 +234,256 @@
             </div>
         </div>
     </div>
-    
+
     <div id="lightbox" class="modal">
         <div class="lightbox-content">
-            <img class="lightbox-image" id="lightbox-image" src="" alt="Gallery Image">
+            <img src="" alt="Lightbox image" id="lightbox-img" class="lightbox-image">
             <div class="lightbox-info">
-                <h3 id="lightbox-caption"></h3>
+                <p id="lightbox-caption">Caption</p>
             </div>
         </div>
         <button class="lightbox-nav lightbox-close">×</button>
         <button class="lightbox-nav lightbox-prev">‹</button>
         <button class="lightbox-nav lightbox-next">›</button>
     </div>
+
+    <div id="timeline-event-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 id="timeline-modal-title">New Timeline Event</h3>
+            <input type="date" id="timeline-modal-date" class="text-input" style="margin-bottom: 1rem;">
+            <input type="text" id="timeline-modal-title-input" class="text-input" placeholder="Event Title" style="margin-bottom: 1rem;">
+            <textarea id="timeline-modal-desc" class="text-input" rows="4" placeholder="Description..." style="margin-bottom: 1rem;"></textarea>
+            <input type="hidden" id="timeline-modal-edit-index">
+            <div class="modal-actions">
+                <button class="btn" id="timeline-modal-cancel">Cancel</button>
+                <button class="btn primary" id="timeline-modal-save">Save Event</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="discover-item-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h3 id="discover-modal-title">Add New Destination</h3>
+            <div class="discover-modal-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="discover-title-input" class="text-input" placeholder="e.g., Okinawa Beaches">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="discover-location-input" class="text-input" placeholder="e.g., Okinawa, Japan">
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="discover-date-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Map Link</label>
+                        <input type="text" id="discover-link-input" class="text-input" placeholder="https://maps.google.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="discover-status-select" class="text-input">
+                            <option value="wishlist">Wishlist</option>
+                            <option value="planned">Planned</option>
+                            <option value="visited">Visited</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="discover-desc-input" class="text-input" rows="8" placeholder="Our dream..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Photos</label>
+                        <div id="discover-photo-upload-area">Click here to upload photos</div>
+                        <input type="file" id="discover-photo-input" hidden multiple accept="image/*">
+                        <div id="discover-photo-previews"></div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="discover-modal-edit-id">
+            <div class="modal-actions">
+                <button class="btn" id="discover-modal-cancel">Cancel</button>
+                <button class="btn primary" id="discover-modal-save">Save Destination</button>
+            </div>
+        </div>
+    </div>
     
     <div id="game-play-modal" class="reward-modal">
         <div class="game-play-modal-content">
-            <span class="close-button" onclick="closeGame()">&times;</span>
+            <span class="close-button" onclick="closeGame()">×</span>
             <div id="game-play-area"></div>
         </div>
     </div>
-
     <div id="reward-modal" class="reward-modal">
         <div class="reward-modal-content">
-            <span class="close-button" onclick="closeRewardModal()">&times;</span>
+            <span class="close-button" onclick="closeRewardModal()">×</span>
             <h2 id="reward-title">A Reward from the Cosmos!</h2>
             <div id="reward-display"></div>
         </div>
     </div>
 
-    <button id="scroll-to-top" title="Go to top">↑</button>
+    <div id="voice-playback-modal" class="voice-playback-modal modal">
+        <div class="voice-playback-content">
+            <div class="playback-header">
+                <h4 id="playback-title">Playing Message...</h4>
+                <button class="playback-close" id="playback-close-btn">×</button>
+            </div>
+            <div class="waveform-container" id="playback-waveform"></div>
+            <div class="playback-progress" id="playback-progress-bar">
+                <div class="playback-progress-fill" id="playback-progress-fill"></div>
+            </div>
+            <div class="playback-time">
+                <span id="playback-current-time">0:00</span>
+                <span id="playback-total-duration">0:00</span>
+            </div>
+            <div class="playback-controls">
+                <button class="playback-btn" id="playback-rewind-btn">⏮️</button>
+                <button class="playback-btn" id="playback-play-pause-btn">▶️</button>
+                <button class="playback-btn" id="playback-forward-btn">⏭️</button>
+            </div>
+            <div class="playback-metadata">
+                <div class="metadata-row">
+                    <span class="metadata-label">From:</span>
+                    <span id="playback-from" class="metadata-value"></span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Date:</span>
+                    <span id="playback-date" class="metadata-value"></span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Note:</span>
+                    <span id="playback-note" class="metadata-value"></span>
+                </div>
+                 <div class="metadata-row">
+                    <button class="voice-action-btn" id="playback-transcript-btn" style="display:none; padding:6px 10px;">Transcript</button>
+                </div>
+            </div>
+            <div class="voice-actions">
+                <button class="voice-action-btn" id="playback-like-btn">👍 Like</button>
+                <button class="voice-action-btn" id="playback-fav-btn">☆ Favorite</button>
+                <button class="voice-action-btn" id="playback-delete-btn">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="blessingModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-icon" id="modalIcon"></span>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="modal-seal"></div>
+            <button class="btn primary accept-button" id="accept-blessing-btn">✧ ACCEPT ✧</button>
+        </div>
+    </div>
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="bookTitle"></h2>
+            <div class="book-modal-content">
+                <p id="bookContent"></p>
+            </div>
+            <button class="btn primary accept-button" id="close-tome-btn">✧ CLOSE TOME ✧</button>
+        </div>
+    </div>
+
+    <div id="artifact-modal" class="artifact-detail-modal modal">
+        <div class="artifact-modal-content">
+            <span class="artifact-modal-close">×</span>
+            <div class="artifact-modal-icon" id="modal-artifact-icon">📖</div>
+            <h3 id="modal-artifact-title">Artifact Name</h3>
+            <div class="artifact-modal-story" id="modal-artifact-story">Story goes here...</div>
+            <div class="artifact-acquisition">
+                <span class="acquisition-label">Acquired:</span>
+                <span class="acquisition-date" id="modal-artifact-date">2019 - 2021</span>
+            </div>
+        </div>
+    </div>
+    <div id="artifact-upload-modal" class="artifact-detail-modal modal">
+        <div class="artifact-modal-content" style="text-align: left;">
+            <span class="artifact-modal-close">×</span>
+            <h3 style="text-align: center;">Add a New Sacred Artifact</h3>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="artifact-icon-input">Icon (Emoji)</label>
+                <input type="text" id="artifact-icon-input" class="text-input" placeholder="e.g., 🎟️">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="artifact-title-input">Artifact Name</label>
+                <input type="text" id="artifact-title-input" class="text-input" placeholder="e.g., Movie Ticket">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="artifact-story-input">Story / Significance</label>
+                <textarea id="artifact-story-input" class="text-input" rows="3" placeholder="e.g., From our first movie date..."></textarea>
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn primary" id="save-artifact-btn">Save Artifact</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="universe-editor-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h3 id="universe-modal-title">Create New Universe</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <div class="form-group">
+                        <label>Universe ID (e.g., 'ancient_china')</label>
+                        <input type="text" id="universe-id-input" class="text-input" placeholder="unique_id (no spaces)">
+                    </div>
+                    <div class="form-group">
+                        <label>Title (e.g., 'The Scholar & The Artist')</label>
+                        <input type="text" id="universe-title-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Era (e.g., 'Ancient China (206 BCE)')</label>
+                        <input type="text" id="universe-era-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Icon (e.g., '🏛️')</label>
+                        <input type="text" id="universe-icon-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Image Path (e.g., 'photos/alternate_universe/new.png')</label>
+                        <input type="text" id="universe-image-input" class="text-input">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Nic's Name (e.g., 'Nicholai of the West')</label>
+                        <input type="text" id="universe-nic-name-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Nic's Role (e.g., 'Scholar & Mathematician')</label>
+                        <input type="text" id="universe-nic-role-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Zoya's Name (e.g., 'Zhang Zoya')</label>
+                        <input type="text" id="universe-zoya-name-input" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Zoya's Role (e.g., 'Imperial Calligrapher')</label>
+                        <input type="text" id="universe-zoya-role-input" class="text-input">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Premise</label>
+                <textarea id="universe-premise-input" class="text-input" rows="3" placeholder="A brief summary of this universe..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="universe-modal-cancel">Cancel</button>
+                <button class="btn primary" id="universe-modal-save">Save Universe</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script src="book_content.js"></script>
-    <script src="control.js"></script>
-    <script>
-        function closeMenu() {
-            const menuDropdown = document.getElementById('main-menu-dropdown');
-            const menuIcon = document.getElementById('menu-icon-img');
-            if (menuDropdown) menuDropdown.classList.remove('visible');
-            if (menuIcon) menuIcon.src = 'photos/favicon1.png';
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-            // Reset theme selector state when menu closes
-            const themeContainer = document.querySelector('.theme-colors-grid');
-            const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-            const menuLinks = menuDropdown ? menuDropdown.querySelectorAll('a') : [];
-            const separator = menuDropdown ? menuDropdown.querySelector('hr') : null;
+    <script type="module" src="js/main.js"></script>
+    <script src="js/chinese_enhancements.js"></script>
 
-            if (themeContainer) themeContainer.style.display = 'none';
-            if (themeToggleBtn) themeToggleBtn.classList.remove('active');
-            menuLinks.forEach(link => link.style.display = 'block');
-            if (separator) separator.style.display = 'block';
-        }
-    </script>
-    <script src="chinese_enhancements.js"></script>
 </body>
 </html>

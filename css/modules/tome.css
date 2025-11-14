@@ -1,0 +1,616 @@
+/* =================================================================== */
+/* MODULE: TOME (BOOK)
+/* (css/modules/tome.css)
+/* =================================================================== */
+
+.tome-panel, #tome-panel {
+    display: flex;
+    flex-direction: column;
+    height: 107%; /* Make the panel fill the available space */
+}
+
+.book-actions-sticky {
+    position: sticky; /* No longer sticky */
+    background: var(--space-black);
+    padding: 1rem 0;
+    z-index: 10; 
+    display: flex; 
+    gap: 0.5rem;
+    flex-shrink: 0; /* Prevent this from shrinking */
+}
+
+.tome-body {
+    flex-grow: 1; /* This container will take up all remaining vertical space */
+    display: flex;
+    gap: 1.5rem;
+    min-height: 0; /* CRITICAL FIX: Allows flex children to shrink and scroll */
+    padding-top: 1rem;
+}
+
+#chapter-list-container { 
+    flex: 0 0 250px; /* Fixed width for the chapter list */
+    border-right: 2px solid var(--gold);
+    padding-right: 1.5rem; 
+    overflow-y: auto; 
+    min-height: 0; /* Allow shrinking */
+    box-shadow: 5px 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.chapter-item { 
+    position: relative; 
+    padding: 0.8rem; 
+    border-bottom: 1px solid transparent; 
+    cursor: pointer; 
+    transition: var(--transition-fast); 
+    border-radius: 4px; 
+}
+
+.chapter-item:hover { 
+    background: rgba(74, 14, 78, 0.5); 
+}
+
+.chapter-item.active { 
+    font-weight: 600; 
+    color: var(--gold); 
+    border-left: 3px solid var(--gold); 
+    background: rgba(74, 14, 78, 0.7); 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); 
+}
+
+.chapter-item .chapter-title { 
+    font-family: var(--font-body); 
+    font-size: 1.1rem; 
+}
+
+.chapter-item .chapter-meta { 
+    font-size: 0.8rem; 
+    color: var(--text-secondary); 
+}
+
+.chapter-actions { 
+    position: absolute; 
+    right: 5px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    opacity: 0; 
+    transition: var(--transition-fast); 
+    display: flex; 
+    gap: 0.5rem; 
+    pointer-events: none; 
+}
+
+.chapter-item:hover .chapter-actions { 
+    opacity: 1; 
+    pointer-events: all; 
+}
+
+.chapter-action-btn { 
+    background: none; 
+    border: none; 
+    color: var(--text-secondary); 
+    cursor: pointer; 
+    font-size: 1.1rem; 
+    padding: 0.25rem; 
+    transition: var(--transition-fast); 
+}
+
+.chapter-action-btn:hover { 
+    color: var(--gold); 
+    transform: scale(1.1); 
+}
+
+#chapter-content-container {
+    flex-grow: 1; /* Take up remaining space */
+    padding: 1rem;
+    background: rgba(17, 12, 31, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    line-height: 1.8;
+    overflow-y: auto; /* Allow this container to scroll its content */
+    min-height: 0; /* Allow shrinking */
+}
+
+#chapter-content-container h3 {
+    font-family: var(--font-display);
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin-bottom: 0.5rem;
+}
+
+/* --- FIX: Force all p tags to have the same color --- */
+#chapter-content-container p {
+    margin-bottom: 1em;
+    color: var(--gold-light); /* This is the main text color */
+}
+
+#chapter-content-container .tome-content-body p {
+    text-indent: 2em;
+}
+
+
+#chapter-content-container em {
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block;
+    margin-bottom: 1rem;
+}
+.tome-content-body p {
+  text-indent: 2em; /* Indents the first line */
+  margin-bottom: 1rem; /* Adds space between paragraphs */
+}
+
+/* Speaker tags for Tome content */
+.tome-content-body .speaker-nic,
+.tome-content-body .speaker-zoy {
+    font-family: var(--font-display);
+    font-size: 1.1em;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    text-indent: 0; /* No indent for speaker tags */
+    color: var(--gold-light); /* FIX: Ensure they also use the main color */
+}
+
+/* =================================================================== */
+/* ENHANCED TOME FEATURES - Add to tome.css
+/* =================================================================== */
+
+/* 1. READING PROGRESS BAR */
+.reading-progress-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 215, 0, 0.1);
+    z-index: 100;
+}
+
+.reading-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--glow-cyan));
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--gold);
+}
+
+/* 2. CHAPTER BOOKMARKS */
+.chapter-item .bookmark-icon {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.chapter-item.bookmarked .bookmark-icon {
+    opacity: 1;
+    color: var(--gold);
+}
+
+.chapter-item:hover .bookmark-icon {
+    opacity: 0.5;
+}
+
+/* 3. READING MODE TOGGLE */
+.reading-mode-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap; /* <-- MODIFIED: Allow wrapping */
+}
+
+.font-size-control {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.font-btn {
+    background: rgba(74, 14, 78, 0.5);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+
+.font-btn:hover {
+    background: rgba(74, 14, 78, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* --- UPDATED: Reading modes --- */
+#chapter-content-container.reading-mode-sepia {
+    background: #ccc8c1;
+    color: #1a0a03;
+}
+#chapter-content-container.reading-mode-dark {
+    background: #121212;
+    color: #e0e0e0;
+}
+#chapter-content-container.reading-mode-parchment {
+    background: #c36d42;
+    color: #4a3626;
+    border-color: #8b7355;
+}
+/* --- NEW: Added new color themes --- */
+#chapter-content-container.reading-mode-mint {
+    background: #76dcf3;
+    color: #241403; /* Dark Slate Gray */
+}
+#chapter-content-container.reading-mode-sakura {
+    background: #fff0f5; /* Lavender Blush */
+    color: #6a5acd; /* Slate Blue */
+}
+/* Ensure themes override all p tags */
+#chapter-content-container[class*="reading-mode-"] p {
+    color: inherit;
+}
+/* ------------------------------------- */
+
+
+/* 4. CHAPTER STATISTICS */
+.chapter-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(74, 14, 78, 0.3);
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-icon {
+    font-size: 1.2rem;
+}
+
+.stat-value {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* 5. CHAPTER PREVIEW ON HOVER */
+.chapter-preview {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 300px;
+    max-height: 200px;
+    overflow: hidden;
+    background: rgba(17, 12, 31, 0.95);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-left: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.chapter-item:hover .chapter-preview {
+    opacity: 1;
+}
+
+.chapter-preview-text {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* 6. ANIMATED PAGE TURN EFFECT */
+@keyframes pageFlip {
+    0% { transform: rotateY(0deg); opacity: 1; }
+    50% { transform: rotateY(90deg); opacity: 0.5; }
+    100% { transform: rotateY(0deg); opacity: 1; }
+}
+
+#chapter-content-container.page-turning {
+    animation: pageFlip 0.6s ease-in-out;
+}
+
+/* 7. CHAPTER TAGS/CATEGORIES */
+.chapter-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.chapter-tag {
+    background: rgba(74, 14, 78, 0.6);
+    color: var(--gold);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* 8. CHAPTER NAVIGATION BREADCRUMB */
+.chapter-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(74, 14, 78, 0.3);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-separator {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-link {
+    color: var(--gold);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+/* 9. FLOATING ACTION BUTTONS */
+.tome-floating-actions {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 50;
+}
+
+.tome-fab {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--space-black), var(--deep-purple));
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.tome-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+/* 10. CHAPTER WORD COUNT & READING TIME */
+.chapter-meta-extended {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* 11. SEARCH HIGHLIGHT */
+.search-highlight {
+    background: rgba(255, 215, 0, 0.3);
+    color: var(--gold);
+    padding: 0.1rem 0.2rem;
+    border-radius: 2px;
+}
+
+/* 12. CHAPTER MOOD INDICATOR */
+.chapter-mood {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    border-radius: 2px;
+    transition: var(--transition-fast);
+}
+
+.chapter-mood.happy { background: linear-gradient(to bottom, #FFD700, #FFA500); }
+.chapter-mood.romantic { background: linear-gradient(to bottom, #FF69B4, #FF1493); }
+.chapter-mood.reflective { background: linear-gradient(to bottom, #9370DB, #6A5ACD); }
+.chapter-mood.adventurous { background: linear-gradient(to bottom, #00CED1, #1E90FF); }
+
+/* 13. ENHANCED SCROLL INDICATOR */
+.scroll-progress-chapters {
+    position: sticky;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.scroll-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--glow-cyan), var(--gold));
+    transition: width 0.1s linear;
+}
+
+/* 14. CHAPTER FILTERS */
+.chapter-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 0.5rem 1rem;
+    background: rgba(74, 14, 78, 0.4);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 0.85rem;
+}
+
+.filter-chip:hover {
+    background: rgba(74, 14, 78, 0.6);
+    border-color: var(--gold);
+}
+
+.filter-chip.active {
+    background: rgba(74, 14, 78, 0.8);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* 15. CHAPTER ILLUSTRATIONS */
+.chapter-illustration {
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto;
+    border-radius: 8px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .chapter-preview {
+        display: none;
+    }
+    
+    .tome-floating-actions {
+        right: 1rem;
+        bottom: 1rem;
+    }
+    
+    .tome-fab {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+}
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .tome-body {
+        /* Allow the body to scroll on mobile where layout is stacked */
+        flex-direction: column;
+    }
+    #chapter-list-container {
+        max-height: 250px; /* Make list shorter when stacked */
+        border-right: none;
+        border-bottom: 1px solid var(--gold);
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+    }
+    #chapter-content-container {
+        overflow-y: visible; /* Disable scrolling on the content itself for mobile */
+    }
+}
+
+/* =================================================================== */
+/* NEW: TEXT-TO-SPEECH STYLES (UPDATED)
+/* =================================================================== */
+
+.tts-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-glass);
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.tts-btn {
+    background: rgba(74, 14, 78, 0.5);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+    font-family: var(--font-body);
+}
+
+.tts-btn:hover {
+    background: rgba(74, 14, 78, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.tts-speed-control,
+.tts-voice-control { /* NEW */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+}
+
+#tts-speed-slider {
+    cursor: pointer;
+    width: 100px; /* Adjust as needed */
+}
+
+/* NEW: Style for the voice select dropdown */
+#tts-voice-select {
+    width: auto; /* Allow it to size to content */
+    max-width: 200px; /* Prevent it from getting too wide */
+    padding: 0.5rem; /* Make padding match buttons */
+    /* It already has .text-input, so it will match */
+}
+
+/* Style the range input */
+#tts-speed-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: rgba(255, 215, 0, 0.2);
+    border-radius: 4px;
+    outline: none;
+}
+
+#tts-speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#tts-speed-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#tts-speed-value {
+    color: var(--gold);
+    font-weight: bold;
+    min-width: 35px; /* Prevent layout shift */
+}
+
+/* --- NEW: Style for the currently spoken paragraph --- */
+.tts-highlight {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+    transition: background-color 0.3s ease-out;
+    border-radius: 4px;
+}

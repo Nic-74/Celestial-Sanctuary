@@ -1,0 +1,503 @@
+/* ===================================================================
+   ENHANCED CHINESE AESTHETICS STYLESHEET (v2 - Full Rewrite)
+   增强版中文美学样式表
+   ================================================================== */
+
+/* NOTE: If you see no Chinese text, check the lanterns (🏮)! 
+   If they look like sparkles (✨), click them to toggle aesthetics ON.
+   
+*/
+
+/* ===================================================================
+   1. Base Element Styles
+   ================================================================== */
+
+/* Main subtitle style used everywhere */
+.chinese-subtitle {
+    display: block;
+    font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
+    font-size: 0.75em; /* 75% of its parent's font size */
+    color: var(--gold);
+    opacity: 0.85;
+    margin-top: 8px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    animation: subtle-glow 3s ease-in-out infinite;
+}
+
+@keyframes subtle-glow {
+    0%, 100% { 
+        opacity: 0.85;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    50% { 
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+}
+
+/* Red thread divider (e.g., in active panels) */
+.red-thread-divider {
+    position: relative;
+    text-align: center;
+    margin: 3rem 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        #dc143c 20%, 
+        #dc143c 80%, 
+        transparent 100%);
+}
+
+.red-thread-divider::before {
+    content: '🧵';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--space-black);
+    padding: 0 1rem;
+    font-size: 1.5rem;
+    animation: thread-glow 3s ease-in-out infinite;
+}
+
+@keyframes thread-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 5px #dc143c);
+    }
+    50% {
+        filter: drop-shadow(0 0 15px #dc143c) drop-shadow(0 0 25px #ff6b9d);
+    }
+}
+
+/* Poetry Quote Box (Landing, Timeline, Gallery, etc.) */
+.chinese-poetry-box {
+    position: relative;
+    padding: 2rem 2.5rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    background: var(--highlight-glass);
+    border-left: 5px solid var(--gold);
+    border-right: 5px solid var(--gold);
+    border-radius: 8px;
+}
+
+.poetry-zh {
+    font-family: 'Noto Serif SC', 'STKaiti', serif;
+    font-size: 1.3rem;
+    color: var(--gold);
+    line-height: 2.2;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.1em;
+}
+
+.poetry-en {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.8;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.poetry-source {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    opacity: 0.7;
+    font-family: 'Noto Serif SC', serif;
+}
+
+
+/* ===================================================================
+   2. Landing Page Specifics
+   ================================================================== */
+
+/* Special 'Yuan' and 'Ai' characters */
+.portal-character {
+    font-family: 'Noto Serif SC', 'STKaiti', serif;
+    font-size: 1.5em;
+    color: var(--gold);
+    text-shadow: 0 0 15px var(--gold), 0 0 25px var(--soft-violet);
+    margin: 0 0.8em;
+    vertical-align: middle;
+    display: inline-block;
+    animation: character-pulse 4s ease-in-out infinite;
+    font-weight: 600;
+}
+.portal-character:first-of-type { animation-delay: 0s; }
+.portal-character:last-of-type { animation-delay: 2s; }
+
+@keyframes character-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px var(--gold));
+    }
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px var(--gold)) drop-shadow(0 0 30px var(--soft-violet));
+    }
+}
+
+/* Landing Page Main Title Styling (NINI & 卓雅) */
+#landing-gate .main-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2em 0.5em; /* Add row-gap for wrapping */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    font-size: 1rem; /* Reset base font size */
+    text-shadow: none;
+    letter-spacing: normal;
+}
+
+.main-title .name-en,
+.main-title .name-zh {
+    display: block;
+    font-family: var(--font-display);
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold), 0 0 30px var(--soft-violet);
+    letter-spacing: 5px;
+}
+
+.main-title .name-en {
+    font-size: clamp(2.5em, 7vw, 5em); /* Slightly smaller */
+    font-weight: 400;
+}
+
+.main-title .name-zh {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(3em, 8vw, 6em); /* Larger */
+    font-weight: 700;
+    letter-spacing: 0.2em; /* Wider spacing for Chinese */
+    text-shadow: 0 0 25px var(--gold), 0 0 40px var(--crimson);
+}
+
+.main-title .name-amp {
+    font-family: var(--font-handwriting);
+    font-size: clamp(2em, 5vw, 4em);
+    color: var(--crimson);
+    text-shadow: 0 0 15px var(--crimson);
+    opacity: 0.8;
+    align-self: baseline; /* Align with the bottom of the text */
+    padding-bottom: 0.2em; /* Adjust alignment relative to font size */
+}
+
+/* Magpie Bridge */
+.countries-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    font-family: var(--font-body);
+    font-size: 1.2em;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    letter-spacing: 2px;
+}
+.country-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.magpie-bridge {
+    width: 10em;
+    height: 3em;
+    overflow: visible;
+}
+.magpie-clone {
+    offset-path: path('M 10 40 Q 100 0 190 40');
+    offset-rotate: auto;
+    animation: fly-on-bridge 4s ease-in-out infinite;
+    opacity: 0;
+    fill: var(--gold-light);
+    filter: drop-shadow(0 0 5px var(--gold));
+}
+@keyframes fly-on-bridge {
+    0% { offset-distance: 0%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+}
+
+
+/* ===================================================================
+   3. Main UI Components
+   ================================================================== */
+
+/* Main Menu Dropdown */
+#main-menu-dropdown a {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 20px;
+}
+#main-menu-dropdown a .chinese-subtitle {
+    font-size: 0.85em;
+    margin-top: 4px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+#main-menu-dropdown a:hover .chinese-subtitle {
+    opacity: 1;
+}
+
+/* Solar System Planet Name Display */
+#planet-name-display .text-chinese {
+    display: block;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.4em;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 15px var(--gold);
+}
+
+
+/* Panel Header Accents (◆) */
+.panel-chinese-accent {
+    font-family: 'Noto Serif SC', serif;
+    color: var(--gold);
+    font-size: 0.6em;
+    margin: 0 0.5rem;
+    opacity: 0.6;
+    vertical-align: middle;
+}
+
+/* Lantern Toggle Buttons */
+.chinese-lantern {
+    display: inline-block;
+    font-size: 1.5rem;
+    animation: lantern-swing 4s ease-in-out infinite;
+    transform-origin: top center;
+}
+@keyframes lantern-swing {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+/* Blooming Click Effect */
+.click-bloom {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-image: none;
+    font-size: 30px;
+    text-align: center;
+    line-height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+    animation: bloom-effect 0.5s ease-out;
+}
+@keyframes bloom-effect {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--space-black);
+    border-left: 1px solid var(--border-glass);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 5px;
+    border: 2px solid var(--space-black);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-light);
+}
+
+/* ===================================================================
+   4. Module-Specific Adjustments
+   ================================================================== */
+
+/* --- Loading Screen --- */
+#loading::after {
+    content: '初始化中...';
+    display: block;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.8em;
+    color: var(--gold);
+    margin-top: 10px;
+    opacity: 0.7;
+}
+#loading::before { /* Scroll Unfurl */
+    content: 'Nini & 卓雅';
+    font-family: var(--font-chinese);
+    font-size: 2.5em;
+    color: var(--gold);
+    font-weight: 700;
+    display: block;
+    background: var(--deep-purple);
+    border: 2px solid var(--gold);
+    padding: 2em;
+    box-shadow: 0 0 30px var(--gold);
+    height: 0;
+    overflow: hidden;
+    animation: unfurl-scroll 1.5s ease-out forwards;
+    white-space: nowrap;
+}
+@keyframes unfurl-scroll {
+    from { height: 0; padding-top: 0; padding-bottom: 0; }
+    to { height: 10em; padding-top: 2em; padding-bottom: 2em; }
+}
+
+/* --- Mood Bar --- */
+.mood-label .chinese-subtitle {
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+.mood-label-text .chinese-subtitle {
+    margin-top: 2px;
+    font-size: 0.7em;
+    letter-spacing: 0.1em;
+}
+
+/* --- Buttons --- */
+/* Style for subtitles placed inside .btn or .tome-unlock-btn */
+.btn .chinese-subtitle,
+.tome-unlock-btn .chinese-subtitle {
+    font-size: 0.75em;
+    margin-top: 4px;
+    letter-spacing: 0.1em;
+    color: inherit; /* Inherit color from button text */
+    opacity: 0.9;
+}
+/* Specific override for primary buttons */
+.btn.primary .chinese-subtitle,
+.tome-unlock-btn .chinese-subtitle {
+     color: var(--deep-purple);
+     opacity: 0.8;
+}
+/* Specific override for active filter buttons */
+.gallery-filter-btn.active .chinese-subtitle,
+.discover-filters .btn.active .chinese-subtitle {
+     color: var(--deep-purple);
+}
+
+/* --- Chronicle (Timeline) --- */
+.event-card::before {
+    content: '◆';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px var(--gold);
+}
+.counter-unit .chinese-subtitle {
+    font-size: 0.8em;
+    margin-top: 4px;
+    letter-spacing: 0.1em;
+}
+
+/* --- Tome (Book) --- */
+.tome-lock-icon::after {
+    content: '封';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.2rem;
+    color: var(--crimson);
+    font-weight: bold;
+}
+/* Ink wash effect for book panel */
+#book-reader-panel {
+    background-image: linear-gradient(180deg, rgba(2, 4, 27, 0.9), rgba(10, 25, 47, 0.7));
+    background-size: 200% 200%;
+    animation: slow-pan 60s linear infinite alternate;
+}
+@keyframes slow-pan {
+    from { background-position: 0% 0%; }
+    to { background-position: 100% 100%; }
+}
+
+/* --- Games --- */
+.game-card h2 .chinese-subtitle,
+.hall-card h2 .chinese-subtitle {
+    font-size: 0.6em; /* Smaller relative to the header */
+    margin-top: 8px;
+    letter-spacing: 0.15em;
+}
+
+/* --- Guide & Sanctuary Hubs --- */
+.hub-choice-btn .hub-label .chinese-subtitle,
+.realm-portal .realm-title .chinese-subtitle {
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+/* --- Voice Garden --- */
+.stat-desc .chinese-subtitle {
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+/* --- Universes --- */
+.universe-title .chinese-subtitle,
+.universe-era .chinese-subtitle {
+    font-size: 0.7em;
+    margin-top: 5px;
+}
+
+/* ===================================================================
+   5. Parallax & Animation
+   ================================================================== */
+
+/* Poetry writing animation */
+.poetry-zh span {
+    opacity: 0;
+    display: inline-block; /* Allows transform */
+}
+@keyframes fade-in-char {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Parallax mouse effect */
+.stars-bg, .chinese-pattern {
+    background-position: 50% 50%;
+    transition: background-position 0.2s ease-out;
+}
+
+/* ===================================================================
+   6. Responsive
+   ================================================================== */
+@media (max-width: 768px) {
+    .chinese-subtitle {
+        font-size: 0.7em;
+        letter-spacing: 0.1em;
+    }
+    .portal-character {
+        font-size: 1.2em;
+        margin: 0 0.5em;
+    }
+    .poetry-zh {
+        font-size: 1.1rem;
+        line-height: 2;
+    }
+    #main-menu-dropdown a {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    #main-menu-dropdown a {
+        padding: 8px 10px; /* Tighter padding */
+    }
+}
