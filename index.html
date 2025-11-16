@@ -16,7 +16,11 @@
     <link rel="stylesheet" href="css/common.css">
     
     <link rel="stylesheet" href="css/chinese_aesthetics.css">
-</head>
+    <style>
+        body, html {
+            overflow-x: hidden;
+        }
+    </style></head>
 <body>
 
     <div class="background-container">
@@ -112,8 +116,8 @@
             </div>
         </div>
 
-        <div id="main-menu-container">
-            <button id="main-menu-button" ontouchstart="this.click();" style="position: relative; z-index: 1000;">
+        <div id="main-menu-container" style="position: fixed; top: 20px; right: 20px; z-index: 1001;">
+            <button id="main-menu-button" ontouchstart="this.click();">
                 <img id="menu-icon-img" src="photos/favicon1.png" alt="Menu">
             </button>
             <nav id="main-menu-dropdown">
