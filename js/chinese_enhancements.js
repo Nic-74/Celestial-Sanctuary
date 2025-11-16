@@ -816,9 +816,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.querySelector('#lantern-toggle-left')) {
             const lanterns = document.createElement('div');
             lanterns.className = 'lantern-decoration';
-            lanterns.id = 'lantern-toggle-left';
-            // Make it clickable
-            lanterns.style.cssText = 'position: fixed; top: 20px; left: 20px; z-index: 1001; cursor: pointer; pointer-events: all;';
+            lanterns.id = 'lantern-toggle-left'; // This is the left button
+            // Styles are now controlled by common.css
             lanterns.innerHTML = '<span class="chinese-lantern">🏮</span>';
             lanterns.title = 'Toggle Chinese Aesthetics';
             
