@@ -206,16 +206,49 @@ hr {
 /* MAIN MENU DROPDOWN */
 #main-menu-container {
     position: fixed;
-    top: 90px; /* Below mood bar + toggle */
+    top: 120px; /* Position below mood bar (60px) + aesthetics button (~50px) */
     left: 20px;
     z-index: 8999;
     transition: top 0.4s ease;
 }
 
-/* Adjust when mood bar is collapsed */
-#mood-sync-bar.collapsed ~ * #main-menu-container {
-    top: 50px; /* Just below the toggle */
+/* --- CORRECTED: Position the Chinese Aesthetics Toggle (Lantern) --- */
+#lantern-toggle-left {
+    position: fixed;
+    top: 70px; /* Default: Below mood bar (60px) + margin (10px) */
+    left: 20px;
+    z-index: 9000; /* Same level as mood bar */
+    transition: top 0.4s ease;
+    cursor: pointer;
+    pointer-events: all;
 }
+
+/* --- ADD THIS: Position the RIGHT Chinese Aesthetics Toggle (Lantern) --- */
+#lantern-toggle-right {
+    position: fixed;
+    top: 70px; /* Default: Below mood bar (60px) + margin (10px) */
+    right: 20px; /* Position on the right */
+    z-index: 9000;
+    transition: top 0.4s ease;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+/* Adjust when mood bar is collapsed */
+body:has(#mood-sync-bar.collapsed) #main-menu-container {
+    top: 70px; /* Move up to be below aesthetics button */
+}
+
+/* --- CORRECTED: Adjust aesthetics toggle when mood bar is collapsed --- */
+/* This uses :has() to check the body for the collapsed class, since they are not siblings */
+body:has(#mood-sync-bar.collapsed) #lantern-toggle-left {
+    top: 20px; /* Move up when mood bar is hidden */
+}
+/* --- ADD THIS: Adjust RIGHT aesthetics toggle when mood bar is collapsed --- */
+body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
+    top: 20px; /* Move up when mood bar is hidden */
+}
+
 #main-menu-button {
     width: 90px;
     height: 90px;
@@ -1834,5 +1867,3 @@ hr {
     z-index: 9999;   /* Ensure particles are on top of everything */
     pointer-events: none;
 }
-
-
