@@ -1508,20 +1508,20 @@ export function mapMoodToPanel(zoyaMood, nichoMood) {
     const a = zoyaMood;
     const b = nichoMood;
     if (a === 'excited' && b === 'excited') return 'games';
-    if (a === 'loving' && b === 'loving') return 'sanctuary';
+    if (a === 'loving' && b === 'loving') return 'sanctum';
     if (a === 'nostalgic' && b === 'nostalgic') return 'gallery';
     if (a === 'calm' && b === 'calm') return 'guide';
     if ((a === 'excited' && b === 'adventurous') || (b === 'excited' && a === 'adventurous')) return 'universes';
     if ((a === 'excited' && b === 'playful') || (b === 'excited' && a === 'playful')) return 'games';
-    if ((a === 'playful' && b === 'playful')) return 'voicegarden';
-    if ((a === 'sad' && b === 'loving') || (b === 'sad' && a === 'loving')) return 'sanctuary';
-    if (a === 'sad' && b === 'sad') return 'sanctuary';
+    if ((a === 'loving' && b === 'playful')) return 'voice-garden';
+    if ((a === 'sad' && b === 'loving') || (b === 'sad' && a === 'loving')) return 'sanctum';
+    if (a === 'sad' && b === 'sad') return 'sanctum';
     if (a === 'sad' || b === 'sad') return 'guide';
     if (a === 'adventurous' || b === 'adventurous') return 'universes';
     if (a === 'nostalgic' || b === 'nostalgic') return 'gallery';
-    if (a === 'playful' || b === 'playful') return 'voicegarden';
+    if (a === 'playful' || b === 'playful') return 'voice-garden';
     if (a === 'excited' || b === 'excited') return 'games';
-    if (a === 'loving' || b === 'loving') return 'sanctuary';
+    if (a === 'loving' || b === 'loving') return 'sanctum';
     return 'home';
 }
 
