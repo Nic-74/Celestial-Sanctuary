@@ -505,8 +505,10 @@ function renderEventDetails(event, index) {
     $('cal-selected-day-num').textContent = date.getDate();
     $('cal-selected-day-name').textContent = dayNames[date.getDay()];
     const container = $('event-details-container');
+    const isSpecial = !!event.special;
     container.innerHTML = `
-        <div class="event-card">
+        <div class="event-card${isSpecial ? ' special-moment' : ''}">
+            ${isSpecial ? '<div class="special-moment-badge">✨ The Moment It All Began ✨</div>' : ''}
             <div class="event-card-header">
                 <h4>${event.title}</h4>
                 <div>

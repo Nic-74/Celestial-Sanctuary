@@ -417,18 +417,11 @@ function sortGallery(sortType) {
 
 // 3. REALISTIC POLAROID EFFECT WITH RANDOM ROTATIONS
 function applyPolaroidEffect() {
-    // This effect is now applied conditionally based on the view
-    const grid = $('gallery-grid');
-    if (grid && grid.classList.contains('masonry-view')) {
-        $$('.polaroid-item').forEach((item, index) => {
-            const rotation = (Math.random() - 0.5) * 6; // Random rotation between -3 and 3 degrees
-            item.classList.add('polaroid-realistic');
-            item.style.setProperty('--rotation', `${rotation}deg`);
-        });
-    } else {
-        // If not in masonry view, remove the polaroid effect to keep the grid clean
-        $$('.polaroid-item').forEach(item => item.classList.remove('polaroid-realistic'));
-    }
+    $$('.polaroid-item').forEach(item => {
+        const rotation = ((Math.random() - 0.5) * 6).toFixed(1);
+        item.classList.add('polaroid-realistic');
+        item.style.setProperty('--rotation', `${rotation}deg`);
+    });
 }
 
 function updateFavoritesCount() {

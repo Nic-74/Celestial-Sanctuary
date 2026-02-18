@@ -1,0 +1,272 @@
+/* =================================================================== */
+/* MODULE: OUR SONG                                                     */
+/* (css/modules/oursong.css)                                            */
+/* =================================================================== */
+
+.oursong-outer {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding-bottom: 4rem;
+}
+
+/* --- Vinyl record --- */
+.oursong-vinyl-wrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    margin: 0 auto 2.5rem;
+}
+
+.oursong-vinyl {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at center, #1a0a20 0%, #0a0a0a 30%, #111 50%, #0a0a0a 60%, #1a0a20 100%);
+    box-shadow:
+        0 0 0 4px rgba(255, 215, 0, 0.25),
+        0 0 30px rgba(138, 43, 226, 0.3),
+        0 0 60px rgba(255, 215, 0, 0.1),
+        inset 0 0 20px rgba(0, 0, 0, 0.8);
+    position: relative;
+    transition: box-shadow 0.5s ease;
+}
+
+.oursong-vinyl.spinning {
+    animation: vinyl-spin 3s linear infinite;
+    box-shadow:
+        0 0 0 4px rgba(255, 215, 0, 0.5),
+        0 0 40px rgba(138, 43, 226, 0.5),
+        0 0 80px rgba(255, 215, 0, 0.2),
+        inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes vinyl-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* Vinyl grooves */
+.oursong-vinyl::before {
+    content: '';
+    position: absolute;
+    inset: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow:
+        0 0 0 15px rgba(255,255,255,0.02),
+        0 0 0 30px rgba(255,255,255,0.015),
+        0 0 0 45px rgba(255,255,255,0.01);
+}
+
+/* Center label */
+.oursong-vinyl-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(74, 14, 78, 0.9) 0%, transparent 60%);
+    border-radius: 50%;
+    padding: 0 40px;
+}
+
+.oursong-vinyl-title {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    color: var(--gold-light);
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 1.4;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    max-width: 120px;
+    word-break: break-word;
+    display: block;
+}
+
+.oursong-vinyl-artist {
+    font-family: var(--font-body);
+    font-size: 0.55rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Record needle */
+.oursong-needle {
+    position: absolute;
+    top: -20px;
+    right: -15px;
+    width: 6px;
+    height: 80px;
+    background: linear-gradient(to bottom, #888, #555, #333);
+    border-radius: 3px;
+    transform-origin: top center;
+    transform: rotate(-30deg);
+    transition: transform 0.5s ease;
+    box-shadow: 1px 0 4px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+}
+
+.oursong-needle.dropped {
+    transform: rotate(-10deg);
+}
+
+.oursong-needle::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--gold);
+}
+
+/* --- Song info --- */
+.oursong-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    margin-bottom: 0.3rem;
+    letter-spacing: 3px;
+}
+
+.oursong-artist {
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.oursong-subtitle {
+    margin-bottom: 1.8rem;
+}
+
+/* --- Play button --- */
+.oursong-controls {
+    margin-bottom: 2.5rem;
+}
+
+.oursong-play-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--soft-violet));
+    border: none;
+    color: var(--deep-purple);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(138, 43, 226, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.oursong-play-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(138, 43, 226, 0.3);
+}
+
+/* --- Dedication --- */
+.oursong-dedication {
+    margin-bottom: 3rem;
+    padding: 2rem 2.5rem;
+    background: rgba(10, 5, 20, 0.5);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 12px;
+    text-align: left;
+    position: relative;
+}
+
+.oursong-dedication::before {
+    content: '❝';
+    position: absolute;
+    top: -0.5rem;
+    left: 1.5rem;
+    font-size: 3rem;
+    color: var(--gold);
+    opacity: 0.3;
+    line-height: 1;
+    font-family: Georgia, serif;
+}
+
+.oursong-dedication-inner p {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--gold-light);
+    line-height: 1.9;
+    font-size: 1.05rem;
+    margin: 0 0 0.5em 0;
+}
+
+.oursong-dedication-inner p:empty { display: none; }
+
+/* --- Lyrics --- */
+.oursong-lyrics {
+    padding: 2rem;
+    background: rgba(10, 5, 20, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.oursong-lyrics-heading {
+    font-family: var(--font-display);
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 3px;
+}
+
+.oursong-lyric-line {
+    margin-bottom: 1.2rem;
+}
+
+.lyric-en {
+    display: block;
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--gold-light);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.lyric-zh {
+    display: block;
+    font-family: 'Noto Serif SC', 'STSong', serif;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 2px;
+    letter-spacing: 0.1em;
+}
+
+.oursong-lyrics-note {
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.6;
+}
+
+.oursong-lyrics-note code {
+    background: rgba(255, 215, 0, 0.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    color: var(--gold-light);
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+    .oursong-vinyl-wrap { width: 200px; height: 200px; }
+    .oursong-vinyl { width: 200px; height: 200px; }
+    .oursong-needle { height: 60px; }
+    .oursong-dedication { padding: 1.5rem 1.2rem; }
+    .oursong-lyrics { padding: 1.5rem 1rem; }
+}

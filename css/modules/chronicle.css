@@ -150,11 +150,48 @@
 #event-details-container { 
     min-height: 200px; 
 }
-.event-card { 
-    background: rgba(2, 4, 27, 0.5); 
-    border-radius: 8px; 
-    padding: 15px; 
-    border-left: 3px solid var(--gold); 
+.event-card {
+    background: rgba(2, 4, 27, 0.5);
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid var(--gold);
+}
+
+/* --- Special "First Time I Knew" event card --- */
+.event-card.special-moment {
+    border-left: 3px solid #e8a2b8;
+    border-top: 1px solid rgba(232, 162, 184, 0.4);
+    border-right: 1px solid rgba(232, 162, 184, 0.2);
+    box-shadow:
+        0 0 18px rgba(232, 162, 184, 0.25),
+        0 0 40px rgba(255, 100, 150, 0.12),
+        inset 0 0 15px rgba(232, 162, 184, 0.07);
+    background: linear-gradient(135deg,
+        rgba(40, 10, 30, 0.6) 0%,
+        rgba(2, 4, 27, 0.5) 100%);
+    animation: special-event-pulse 4s ease-in-out infinite;
+}
+
+@keyframes special-event-pulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(232, 162, 184, 0.25), 0 0 40px rgba(255, 100, 150, 0.12); }
+    50%       { box-shadow: 0 0 28px rgba(232, 162, 184, 0.45), 0 0 60px rgba(255, 100, 150, 0.25); }
+}
+
+.special-moment-badge {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 0.8rem;
+    color: #e8a2b8;
+    text-align: center;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    opacity: 0.9;
+    text-shadow: 0 0 8px rgba(232, 162, 184, 0.5);
+}
+
+.event-card.special-moment .event-card-header h4 {
+    color: #e8c4d0;
+    text-shadow: 0 0 12px rgba(232, 162, 184, 0.4);
 }
 .event-card-header { 
     display: flex; 

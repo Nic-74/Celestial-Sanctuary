@@ -142,10 +142,16 @@ async function loadPanel(panelId) {
         
         if (AppState.complimentInterval) { clearInterval(AppState.complimentInterval); }
         AppState.complimentInterval = setInterval(createFloatingCompliment, 7000);
+
+        // Anniversary live ticker
+        initHomeTicker();
         return;
     }
 
     if (AppState.complimentInterval) { clearInterval(AppState.complimentInterval); AppState.complimentInterval = null; }
+    if (AppState.homeTickerInterval) { clearInterval(AppState.homeTickerInterval); AppState.homeTickerInterval = null; }
+    const homeTicker = document.getElementById('home-ticker');
+    if (homeTicker) homeTicker.remove();
     
     DOM.mainContent.classList.add('visible');
     if(DOM.solarSystemContainer) DOM.solarSystemContainer.classList.add('hidden');
@@ -213,6 +219,41 @@ function loadCssModule(panelId) {
 // ===================================================================
 
 function initLandingPage() {
+    // --- Photo background slideshow ---
+    (function startLandingSlideshow() {
+        const gateContainer = document.querySelector('.gate-container');
+        if (!gateContainer || document.getElementById('landing-photo-bg')) return;
+
+        const photos = EDITABLE_CONFIG.PHOTOS_DATA.filter(p => p.src);
+        if (!photos.length) return;
+
+        const bg = document.createElement('div');
+        bg.id = 'landing-photo-bg';
+
+        // Create two img elements for crossfade
+        const imgA = document.createElement('img');
+        const imgB = document.createElement('img');
+        imgA.className = 'lbg-img active';
+        imgB.className = 'lbg-img';
+        bg.appendChild(imgA);
+        bg.appendChild(imgB);
+        gateContainer.prepend(bg);
+
+        let currentIndex = Math.floor(Math.random() * photos.length);
+        let toggle = true;
+        imgA.src = photos[currentIndex].src;
+
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % photos.length;
+            const next = toggle ? imgB : imgA;
+            const prev = toggle ? imgA : imgB;
+            next.src = photos[currentIndex].src;
+            next.classList.add('active');
+            prev.classList.remove('active');
+            toggle = !toggle;
+        }, 4000);
+    })();
+
     // --- MODIFIED: Two-click entry logic ---
     // The first click starts the audio, the second enters the sanctuary.
     const handleLandingGateClick = () => {
@@ -1225,64 +1266,50 @@ function createClickRipple(planet) {
     }
 }
 
-// Create explosion particles
+// Pre-define all particle + ripple keyframes once at load time (not per-click)
+(function injectParticleStyles() {
+    const style = document.createElement('style');
+    const NUM = 12;
+    let css = `
+        @keyframes ripple-expand {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        @keyframes particle-explode {
+            0%   { transform: translate(-50%, -50%) translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%)
+                               translate(var(--px), var(--py)) scale(0); opacity: 0; }
+        }
+    `;
+    style.textContent = css;
+    document.head.appendChild(style);
+})();
+
+// Create explosion particles — uses CSS custom properties instead of per-particle style tags
 function createParticle(planet, color, index) {
-    if (!planet || !document.body.contains(planet)) return; // Defensive check
+    if (!planet || !document.body.contains(planet)) return;
     const particle = document.createElement('div');
-    particle.className = 'particle'; // *** FIX: Apply the particle class for correct styling ***
+    particle.className = 'particle';
     const planetRect = planet.getBoundingClientRect();
     const startX = planetRect.left + planetRect.width / 2;
     const startY = planetRect.top + planetRect.height / 2;
-
     const angle = (360 / 12) * index;
     const distance = 60 + Math.random() * 40;
-    
+    const px = (Math.cos(angle * Math.PI / 180) * distance).toFixed(1) + 'px';
+    const py = (Math.sin(angle * Math.PI / 180) * distance).toFixed(1) + 'px';
+
     particle.style.cssText = `
-        width: 4px;
-        height: 4px;
+        width: 4px; height: 4px;
         background: ${color};
         border-radius: 50%;
         box-shadow: 0 0 10px ${color};
-        left: ${startX}px;
-        top: ${startY}px;
-        animation: particle-explode-${index} 1s ease-out forwards;
+        left: ${startX}px; top: ${startY}px;
+        --px: ${px}; --py: ${py};
+        animation: particle-explode 1s ease-out forwards;
     `;
-    
-    // Create unique animation for each particle
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        @keyframes particle-explode-${index} {
-            0% {
-                transform: translate(-50%, -50%) translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) 
-                           translate(${Math.cos(angle * Math.PI / 180) * distance}px, 
-                                     ${Math.sin(angle * Math.PI / 180) * distance}px)
-                           scale(0);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(styleSheet);
-    
     document.body.appendChild(particle);
-    setTimeout(() => {
-        particle.remove();
-        styleSheet.remove();
-    }, 1000);
+    setTimeout(() => particle.remove(), 1000);
 }
-
-// Add ripple animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes ripple-expand {
-        0% { transform: scale(0.5); opacity: 1; }
-        100% { transform: scale(3); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
 
 
 function createFloatingCompliment() {
@@ -1404,6 +1431,53 @@ function initializeParallax() {
         if (starsBg) starsBg.style.backgroundPosition = `${50 - (x * 20)}% ${50 - (y * 20)}%`;
         if (patternBg) patternBg.style.backgroundPosition = `${50 - (x * 10)}% ${50 - (y * 10)}%`;
     });
+}
+
+// ===================================================================
+//  HOME TICKER
+// ===================================================================
+
+function initHomeTicker() {
+    // Clear any previous ticker interval
+    if (AppState.homeTickerInterval) {
+        clearInterval(AppState.homeTickerInterval);
+        AppState.homeTickerInterval = null;
+    }
+
+    // Remove any existing ticker element
+    const existing = document.getElementById('home-ticker');
+    if (existing) existing.remove();
+
+    const ticker = document.createElement('div');
+    ticker.id = 'home-ticker';
+
+    const start = EDITABLE_CONFIG.relationshipStart;
+
+    function update() {
+        const now = new Date();
+        const diff = now - start;
+        const totalDays = Math.floor(diff / 86400000);
+        const years = Math.floor(totalDays / 365);
+        const months = Math.floor((totalDays % 365) / 30);
+        const days = totalDays % 30;
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        ticker.innerHTML = `
+            <span class="ticker-label">Together for</span>
+            <span class="ticker-unit">${years}<em>y</em></span>
+            <span class="ticker-unit">${months}<em>m</em></span>
+            <span class="ticker-unit">${days}<em>d</em></span>
+            <span class="ticker-sep">·</span>
+            <span class="ticker-unit">${String(hours).padStart(2,'0')}<em>h</em></span>
+            <span class="ticker-unit">${String(minutes).padStart(2,'0')}<em>min</em></span>
+            <span class="ticker-unit">${String(seconds).padStart(2,'0')}<em>s</em></span>
+        `;
+    }
+
+    update();
+    AppState.homeTickerInterval = setInterval(update, 1000);
+    document.body.appendChild(ticker);
 }
 
 // ===================================================================

@@ -1,0 +1,166 @@
+/* =================================================================== */
+/* MODULE: A LETTER TO ZOYA                                            */
+/* (css/modules/letter.css)                                            */
+/* =================================================================== */
+
+/* --- Outer wrapper --- */
+.letter-outer {
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    padding-bottom: 3rem;
+}
+
+/* --- Floating petals layer --- */
+.letter-petal-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.letter-petal {
+    position: absolute;
+    top: -10%;
+    animation: petal-fall linear infinite;
+    opacity: 0.6;
+    user-select: none;
+}
+
+@keyframes petal-fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+}
+
+/* --- Envelope seal --- */
+.letter-envelope-seal {
+    font-size: 3.5rem;
+    display: block;
+    margin: 0 auto 1rem;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(232, 162, 184, 0.5));
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+}
+
+/* --- Heading --- */
+.letter-heading {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: #e8c4d0;
+    text-shadow: 0 0 20px rgba(232, 162, 184, 0.5), 0 0 40px rgba(232, 100, 150, 0.2);
+    margin-bottom: 0.4rem;
+    letter-spacing: 3px;
+}
+
+.letter-subheading {
+    margin-bottom: 2.5rem;
+}
+
+/* --- Parchment card --- */
+.letter-parchment {
+    position: relative;
+    background: linear-gradient(
+        160deg,
+        rgba(40, 20, 35, 0.85) 0%,
+        rgba(20, 10, 28, 0.9) 50%,
+        rgba(35, 15, 30, 0.85) 100%
+    );
+    border: 1px solid rgba(232, 162, 184, 0.35);
+    border-radius: 4px;
+    padding: 3rem 3.5rem;
+    text-align: left;
+    box-shadow:
+        0 0 30px rgba(232, 162, 184, 0.1),
+        0 0 60px rgba(180, 80, 120, 0.08),
+        inset 0 0 40px rgba(0, 0, 0, 0.3);
+    min-height: 300px;
+}
+
+/* Decorative corner ornaments */
+.letter-parchment-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: rgba(232, 162, 184, 0.5);
+    border-style: solid;
+}
+.letter-parchment-corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+.letter-parchment-corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+.letter-parchment-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+.letter-parchment-corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+/* --- Letter body text --- */
+.letter-body {
+    font-family: var(--font-handwriting, 'Sacramento', cursive);
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    line-height: 2;
+    color: #f0d8e4;
+}
+
+.letter-line {
+    margin: 0;
+    min-height: 1.5em;
+}
+
+.letter-line.letter-spacer {
+    min-height: 1em;
+}
+
+/* --- Blinking cursor --- */
+.letter-cursor {
+    display: inline-block;
+    color: #e8a2b8;
+    font-size: 1.2rem;
+    animation: blink 0.7s step-end infinite;
+    line-height: 1;
+    margin-left: 2px;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+/* --- Replay button --- */
+.letter-replay-wrap {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.letter-replay-btn {
+    background: rgba(232, 162, 184, 0.1);
+    border: 1px solid rgba(232, 162, 184, 0.4);
+    color: #e8c4d0;
+    padding: 0.6rem 1.6rem;
+    border-radius: 30px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.letter-replay-btn:hover {
+    background: rgba(232, 162, 184, 0.2);
+    box-shadow: 0 0 15px rgba(232, 162, 184, 0.25);
+    transform: translateY(-2px);
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+    .letter-parchment {
+        padding: 2rem 1.5rem;
+    }
+    .letter-body {
+        font-size: 1rem;
+    }
+}

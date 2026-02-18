@@ -13,7 +13,7 @@ export let EDITABLE_CONFIG = {
     relationshipStart: new Date('2021-08-25T00:00:00'),
     thenVsNow_ImagePairs: [
         { then: 'then1', now: 'now1' }, { then: 'then2', now: 'now2' },
-        { then: 'then3', now: 'then3' }, { then: 'then4', now: 'now4' }, 
+        { then: 'then3', now: 'now3' }, { then: 'then4', now: 'now4' },
         { then: 'then5', now: 'now5' }
     ],
     PHOTOS_DATA: [
@@ -119,7 +119,7 @@ export const AppState = {
  * Shared data arrays.
  */
 export let CHRONICLE_DATA = [
-    { year: 'Sep 15, 2019', title: 'First Meeting', desc: 'During the Taiku Taikai (sports festival), two lonely souls from different worlds first crossed paths. A boy with a math book and a girl with a curious heart.', icon: '💕' },
+    { year: 'Sep 15, 2019', title: 'First Meeting', desc: 'During the Taiku Taikai (sports festival), two lonely souls from different worlds first crossed paths. A boy with a math book and a girl with a curious heart.', icon: '💕', special: true },
     { year: 'Jan 2020', title: 'Genesis of a Shared Canvas', desc: 'Our first art class together. Nic drew two people dancing, unknowingly sketching the first lines of our shared story.', icon: '🎨' },
     { year: 'Jan 2020', title: 'Navigating a New Nebula', desc: 'Nic officially joined the "Special Course," a cosmic shift that placed him in more classes with Zoya and altered the trajectory of our daily interactions.', icon: '🌌' },
     { year: 'May 2, 2021', title: 'The Distant Supernova', desc: 'Zoya\'s birthday, which Nic wasn\'t invited to. The feeling of being left out sparked a realization of how deeply he already cared.', icon: '💥' },
@@ -763,7 +763,10 @@ export const DOM = {
 //  API & DATA HELPERS
 // ===================================================================
 
-export const API_URL = 'http://127.0.0.1:5000/api'; // The base URL of your server
+// IMPORTANT: UPDATE THIS URL after deploying to Railway (see DEPLOY.md)
+export const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:5000/api'
+    : 'https://YOUR-APP.railway.app/api';
 
 export async function loadDataFromServer() {
     // ===================================================================

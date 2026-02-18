@@ -146,6 +146,33 @@ hr {
     animation: fade-in 1.5s ease-out forwards;
     width: 100%;
     min-height: 100%; /* Ensures it fills at least the viewport */
+    position: relative;
+}
+
+/* Landing page photo background slideshow */
+#landing-photo-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+#landing-photo-bg .lbg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity 1.8s ease-in-out;
+    filter: blur(2px) brightness(0.22) saturate(1.3);
+    pointer-events: none;
+}
+
+#landing-photo-bg .lbg-img.active {
+    opacity: 1;
 }
 .gate-content {
     max-width: 800px;
@@ -619,11 +646,6 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
     .planet:hover {
         transform: translate(-50%, -50%) scale(1.3) !important;
     }
-}
-/* Add the missing revolve animation */
-@keyframes revolve {
-    from { transform: rotate(0deg) translateX(50%) rotate(0deg); }
-    to   { transform: rotate(360deg) translateX(50%) rotate(-360deg); }
 }
 
 
@@ -1599,159 +1621,81 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
     .main-content { padding: 100px 5vw 50px 5vw; } /* ALIGNMENT FIX: Symmetrical padding */
 }
 @media (max-width: 768px) {
+    /* Layout */
     .panel-header { font-size: 2.2rem; text-align: center; }
     .panel-subheader { text-align: center; }
-    /* --- MODIFIED: Remove horizontal padding for full-width content on mobile --- */
     .main-content:not(.observatory-active):not(.nebula-active) { padding: 90px 0 30px 0; }
-    
-    /* *** FIX: Responsive Solar System Size *** */
-    #solar-system-container {
-        inset: 90px 0 30px 0;
-    }
-    
-    .planet-name-display { 
-        top: 70px; /* Move below mood bar */
-        right: 10px; 
-    }
+    #solar-system-container { inset: 90px 0 30px 0; }
     .tome-title { font-size: 2.5rem; }
-}
-@media (max-width: 768px) {
+
+    /* Planet name display */
     #planet-name-display {
         top: 70px;
         font-size: 1rem;
         padding: 8px 20px;
     }
-    
-    #main-menu-container {
-        top: 70px;
-        left: 10px;
-    }
-    
+
+    /* Menu */
+    #main-menu-container { top: 70px; left: 10px; }
     #main-menu-button {
         width: 60px;
         height: 60px;
+        padding: 4px;
     }
-    
-    #mood-sync-visibility-toggle {
-        width: 60px;
-        height: 25px;
-        font-size: 1rem;
+    #main-menu-container.ready-to-drag::after {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        bottom: var(--tooltip-bottom, -30px);
     }
-    
+    #main-menu-dropdown { width: 190px; padding: 8px; }
+    #main-menu-dropdown a { font-size: 1rem; padding: 10px 12px; }
+
+    /* Theme grid */
+    .theme-colors-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 8px;
+    }
+
+    /* Mood bar */
+    #mood-sync-content { padding: 0 10px; }
+    .mood-center { flex-shrink: 1; min-width: 0; }
+    .mood-label { display: none; }
+    .current-mood-btn { padding: 6px 12px; }
+    .mood-emoji { font-size: 1.2rem; }
+    .mood-name { font-size: 0.8rem; }
+    .combined-mood-display { font-size: 1rem; gap: 5px; }
+
+    /* Toggle */
+    #mood-sync-visibility-toggle { width: 60px; height: 25px; font-size: 1rem; }
+
+    /* Music player */
     #music-player-sun {
         width: 16vmin;
         height: 16vmin;
         min-width: 100px;
         min-height: 100px;
     }
-    
-    .floating-compliment {
-        font-size: 1rem;
-        padding: 10px 15px;
-        max-width: 280px;
-    }
+
+    /* Compliments */
+    .floating-compliment { font-size: 1rem; padding: 10px 15px; max-width: 280px; }
 }
 
 @media (max-width: 480px) {
-    /* *** FIX: Responsive Solar System Size *** */
-    #solar-system-container {
-        inset: 80px 0 20px 0;
-    }
-    
-    #planet-name-display {
-        top: 60px;
-        font-size: 0.9rem;
-        padding: 6px 15px;
-    }
-    
-    #main-menu-container {
-        top: 60px;
-        left: 5px;
-    }
-    
-    #main-menu-button {
-        width: 50px;
-        height: 50px;
-    }
-}
-
-@media (max-width: 480px) {
-    /* --- MODIFIED: Remove horizontal padding for full-width content on mobile --- */
+    /* Layout */
     .main-content:not(.observatory-active):not(.nebula-active) { padding: 80px 0 20px 0; }
-}
+    #solar-system-container { inset: 80px 0 20px 0; }
 
-/* --- ADD THIS: Responsive Menu Button --- */
-@media (max-width: 768px) {
-    #main-menu-button {
-        width: 60px;
-        height: 60px;
-        padding: 4px; /* Adjust padding for smaller button */
-    }
-    #main-menu-container.ready-to-drag::after {
-        font-size: 0.8rem;
-        padding: 6px 10px;
-        bottom: -30px; /* Adjust position for smaller button */
-        bottom: var(--tooltip-bottom, -30px);
-    }
-    /* --- ADD THIS: Make dropdown content smaller on mobile --- */
-    #main-menu-dropdown {
-        width: 190px; /* Further reduce width to better fit content */
-        padding: 8px;
-    }
-    #main-menu-dropdown a {
-        font-size: 1rem; /* Reduce font size from 1.1rem */
-        padding: 10px 12px; /* Reduce padding */
-    }
-    /* --- ADD THIS: Make  buttons smaller on mobile --- */
-    .theme-colors-grid {
-        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-        gap: 8px;
-    }
-}
+    /* Planet name */
+    #planet-name-display { top: 60px; font-size: 0.9rem; padding: 6px 15px; }
 
-/* --- ADD THIS: Further reduce menu button size on very small screens --- */
-@media (max-width: 480px) {
-    #main-menu-container {
-        top: 70px;
-        left: 10px;
-    }
-    #main-menu-button {
-        width: 44px;
-        height: 44px;
-        padding: 3px;
-    }
-    /* --- ADD THIS: Further reduce theme button size on very small screens --- */
+    /* Menu */
+    #main-menu-container { top: 70px; left: 10px; }
+    #main-menu-button { width: 44px; height: 44px; padding: 3px; }
+
+    /* Theme grid */
     .theme-colors-grid {
         grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
         gap: 6px;
-    }
-}
-
-/* --- RESPONSIVE MOOD BAR --- */
-@media (max-width: 768px) {
-    #mood-sync-content {
-        padding: 0 10px;
-    }
-
-    .mood-center {
-        flex-shrink: 1;
-        min-width: 0;
-    }
-
-    .mood-label {
-        display: none; /* Hide text labels on mobile to save space */
-    }
-
-    .current-mood-btn {
-        padding: 6px 12px;
-    }
-
-    .mood-emoji { font-size: 1.2rem; }
-    .mood-name { font-size: 0.8rem; }
-
-    .combined-mood-display {
-        font-size: 1rem;
-        gap: 5px;
     }
 }
 
@@ -1866,4 +1810,66 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
     position: fixed; /* Use fixed positioning to stay relative to the viewport */
     z-index: 9999;   /* Ensure particles are on top of everything */
     pointer-events: none;
+}
+
+/* --- HOME ANNIVERSARY TICKER --- */
+#home-ticker {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    background: rgba(10, 5, 20, 0.75);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 40px;
+    padding: 0.55rem 1.6rem;
+    backdrop-filter: blur(8px);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--gold-light);
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.15);
+}
+
+#home-ticker .ticker-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+    font-style: italic;
+    margin-right: 0.4rem;
+}
+
+#home-ticker .ticker-unit {
+    color: var(--gold);
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+#home-ticker .ticker-unit em {
+    font-style: normal;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-left: 2px;
+    font-family: var(--font-body);
+}
+
+#home-ticker .ticker-sep {
+    color: rgba(255, 215, 0, 0.3);
+    font-size: 0.8rem;
+    margin: 0 0.2rem;
+}
+
+@media (max-width: 480px) {
+    #home-ticker {
+        font-size: 0.8rem;
+        padding: 0.45rem 1rem;
+        gap: 0.25rem;
+        bottom: 1rem;
+    }
+    #home-ticker .ticker-unit { font-size: 0.95rem; }
 }
