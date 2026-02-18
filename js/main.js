@@ -219,41 +219,6 @@ function loadCssModule(panelId) {
 // ===================================================================
 
 function initLandingPage() {
-    // --- Photo background slideshow ---
-    (function startLandingSlideshow() {
-        const gateContainer = document.querySelector('.gate-container');
-        if (!gateContainer || document.getElementById('landing-photo-bg')) return;
-
-        const photos = EDITABLE_CONFIG.PHOTOS_DATA.filter(p => p.src);
-        if (!photos.length) return;
-
-        const bg = document.createElement('div');
-        bg.id = 'landing-photo-bg';
-
-        // Create two img elements for crossfade
-        const imgA = document.createElement('img');
-        const imgB = document.createElement('img');
-        imgA.className = 'lbg-img active';
-        imgB.className = 'lbg-img';
-        bg.appendChild(imgA);
-        bg.appendChild(imgB);
-        gateContainer.prepend(bg);
-
-        let currentIndex = Math.floor(Math.random() * photos.length);
-        let toggle = true;
-        imgA.src = photos[currentIndex].src;
-
-        setInterval(() => {
-            currentIndex = (currentIndex + 1) % photos.length;
-            const next = toggle ? imgB : imgA;
-            const prev = toggle ? imgA : imgB;
-            next.src = photos[currentIndex].src;
-            next.classList.add('active');
-            prev.classList.remove('active');
-            toggle = !toggle;
-        }, 4000);
-    })();
-
     // --- MODIFIED: Two-click entry logic ---
     // The first click starts the audio, the second enters the sanctuary.
     const handleLandingGateClick = () => {

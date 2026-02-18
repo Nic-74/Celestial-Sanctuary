@@ -1,6 +1,6 @@
-# Deploying Celestial Sanctuary to Railway.app
+# Deploying Celestial Sanctuary to Render.com
 
-This guide deploys the Flask backend (`server.py`) to Railway so your app works online — not just on your laptop.
+This guide deploys the Flask backend (`server.py`) to Render.com so your app works online — not just on your laptop.
 
 ---
 
@@ -10,83 +10,97 @@ Make sure all your changes are committed and pushed to `main`:
 
 ```bash
 git add .
-git commit -m "Add Railway deployment config"
+git commit -m "Ready for deployment"
 git push origin main
 ```
 
 ---
 
-## Step 2 — Create a Railway account
+## Step 2 — Create a Render account
 
-Go to [https://railway.app](https://railway.app) and sign up (free). You can sign in with your GitHub account — that makes Step 3 much easier.
-
----
-
-## Step 3 — Deploy from GitHub
-
-1. Click **"New Project"**
-2. Choose **"Deploy from GitHub repo"**
-3. Select **Celestial-Sanctuary**
-4. Railway will auto-detect Python and use the `Procfile` you added
-
-Railway will start building. This takes about 1–2 minutes.
+Go to [https://render.com](https://render.com) and sign up for free. Sign in with your GitHub account — this makes Step 3 much easier.
 
 ---
 
-## Step 4 — Add a persistent volume for `database.json`
+## Step 3 — Create a new Web Service
 
-Your `database.json` stores all uploaded photos, voice messages, and chapters. Railway's filesystem resets on redeploy, so you need a volume:
+1. Click **"New +"** → **"Web Service"**
+2. Connect your GitHub account if not already connected
+3. Find and select **Celestial-Sanctuary**
+4. Fill in the settings:
 
-1. In your Railway project, click your service → **"Volumes"**
-2. Click **"New Volume"**
-3. Set mount path to `/app` (or wherever Railway runs your app)
-4. This keeps `database.json` safe between deployments
+| Field | Value |
+|---|---|
+| **Name** | `celestial-sanctuary` |
+| **Runtime** | `Python 3` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `gunicorn server:app` |
+| **Instance Type** | `Free` |
+
+5. Click **"Create Web Service"**
+
+Render will start building — takes about 2 minutes.
 
 ---
 
-## Step 5 — Get your public URL
+## Step 4 — Get your public URL
 
-1. In your Railway service, go to **"Settings" → "Networking"**
-2. Click **"Generate Domain"**
-3. You'll get a URL like: `https://celestial-sanctuary-production.up.railway.app`
+Once the build says **"Live"**, Render gives you a URL like:
+```
+https://celestial-sanctuary.onrender.com
+```
+
+Copy it.
 
 ---
 
-## Step 6 — Update `API_URL` in the frontend
+## Step 5 — Update `API_URL` in the frontend
 
 Open `js/common.js` and find this line (search for `IMPORTANT: UPDATE THIS URL`):
 
 ```js
-// IMPORTANT: UPDATE THIS URL after deploying to Railway
-: 'https://YOUR-APP.railway.app';
+: 'https://YOUR-APP.railway.app/api';
 ```
 
-Replace `YOUR-APP.railway.app` with your actual Railway URL from Step 5:
+Replace it with your Render URL:
 
 ```js
-: 'https://celestial-sanctuary-production.up.railway.app';
+: 'https://celestial-sanctuary.onrender.com/api';
 ```
 
 Then commit and push:
 
 ```bash
 git add js/common.js
-git commit -m "Update API_URL to Railway deployment"
+git commit -m "Update API_URL to Render deployment"
 git push origin main
 ```
 
 ---
 
-## Step 7 — Enable GitHub Pages for the frontend
+## Step 6 — Enable GitHub Pages for the frontend
 
 1. Go to your repo on GitHub → **Settings → Pages**
 2. Source: **Deploy from a branch**
 3. Branch: `main` / root
-4. Save — your frontend will be live at `https://nic-74.github.io/Celestial-Sanctuary/`
+4. Save
 
-The frontend (HTML/CSS/JS) lives on GitHub Pages.
-The backend (Flask/Python) lives on Railway.
+Your frontend will be live at:
+```
+https://nic-74.github.io/Celestial-Sanctuary/
+```
+
+The frontend (HTML/CSS/JS) runs on GitHub Pages.
+The backend (Flask/Python) runs on Render.com.
 They talk to each other via the `API_URL`.
+
+---
+
+## ⚠️ Important note about Render's free tier
+
+On the free tier, your service **spins down after 15 minutes of inactivity**. The first request after inactivity takes ~30 seconds to wake up. After that it's fast.
+
+If you want it always-on, upgrade to Render's Starter plan ($7/month) — or keep the free tier and just know uploads/saves take a moment to wake up.
 
 ---
 
@@ -94,7 +108,7 @@ They talk to each other via the `API_URL`.
 
 | What you want to do | How |
 |---|---|
-| Add photos or music | Use the "Upload Photo" / "Upload Song" buttons in the app — they go through the Flask API and are saved in `database.json` on Railway |
+| Add photos or music | Use the "Upload Photo" / "Upload Song" buttons in the app |
 | Edit the letter | Open `js/modules/letter.js`, change the `LETTER_LINES` array, push to GitHub |
 | Edit song lyrics | Open `js/modules/oursong.js`, change the `LYRICS` array, push to GitHub |
 | Add a chronicle event | Use the "Add Timeline Event" button in the Chronicle section |
@@ -104,8 +118,10 @@ They talk to each other via the `API_URL`.
 
 ## Troubleshooting
 
-**"Cannot connect to server"** — Check that your Railway URL in `common.js` is correct and that the Railway service is running (green dot in dashboard).
+**"Cannot connect to server"** — Check that your Render URL in `common.js` is correct and that the Render service shows "Live" in the dashboard.
 
-**"Upload not working"** — Make sure the Railway volume is mounted at the correct path. Check Railway logs under "Deployments → View Logs".
+**"Upload not working"** — Render's free tier has an ephemeral filesystem — files uploaded are lost on redeploy. For persistent uploads, add a Render Disk (Storage → Disks, $0.25/GB/month).
 
-**"CORS error"** — The `flask-cors` package is already installed via `requirements.txt` and active in `server.py`. If you still see CORS errors, check that your Railway URL exactly matches what's in `common.js` (no trailing slash).
+**"CORS error"** — The `flask-cors` package is already installed and active. Make sure your Render URL in `common.js` has no trailing slash.
+
+**Service sleeping** — First request after inactivity takes ~30 seconds. This is normal on the free tier.

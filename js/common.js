@@ -763,10 +763,10 @@ export const DOM = {
 //  API & DATA HELPERS
 // ===================================================================
 
-// IMPORTANT: UPDATE THIS URL after deploying to Railway (see DEPLOY.md)
+// IMPORTANT: UPDATE THIS URL after deploying to Render.com (see DEPLOY.md)
 export const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://127.0.0.1:5000/api'
-    : 'https://YOUR-APP.railway.app/api';
+    : 'https://YOUR-APP.onrender.com/api';
 
 export async function loadDataFromServer() {
     // ===================================================================
