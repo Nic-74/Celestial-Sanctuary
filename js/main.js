@@ -9,6 +9,7 @@ import {
     $, $$, DOM, AppState, EDITABLE_CONFIG, CHRONICLE_DATA, ALTERNATE_UNIVERSES, GUIDE_RIDDLES, COMPLIMENTS, personalizedContent,
     API_URL, loadDataFromServer, apiAddItem, apiUpdateItem, apiDeleteItem, THEME_COLORS, THEME_STAR_SHAPES,
     formatTime, closeMenu, applyTheme, applyRandomMixTheme, createThemeButton, loadSavedTheme, initThemeSystem,
+    restoreThemeAutoRotate,
     getMoodFromState, mapMoodToPanel, showMoodLoadingAndRedirect, evaluateMoodAndRedirect,
     findImageWithExtension, openUniverseEditor,
     // Import the global modal controllers
@@ -53,6 +54,7 @@ async function initApp() {
     initLandingPage();
     initMoodPickers();
     initThemeSystem(); // Initialize the theme system
+    restoreThemeAutoRotate(); // Resume auto-rotate if it was on before
 
     // 4. Set up navigation
     window.addEventListener('hashchange', handleHashChange, false);

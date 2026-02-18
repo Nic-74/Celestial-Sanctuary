@@ -1286,6 +1286,87 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
     bottom: 0;
 }
 
+/* --- AUTO-ROTATE THEME TOGGLE BUTTON --- */
+.theme-auto-rotate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: calc(100% - 30px);
+    margin: 8px 15px 4px;
+    padding: 9px 14px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 30px;          /* pill shape */
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    /* Prevent overflow on tiny screens */
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.theme-auto-rotate-btn:hover {
+    background: rgba(255, 215, 0, 0.12);
+    border-color: rgba(255, 215, 0, 0.5);
+    color: var(--gold-light);
+}
+
+.theme-auto-rotate-btn.active {
+    background: rgba(255, 215, 0, 0.18);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.25), 0 0 24px rgba(138, 43, 226, 0.15);
+}
+
+.theme-auto-rotate-btn .auto-rotate-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    /* Spin the icon when active */
+    display: inline-block;
+    transition: animation 0.3s;
+}
+
+.theme-auto-rotate-btn.active .auto-rotate-icon {
+    animation: auto-rotate-spin 2s linear infinite;
+}
+
+@keyframes auto-rotate-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.theme-auto-rotate-btn .auto-rotate-label {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive — mobile */
+@media (max-width: 768px) {
+    .theme-auto-rotate-btn {
+        width: calc(100% - 16px);
+        margin: 6px 8px 4px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-auto-rotate-btn {
+        width: calc(100% - 10px);
+        margin: 5px 5px 3px;
+        padding: 7px 8px;
+        font-size: 0.75rem;
+    }
+}
+
 @media (max-width: 768px) {
     /* Make selector more specific to override styles.css */
     #main-menu-dropdown .theme-colors-grid {

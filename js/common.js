@@ -1358,7 +1358,7 @@ export const THEME_STAR_SHAPES = {
   jade: { char: '⋆｡˚ ☁︎ ˚｡⋆｡˚☽˚｡⋆', shadowColor: '#a4b5a1' }
 };
 
-export function applyTheme(themeName) {
+export function applyTheme(themeName, { silent = false } = {}) {
   const theme = THEME_COLORS[themeName];
   if (!theme) return;
   const root = document.documentElement;
@@ -1387,7 +1387,7 @@ export function applyTheme(themeName) {
   if (document.getElementById('tab-observatory') && window.initObservatory) {
       window.initObservatory();
   }
-  closeMenu();
+  if (!silent) closeMenu();
 }
 
 export function applyRandomMixTheme() {
@@ -1491,10 +1491,103 @@ export function initThemeSystem() {
       localStorage.setItem('selectedTheme', 'random');
   });
   themeContainer.appendChild(randomBtn);
+
+  // --- Auto-rotate toggle button ---
+  const autoRotateBtn = document.createElement('button');
+  autoRotateBtn.id = 'theme-auto-rotate-btn';
+  autoRotateBtn.className = 'theme-auto-rotate-btn';
+  autoRotateBtn.setAttribute('aria-pressed', 'false');
+  autoRotateBtn.setAttribute('title', 'Cycle through all themes automatically every 30 seconds');
+  autoRotateBtn.innerHTML = `
+    <span class="auto-rotate-icon">🔄</span>
+    <span class="auto-rotate-label">Auto: Off</span>
+  `;
+  autoRotateBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleThemeAutoRotate();
+  });
   menuDropdown.appendChild(themeSeparator);
   menuDropdown.appendChild(themeToggleBtn);
   menuDropdown.appendChild(themeContainer);
+  menuDropdown.appendChild(autoRotateBtn);
   loadSavedTheme();
+}
+
+// ===================================================================
+//  AUTO-ROTATE THEME SYSTEM
+// ===================================================================
+
+const AUTO_ROTATE_INTERVAL_MS = 30000; // 30 seconds
+const THEME_ROTATE_ORDER = Object.keys(THEME_COLORS); // All theme names in order
+let _autoRotateTimer = null;
+let _autoRotateIndex = 0;
+
+/**
+ * Starts the auto-rotate cycle from the current active theme.
+ * Silently applies each theme (no menu close, no localStorage spam mid-cycle).
+ */
+export function startThemeAutoRotate() {
+    stopThemeAutoRotate(); // Clear any existing timer first
+
+    // Start from the currently active theme so the transition feels natural
+    const current = localStorage.getItem('selectedTheme') || 'mystical';
+    const idx = THEME_ROTATE_ORDER.indexOf(current);
+    _autoRotateIndex = idx !== -1 ? idx : 0;
+
+    localStorage.setItem('themeAutoRotate', 'on');
+    _updateAutoRotateToggleUI(true);
+
+    _autoRotateTimer = setInterval(() => {
+        _autoRotateIndex = (_autoRotateIndex + 1) % THEME_ROTATE_ORDER.length;
+        const nextTheme = THEME_ROTATE_ORDER[_autoRotateIndex];
+        applyTheme(nextTheme, { silent: true });
+    }, AUTO_ROTATE_INTERVAL_MS);
+}
+
+/**
+ * Stops the auto-rotate cycle.
+ */
+export function stopThemeAutoRotate() {
+    if (_autoRotateTimer) {
+        clearInterval(_autoRotateTimer);
+        _autoRotateTimer = null;
+    }
+    localStorage.setItem('themeAutoRotate', 'off');
+    _updateAutoRotateToggleUI(false);
+}
+
+/**
+ * Toggles auto-rotate on or off.
+ */
+export function toggleThemeAutoRotate() {
+    const isOn = _autoRotateTimer !== null;
+    if (isOn) {
+        stopThemeAutoRotate();
+    } else {
+        startThemeAutoRotate();
+    }
+}
+
+/**
+ * Updates the visual state of the auto-rotate toggle button.
+ */
+function _updateAutoRotateToggleUI(isOn) {
+    const btn = document.getElementById('theme-auto-rotate-btn');
+    if (!btn) return;
+    btn.classList.toggle('active', isOn);
+    btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+    const label = btn.querySelector('.auto-rotate-label');
+    if (label) label.textContent = isOn ? 'Auto: On' : 'Auto: Off';
+}
+
+/**
+ * Restores auto-rotate state from localStorage on page load.
+ */
+export function restoreThemeAutoRotate() {
+    if (localStorage.getItem('themeAutoRotate') === 'on') {
+        startThemeAutoRotate();
+    }
 }
 
 // ===================================================================
