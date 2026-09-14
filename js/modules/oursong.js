@@ -2,7 +2,7 @@
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260914b';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;
@@ -19,11 +19,10 @@ const DEDICATION_TEXT = `
     This one is for you, Zoya. Always.
 `;
 
-// Fill these in with real lyrics or leave as placeholders
-const LYRICS = [
-    { en: "[ Fill in the lyrics here ]", zh: "「 在这里填写歌词 」" },
-    { en: "[ Every line a memory ]", zh: "「 每一行都是回忆 」" },
-    { en: "[ Every note a promise ]", zh: "「 每一音符都是承诺 」" },
+// Official artist videos; loaded only when a visitor chooses a song.
+const LISTENING_ROOM = [
+    { title: 'Let Me Down Slowly', artist: 'Alec Benjamin', videoId: '50VNCymT-Cs' },
+    { title: 'Perfect', artist: 'Ed Sheeran', videoId: '2Vv-BfVoq4g' },
 ];
 
 function getOurSongHTML(song) {
@@ -50,31 +49,34 @@ function getOurSongHTML(song) {
             </div>
 
             <div class="oursong-controls">
-                <button id="oursong-play-btn" class="oursong-play-btn" title="Play / Pause">
+                <button id="oursong-play-btn" class="oursong-play-btn" title="Play / Pause" aria-label="Play or pause our recording">
                     ▶
                 </button>
             </div>
 
+            <p id="oursong-status" role="status"></p>
             <div class="oursong-dedication">
                 <div class="oursong-dedication-inner">
                     ${DEDICATION_TEXT.trim().split('\n').map(l => `<p>${l.trim()}</p>`).join('')}
                 </div>
             </div>
 
-            <div class="oursong-lyrics">
-                <h3 class="oursong-lyrics-heading">✦ Lyrics ✦</h3>
-                <div class="oursong-lyrics-body">
-                    ${LYRICS.map(line => `
-                        <div class="oursong-lyric-line">
-                            <span class="lyric-en">${line.en}</span>
-                            <span class="lyric-zh">${line.zh}</span>
-                        </div>
+            <section class="oursong-listening-room" aria-labelledby="listening-room-title">
+                <p class="oursong-eyebrow">THE SOUNDTRACK OF US</p>
+                <h3 id="listening-room-title">Stay for one more song</h3>
+                <p>For the quiet evenings, the distance, and every dance still to come.</p>
+                <div class="oursong-track-list">
+                    ${LISTENING_ROOM.map((track, index) => `
+                        <button class="oursong-track" data-track="${index}" aria-pressed="false">
+                            <span class="oursong-track-number">0${index + 1}</span>
+                            <span><strong>${track.title}</strong><small>${track.artist}</small></span>
+                            <span aria-hidden="true">↗</span>
+                        </button>
                     `).join('')}
                 </div>
-                <p class="oursong-lyrics-note">
-                    ✎ To add real lyrics, edit <code>LYRICS</code> in <code>js/modules/oursong.js</code>
-                </p>
-            </div>
+                <div id="oursong-video-slot"></div>
+                <p class="oursong-listening-note">Choose a song to load its official YouTube player, then press play. Availability may vary by region.</p>
+            </section>
 
         </div>
     </div>
@@ -84,7 +86,7 @@ function getOurSongHTML(song) {
 let songAudio = null;
 let isPlaying = false;
 
-function togglePlay(song) {
+async function togglePlay(song) {
     const btn = document.getElementById('oursong-play-btn');
     const vinyl = document.getElementById('oursong-vinyl');
     const needle = document.getElementById('oursong-needle');
@@ -108,7 +110,17 @@ function togglePlay(song) {
         if (vinyl) vinyl.classList.remove('spinning');
         if (needle) needle.classList.remove('dropped');
     } else {
-        songAudio.play().catch(e => console.warn('Audio play blocked:', e));
+        document.getElementById('oursong-video-slot')?.replaceChildren();
+        document.querySelectorAll('.oursong-track').forEach(button => button.setAttribute('aria-pressed', 'false'));
+        pauseBackgroundMusic();
+        try {
+            await songAudio.play();
+        } catch (error) {
+            const status = document.getElementById('oursong-status');
+            if (status) status.textContent = 'This recording could not play. Try a song below.';
+            return;
+        }
+        if (!document.getElementById('oursong-play-btn')) return;
         isPlaying = true;
         if (btn) btn.textContent = '⏸';
         if (vinyl) vinyl.classList.add('spinning');
@@ -116,10 +128,48 @@ function togglePlay(song) {
     }
 }
 
+function pauseBackgroundMusic() {
+    AppState.music.player?.pause();
+    AppState.music.isPlaying = false;
+    const globalButton = document.getElementById('play-pause-btn');
+    if (globalButton) globalButton.textContent = '▶️';
+    AppState.landingAudioPlayer?.pause();
+}
+
+function selectTrack(index) {
+    const track = LISTENING_ROOM[index];
+    if (!track) return;
+    songAudio?.pause();
+    isPlaying = false;
+    document.getElementById('oursong-play-btn').textContent = '▶';
+    document.getElementById('oursong-vinyl').classList.remove('spinning');
+    document.getElementById('oursong-needle').classList.remove('dropped');
+    pauseBackgroundMusic();
+    document.querySelectorAll('.oursong-track').forEach(button => {
+        button.setAttribute('aria-pressed', String(Number(button.dataset.track) === index));
+    });
+    const slot = document.getElementById('oursong-video-slot');
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.youtube-nocookie.com/embed/${track.videoId}`;
+    frame.title = `${track.title} — ${track.artist}, official music video`;
+    frame.allow = 'encrypted-media; fullscreen; picture-in-picture';
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    const fallback = document.createElement('a');
+    fallback.href = `https://www.youtube.com/watch?v=${track.videoId}`;
+    fallback.target = '_blank';
+    fallback.rel = 'noopener noreferrer';
+    fallback.textContent = `Open ${track.title} on YouTube ↗`;
+    slot.replaceChildren(frame, fallback);
+}
+
 export function render(container) {
     const song = EDITABLE_CONFIG.SONGS_DATA[FEATURED_SONG_INDEX] || null;
     container.innerHTML = getOurSongHTML(song);
 
+    container.querySelectorAll('.oursong-track').forEach(button => {
+        button.addEventListener('click', () => selectTrack(Number(button.dataset.track)));
+    });
     const playBtn = document.getElementById('oursong-play-btn');
     if (playBtn) {
         playBtn.addEventListener('click', () => togglePlay(song));
@@ -127,6 +177,7 @@ export function render(container) {
 }
 
 export function cleanup() {
+    document.getElementById('oursong-video-slot')?.replaceChildren();
     if (songAudio) {
         songAudio.pause();
         songAudio = null;

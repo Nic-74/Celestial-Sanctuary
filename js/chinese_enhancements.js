@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
     
             Object.entries(menuLinks).forEach(([href, chineseText]) => {
-                const link = document.querySelector(`a[href="${href}"]`);
+                const link = document.querySelector(`#main-menu-dropdown a[href="${href}"]`);
                 if (link && !link.querySelector('.chinese-subtitle')) {
                     const originalText = link.textContent.trim(); // Get text only
                     link.innerHTML = originalText; // Clear existing content

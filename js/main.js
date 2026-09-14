@@ -15,9 +15,10 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js';
+} from './common.js?v=20260914b';
 
 // --- Global State for Panel Management ---
+let panelRequestId = 0;
 let currentPanelModule = null; // To store the currently loaded module for cleanup
 // Make this global so modules can access it
 window.currentPanelModule = null; 
@@ -38,7 +39,7 @@ async function initApp() {
     await loadDataFromServer();
     
     // 2. Handle page reloads
-    const navigationType = performance.getEntriesByType("navigation")[0].type;
+    const navigationType = performance.getEntriesByType("navigation")[0]?.type;
     if (navigationType === 'reload') {
         sessionStorage.removeItem('enteredFromGate');
     }
@@ -54,7 +55,7 @@ async function initApp() {
     initLandingPage();
     initMoodPickers();
     initThemeSystem(); // Initialize the theme system
-    restoreThemeAutoRotate(); // Resume auto-rotate if it was on before
+    // Keep the editorial palette steady; theme controls remain available in the archive.
 
     // 4. Set up navigation
     window.addEventListener('hashchange', handleHashChange, false);
@@ -111,6 +112,7 @@ function handleHashChange() {
         return;
     }
     let panelId = window.location.hash.substring(1) || 'home';
+    if (panelId === 'home') panelId = 'journey';
     if (panelId === 'observatory-direct') {
         panelId = 'guide'; 
     }
@@ -121,6 +123,7 @@ function handleHashChange() {
 }
 
 async function loadPanel(panelId) {
+    const requestId = ++panelRequestId;
     if (currentPanelModule && typeof currentPanelModule.cleanup === 'function') {
         currentPanelModule.cleanup();
     }
@@ -129,9 +132,15 @@ async function loadPanel(panelId) {
     // Clear global functions that are module-specific
     if (window.initObservatory) window.initObservatory = undefined;
     
-    DOM.mainContent.innerHTML = ''; 
+    DOM.mainContent.innerHTML = '';
+    document.body.dataset.panel = panelId;
+    document.querySelectorAll('.sanctuary-header nav a').forEach(link => {
+        const active = link.hash === `#${panelId === 'journey' ? 'home' : panelId}`;
+        if (active) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+    });
 
-    if (panelId === 'home' || panelId === '') {
+    if (panelId === 'orbit') {
         AppState.activePanel = 'home';
         DOM.mainContent.classList.remove('visible');
         if (AppState.solarHideTimeout) { clearTimeout(AppState.solarHideTimeout); }
@@ -169,14 +178,28 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js`)
+            import(`./modules/${panelId}.js?v=20260914b`)
         ]);
 
+        if (requestId !== panelRequestId) return;
         if (jsModule && typeof jsModule.render === 'function') {
             AppState.activePanel = panelId;
             jsModule.render(DOM.mainContent); // Pass the container to the module
             currentPanelModule = jsModule; // Store for cleanup
             window.currentPanelModule = jsModule; // Expose to common.js
+            const journeySteps = [
+                ['chronicle', 'Our Chronicle'], ['gallery', 'The Memory Album'],
+                ['voice-garden', 'The Voice Garden'], ['oursong', 'Our Listening Room'], ['letter', 'A Letter to Zoya']
+            ];
+            const step = journeySteps.findIndex(([id]) => id === panelId);
+            if (step >= 0) {
+                const next = journeySteps[step + 1];
+                const trail = document.createElement('nav');
+                trail.className = 'journey-trail';
+                trail.setAttribute('aria-label', 'Continue our story');
+                trail.innerHTML = `<a href="#home">← Back to our universe</a><span>${step + 1} / ${journeySteps.length}</span><a href="#${next ? next[0] : 'home'}">${next ? `Next: ${next[1]} ↗` : 'Return to the stars ↗'}</a>`;
+                DOM.mainContent.appendChild(trail);
+            }
             
             // *** ADDED: Expose module functions to window if they exist ***
             if (panelId === 'guide' && typeof jsModule.initObservatory === 'function') {
@@ -193,6 +216,7 @@ async function loadPanel(panelId) {
         }
 
     } catch (error) {
+        if (requestId !== panelRequestId) return;
         console.error(`Failed to load panel '${panelId}':`, error);
         DOM.mainContent.innerHTML = `<h2 class="panel-header">Error</h2><p class="panel-subheader">Could not load module: ${panelId}.js. ${error.message}</p>`;
     }
@@ -208,7 +232,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css`;
+        link.href = `css/modules/${panelId}.css?v=20260914b`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);
@@ -221,56 +245,42 @@ function loadCssModule(panelId) {
 // ===================================================================
 
 function initLandingPage() {
-    // --- MODIFIED: Two-click entry logic ---
-    // The first click starts the audio, the second enters the sanctuary.
-    const handleLandingGateClick = () => {
-        // 1. On the first click, start the audio.
-        if (!AppState.landingAudioStarted) {
-            // Initialize and play the audio if it doesn't exist.
-            if (!AppState.landingAudioPlayer) {
-                // This block should ideally not be hit if pre-loading works, but is a good fallback.
-                AppState.landingAudioPlayer = new Audio('music/landing.mp3'); 
-                AppState.landingAudioPlayer.loop = false; // Ensure audio does not loop
-            }
-            AppState.landingAudioPlayer.play().catch(e => console.error("Landing audio playback failed:", e));
-            AppState.landingAudioStarted = true; // Set the flag
-
-            // Optional: Add a class to provide visual feedback
-            DOM.landingGate.classList.add('audio-playing');
-
-            // Add listener for when the audio finishes
+    const soundButton = $('gate-sound');
+    $('enter-sanctuary').addEventListener('click', () => enterSanctuary(false));
+    soundButton.addEventListener('click', async () => {
+        if (!AppState.landingAudioPlayer) {
+            AppState.landingAudioPlayer = new Audio('music/landing.mp3');
+            AppState.landingAudioPlayer.preload = 'none';
             AppState.landingAudioPlayer.addEventListener('ended', () => {
-                // Check if we haven't already entered the sanctuary
-                if (sessionStorage.getItem('enteredFromGate') !== 'true') {
-                    enterSanctuary(false);
-                }
-            }, { once: true }); // Use { once: true } to ensure it only fires once
-        } else {
-            // 2. On the second click, enter the sanctuary.
-            enterSanctuary(false);
+                soundButton.textContent = '♫ Sound off';
+                soundButton.setAttribute('aria-pressed', 'false');
+            });
         }
-    };
-
-    DOM.landingGate.addEventListener('click', handleLandingGateClick);
-    const heartPortal = $('heart-portal');
-    if (heartPortal) {
-        heartPortal.addEventListener('click', (e) => e.stopPropagation());
-    }
-    let savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
-    if (!THEME_COLORS[savedTheme]) savedTheme = 'mystical';
-    applyThemeToLanding(savedTheme);
-    initWebBackground('web-canvas-landing', THEME_COLORS[savedTheme]);
-    initSpiralAnimation('spiral-canvas-landing', { intensity: 'subtle' });
-    
-    // --- MODIFIED: Prepare Landing Page Audio ---
-    if (sessionStorage.getItem('enteredFromGate') !== 'true' && !window.location.hash) {
-        // Pre-load the audio object, but don't play it yet.
-        AppState.landingAudioPlayer = new Audio('music/landing.mp3');
-        AppState.landingAudioPlayer.loop = false; // Audio should only play once
-    }
+        const audio = AppState.landingAudioPlayer;
+        if (!audio.paused) {
+            audio.pause();
+            soundButton.textContent = '♫ Sound off';
+            soundButton.setAttribute('aria-pressed', 'false');
+            return;
+        }
+        try {
+            await audio.play();
+            soundButton.textContent = '♫ Sound on';
+            soundButton.setAttribute('aria-pressed', 'true');
+            $('gate-audio-status').textContent = '';
+        } catch { $('gate-audio-status').textContent = 'Sound could not start. You can still enter and explore.'; }
+    });
+    $('heart-portal').addEventListener('click', event => {
+        event.preventDefault();
+        sessionStorage.setItem('pendingHash', '#oursong');
+        enterSanctuary(false);
+    });
 }
 
 function enterSanctuary(skipAnimation = false) {
+    if (DOM.landingGate.dataset.entered) return;
+    DOM.landingGate.dataset.entered = 'true';
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) skipAnimation = true;
     sessionStorage.setItem('enteredFromGate', 'true');
     DOM.celestialSanctuary.style.display = 'block';
     
@@ -315,15 +325,13 @@ function initSanctuary() {
     
     let savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     if (!THEME_COLORS[savedTheme]) savedTheme = 'mystical';
-    initMainParticles(savedTheme);
-    initWebBackground('web-canvas-main', THEME_COLORS[savedTheme]);
-    initSpiralAnimation('spiral-canvas-main', { intensity: 'moderate' });
+    // The editorial shell uses a lightweight CSS sky instead of perpetual canvas loops.
     
     // Re-initialize parallax for the main sanctuary view
     initializeParallax();
 
     addSanctuaryEventListeners();
-    evaluateMoodAndRedirect();
+    // Mood recommendations remain available through the mood controls.
 
     const moodBar = document.getElementById('mood-sync-bar');
     if (moodBar) {
@@ -552,7 +560,13 @@ function initMusicPlayer() {
     if (savedStateJSON) {
         const savedState = JSON.parse(savedStateJSON);
         const savedSongsJSON = sessionStorage.getItem('songsData');
-        if (savedSongsJSON) { EDITABLE_CONFIG.SONGS_DATA = JSON.parse(savedSongsJSON); }
+        if (savedSongsJSON) {
+            const songs = JSON.parse(savedSongsJSON).filter(song => {
+                const legacy = /^music\/song(\d+)\.mp3$/.exec(song.src);
+                return !(legacy && Number(legacy[1]) > 2 && song.title === `Our Song ${legacy[1]}`);
+            });
+            if (songs.length) EDITABLE_CONFIG.SONGS_DATA = songs;
+        }
         AppState.music.isShuffled = savedState.isShuffled;
         AppState.music.player.volume = savedState.volume;
         $('volume-slider').value = savedState.volume;

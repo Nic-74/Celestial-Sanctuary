@@ -110,9 +110,9 @@ If you want it always-on, upgrade to Render's Starter plan ($7/month) — or kee
 |---|---|
 | Add photos or music | Use the "Upload Photo" / "Upload Song" buttons in the app |
 | Edit the letter | Open `js/modules/letter.js`, change the `LETTER_LINES` array, push to GitHub |
-| Edit song lyrics | Open `js/modules/oursong.js`, change the `LYRICS` array, push to GitHub |
+| Edit listening room | Open `js/modules/oursong.js`, update `LISTENING_ROOM` with official video IDs, push to GitHub |
 | Add a chronicle event | Use the "Add Timeline Event" button in the Chronicle section |
-| Change the featured song | In `js/modules/oursong.js`, change `FEATURED_SONG_INDEX` to any number 0–19 |
+| Change the featured song | In `js/modules/oursong.js`, change `FEATURED_SONG_INDEX` to 0 or 1 |
 
 ---
 
@@ -125,3 +125,13 @@ If you want it always-on, upgrade to Render's Starter plan ($7/month) — or kee
 **"CORS error"** — The `flask-cors` package is already installed and active. Make sure your Render URL in `common.js` has no trailing slash.
 
 **Service sleeping** — First request after inactivity takes ~30 seconds. This is normal on the free tier.
+
+## September 2026 story redesign
+
+The default home route now renders `js/modules/journey.js`, styled by `css/modules/journey.css`. The original planet navigation is available at `#orbit` and through the menu. The entrance and persistent navigation use `css/editorial.css`.
+
+Update the four constellation memories in the `memories` array. Optimized copies of existing photographs live in `photos/web/`; original photographs are unchanged. Location clock selections are stored only in the visitor's browser. The skies are illustrations, not astronomical forecasts or live location tracking.
+
+Music videos use official YouTube embeds with direct YouTube fallback links. Availability depends on YouTube and the visitor's region/browser. Existing personal recordings remain locally hosted.
+
+For this release, module and stylesheet URLs carry a shared version query to refresh cached assets. If changing the shared module version in future, update all imports together so every panel uses the same AppState instance.

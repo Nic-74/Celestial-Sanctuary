@@ -16,12 +16,14 @@
     <link rel="stylesheet" href="css/common.css">
     
     <link rel="stylesheet" href="css/chinese_aesthetics.css">
+    <link rel="stylesheet" href="css/editorial.css?v=20260914b">
+    <meta name="description" content="Nini and Zoya’s living archive: a constellation of memories, songs, and quiet promises.">
     <style>
         body, html {
             overflow-x: hidden;
         }
     </style></head>
-<body>
+<body class="sanctuary-editorial">
 
     <div class="background-container">
         <canvas id="web-canvas-landing"></canvas>
@@ -29,30 +31,25 @@
         <canvas id="landing-particles-canvas"></canvas>
     </div>
 
-    <section id="landing-gate">
-        <div class="gate-container">
-            <div class="gate-content">
-                <h1 class="main-title">Nini & Zoya</h1>
-                <p class="subtitle">A Celestial Sanctuary</p>
-                <p class="description">
-                    "From the moment our paths crossed at that sports festival, a new universe was born. This is a living archive of that universe—a world built on shared memories, quiet understanding, and a love that spans across time and space."
-                </p>
-                <div class="countries">
-                    Uganda <span class="heart-icon">💖</span> China
-                </div>
-                <p class="prophecy">
-                    "Two souls, one orbit, bound by a gravity stronger than any star."
-                </p>
-                <p class="prompt">[ Click anywhere to Enter ]</p>
-                
-                <a href="#observatory-direct" id="heart-portal" style="text-decoration: none; color: var(--gold); margin-top: 2rem; display: inline-block; font-family: var(--font-display);">
-                    Or, journey directly to the 🔭 Observatory
-                </a>
+    <section id="landing-gate" aria-labelledby="gate-title">
+        <div class="editorial-gate">
+            <div class="gate-wordmark">N <span>✧</span> Z</div>
+            <div class="gate-orbit" aria-hidden="true"></div>
+            <div class="gate-editorial-copy">
+                <p class="gate-eyebrow">A CELESTIAL SANCTUARY</p>
+                <h1 id="gate-title">Nini <em>&</em> Zoya</h1>
+                <p class="gate-tagline">Somewhere in this universe,<br>we found our way to each other.</p>
+                <div class="gate-actions"><button id="enter-sanctuary" class="gate-enter">Enter our universe <span>↗</span></button><button id="gate-sound" aria-pressed="false">♫ Sound off</button></div>
+                <p id="gate-audio-status" role="status"></p>
+                <a href="#oursong" id="heart-portal">Stay for a song ↗</a>
             </div>
+            <figure class="gate-photo"><img src="photos/web/memory-4.jpg" alt="Nic and Zoya sharing a moment in Arashiyama" width="900" height="1200" fetchpriority="high"><figcaption>ONE MOMENT. OUR WHOLE UNIVERSE.</figcaption></figure>
+            <div class="gate-bottom"><span>UGANDA · CHINA · A LOVE WITHOUT BORDERS</span><span>Est. 25 August 2021</span></div>
         </div>
     </section>
 
     <main id="celestial-sanctuary" style="display: none;">
+        <header class="sanctuary-header"><a class="sanctuary-brand" href="#home">Nini <em>&</em> Zoya<span>THE CELESTIAL SANCTUARY</span></a><nav aria-label="Main navigation"><a href="#home">Our universe</a><a href="#gallery">Memories</a><a href="#oursong">Listen</a><a href="#letter">The letter</a></nav></header>
         <div class="background-container">
             <canvas id="web-canvas-main"></canvas>
             <canvas id="spiral-canvas-main"></canvas>
@@ -117,11 +114,12 @@
         </div>
 
         <div id="main-menu-container">
-            <button id="main-menu-button" ontouchstart="this.click();">
+            <button id="main-menu-button" aria-label="Open all sanctuary sections">
                 <img id="menu-icon-img" src="photos/favicon1.png" alt="Menu">
             </button>
             <nav id="main-menu-dropdown">
-                <a href="#home" onclick="closeMenu()">Home</a>
+                <a href="#home" onclick="closeMenu()">Our Universe</a>
+                <a href="#orbit" onclick="closeMenu()">Explore the Planets</a>
                 <a href="#chronicle" onclick="closeMenu()">Our Chronicle</a>
                 <a href="#tome" onclick="closeMenu()">The Stardust Tome</a>
                 <a href="#gallery" onclick="closeMenu()">Gallery of Ages</a>
@@ -182,7 +180,7 @@
             <div id="planet-name-display"></div>
         </div>
 
-        <main class="main-content"></main>
+        <div class="main-content" role="region" aria-label="Sanctuary content"></div>
 
         <button id="scroll-to-top" title="Go to top">↑</button>
 
@@ -488,8 +486,8 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <script type="module" src="js/main.js"></script>
-    <script src="js/chinese_enhancements.js"></script>
+    <script type="module" src="js/main.js?v=20260914b"></script>
+    <script src="js/chinese_enhancements.js?v=20260914b"></script>
 
 </body>
 </html>

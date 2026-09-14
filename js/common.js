@@ -28,7 +28,7 @@ export let EDITABLE_CONFIG = {
         { src: `photos/photo17.jpg`, caption: 'Just Nicholas', year: 2022, category: 'nicholas' }, { src: `photos/photo18.jpg`, caption: 'Bakinggggg', year: 2024, category: 'random' },
         { src: `photos/photo19.jpg`, caption: 'Random Artifact', year: 2024, category: 'random' }, { src: `photos/photo20.jpg`, caption: 'Lost but found', year: 2025, category: 'random' }
     ],
-    SONGS_DATA: Array.from({length: 20}, (_, i) => ({ src: `music/song${i+1}.mp3`, title: `Our Song ${i+1}`, artist: 'Nini & Zoya', albumArt: `photos/photo${(i % 20) + 1}.jpg` })), 
+    SONGS_DATA: Array.from({length: 2}, (_, i) => ({ src: `music/song${i+1}.mp3`, title: `Our Song ${i+1}`, artist: 'Nini & Zoya', albumArt: `photos/photo${(i % 20) + 1}.jpg` })),
     GALLERY_CATEGORIES: { 'cooking': '🍳 Food', 'travel': '✈️ Trip', 'random': '🎲 Random', 'intimate': '💕 Intimate', 'zoya': '🌸 Zoya', 'nicholas': '📖 Nic' },
     DISCOVER_DATA: [
         {

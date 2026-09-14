@@ -5,7 +5,7 @@
 import {
     $, $$, AppState, CHRONICLE_DATA, EDITABLE_CONFIG,
     apiAddItem, apiUpdateItem, apiDeleteItem, findImageWithExtension
-} from '../common.js';
+} from '../common.js?v=20260914b';
 
 // --- Local state for this module ---
 let counterInterval;
