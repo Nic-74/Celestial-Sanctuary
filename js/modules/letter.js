@@ -2,7 +2,7 @@
 //  MODULE: A LETTER TO ZOYA (js/modules/letter.js)
 // ===================================================================
 
-import { EDITABLE_CONFIG } from '../common.js?v=20260914b';
+import { EDITABLE_CONFIG } from '../common.js?v=20260914c';
 
 const LETTER_LINES = [
     "To my Zoya,",

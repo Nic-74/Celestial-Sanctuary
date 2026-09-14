@@ -612,9 +612,7 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
         perspective: 800px;
     }
     
-    .orbit:nth-child(n) {
-        transform: translateZ(0) !important;
-    }
+    /* Keep orbital rotation on phones; a forced transform here freezes the animation. */
     
     .planet:hover {
         transform: translate(-50%, -50%) scale(1.3) !important;

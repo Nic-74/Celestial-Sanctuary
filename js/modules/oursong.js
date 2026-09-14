@@ -2,7 +2,7 @@
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260914b';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260914c';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;

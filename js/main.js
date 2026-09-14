@@ -15,7 +15,7 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260914b';
+} from './common.js?v=20260914c';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -178,7 +178,7 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260914b`)
+            import(`./modules/${panelId}.js?v=20260914c`)
         ]);
 
         if (requestId !== panelRequestId) return;
@@ -232,7 +232,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260914b`;
+        link.href = `css/modules/${panelId}.css?v=20260914c`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);

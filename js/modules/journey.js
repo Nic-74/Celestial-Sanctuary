@@ -1,4 +1,4 @@
-import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260914b';
+import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260914c';
 
 let clockInterval;
 let voice;
