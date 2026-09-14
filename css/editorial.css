@@ -68,3 +68,6 @@ body.sanctuary-editorial:has(#mood-sync-bar.collapsed) #main-menu-container,body
 .journey-trail a { color:#dac39a; text-decoration:none; padding:12px 0; }
 .journey-trail span { color:#a6adba; white-space:nowrap; }
 @media(max-width:600px) { .journey-trail { font-size:10px; gap:15px; } }
+.planet-story-invitation { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:500; padding:14px 24px; background:#101b2be8; border:1px solid #dac39a60; border-radius:8px; color:#eee0c6; text-decoration:none; font:12px/1.6 Arial,sans-serif; text-align:center; width:max-content; max-width:80vw; }
+.planet-story-invitation span { display:block; font-size:8px; letter-spacing:.2em; color:#a6adba; margin-bottom:4px; }
+@media(max-width:700px) { .sanctuary-header .nav-memories { display:none; } .planet-story-invitation { bottom:18px; font-size:10px; } }

@@ -112,7 +112,7 @@ function handleHashChange() {
         return;
     }
     let panelId = window.location.hash.substring(1) || 'home';
-    if (panelId === 'home') panelId = 'journey';
+    if (panelId === 'home') panelId = 'orbit';
     if (panelId === 'observatory-direct') {
         panelId = 'guide'; 
     }
@@ -135,7 +135,7 @@ async function loadPanel(panelId) {
     DOM.mainContent.innerHTML = '';
     document.body.dataset.panel = panelId;
     document.querySelectorAll('.sanctuary-header nav a').forEach(link => {
-        const active = link.hash === `#${panelId === 'journey' ? 'home' : panelId}`;
+        const active = link.hash === `#${panelId === 'orbit' ? 'home' : panelId}`;
         if (active) link.setAttribute('aria-current', 'page');
         else link.removeAttribute('aria-current');
     });
@@ -197,7 +197,7 @@ async function loadPanel(panelId) {
                 const trail = document.createElement('nav');
                 trail.className = 'journey-trail';
                 trail.setAttribute('aria-label', 'Continue our story');
-                trail.innerHTML = `<a href="#home">← Back to our universe</a><span>${step + 1} / ${journeySteps.length}</span><a href="#${next ? next[0] : 'home'}">${next ? `Next: ${next[1]} ↗` : 'Return to the stars ↗'}</a>`;
+                trail.innerHTML = `<a href="#journey">← Back to our story</a><span>${step + 1} / ${journeySteps.length}</span><a href="#${next ? next[0] : 'home'}">${next ? `Next: ${next[1]} ↗` : 'Return to the stars ↗'}</a>`;
                 DOM.mainContent.appendChild(trail);
             }
             

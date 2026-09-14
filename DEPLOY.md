@@ -128,7 +128,7 @@ If you want it always-on, upgrade to Render's Starter plan ($7/month) — or kee
 
 ## September 2026 story redesign
 
-The default home route now renders `js/modules/journey.js`, styled by `css/modules/journey.css`. The original planet navigation is available at `#orbit` and through the menu. The entrance and persistent navigation use `css/editorial.css`.
+The default home route preserves the original rotating planet navigation (`#home` or `#orbit`). The new story page is available at `#journey`, rendered by `js/modules/journey.js` and styled by `css/modules/journey.css`. The entrance and persistent navigation use `css/editorial.css`.
 
 Update the four constellation memories in the `memories` array. Optimized copies of existing photographs live in `photos/web/`; original photographs are unchanged. Location clock selections are stored only in the visitor's browser. The skies are illustrations, not astronomical forecasts or live location tracking.
 
