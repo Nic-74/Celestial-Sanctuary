@@ -6,7 +6,7 @@ import {
     apiAddItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260914c';
+} from '../common.js?v=20260915';
 
 // --- Local State ---
 let panelContainer = null; // To store the main content element

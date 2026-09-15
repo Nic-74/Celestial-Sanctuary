@@ -1,7 +1,7 @@
 // ===================================================================
 //  MODULE: SANCTUARY (js/modules/sanctuary.js) - ENHANCED
 // ===================================================================
-import { $, $$, AppState, personalizedContent } from '../common.js?v=20260914c';
+import { $, $$, AppState, personalizedContent } from '../common.js?v=20260915';
 
 // --- Local State ---
 let panelContainer = null;

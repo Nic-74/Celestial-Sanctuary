@@ -2,7 +2,7 @@
 //  MODULE: VOICE GARDEN (js/modules/voicegarden.js)
 // ===================================================================
 
-import { $, $$, formatTime } from '../common.js?v=20260914c';
+import { $, $$, formatTime } from '../common.js?v=20260915';
 
 // --- Local State ---
 let panelContainer = null;

@@ -135,3 +135,9 @@ Update the four constellation memories in the `memories` array. Optimized copies
 Music videos use official YouTube embeds with direct YouTube fallback links. Availability depends on YouTube and the visitor's region/browser. Existing personal recordings remain locally hosted.
 
 For this release, module and stylesheet URLs carry a shared version query to refresh cached assets. If changing the shared module version in future, update all imports together so every panel uses the same AppState instance.
+
+## August 22 dance keepsake
+
+The existing planet view and Our Song panel now open the same native dialog, implemented in `js/dance-memory.js` and `css/dance-memory.css`. No new route is added. It features Nic’s `22nd august 2021` YouTube playlist, with the eight tracks observed on 15 September 2026 in their original order. The playlist embed follows live playlist changes; update `DANCE_TRACKS` if you later change the visible eight-song keepsake list. Closing the dialog removes the embedded player and restores keyboard focus.
+
+Falling stars render in `#romantic-sky` even at `#home`; the original animated sky canvases are restored. Reduced-motion preferences suppress the sky animation.

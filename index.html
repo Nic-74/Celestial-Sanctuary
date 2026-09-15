@@ -13,10 +13,11 @@
     
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/common.css?v=20260914c">
+    <link rel="stylesheet" href="css/common.css?v=20260915">
     
     <link rel="stylesheet" href="css/chinese_aesthetics.css">
-    <link rel="stylesheet" href="css/editorial.css?v=20260914c">
+    <link rel="stylesheet" href="css/editorial.css?v=20260915">
+    <link rel="stylesheet" href="css/dance-memory.css?v=20260915">
     <meta name="description" content="Nini and Zoya’s living archive: a constellation of memories, songs, and quiet promises.">
     <style>
         body, html {
@@ -24,6 +25,8 @@
         }
     </style></head>
 <body class="sanctuary-editorial">
+    <div id="romantic-sky" aria-hidden="true"></div>
+    <dialog id="dance-memory" aria-labelledby="dance-title"></dialog>
 
     <div class="background-container">
         <canvas id="web-canvas-landing"></canvas>
@@ -134,8 +137,12 @@
             </nav>
         </div>
 
-        <div id="solar-system-container">
+        <div id="planet-keepsakes">
+            <button id="open-dance-memory"><span class="dance-invitation-date">22 AUGUST · OUR SECRET PLACE</span><strong>Dance with me again ♡</strong></button>
             <a class="planet-story-invitation" href="#journey"><span>NEW · OUR STORY</span>Follow the thread through our memories ↗</a>
+        </div>
+        <div id="solar-system-container">
+
             <div id="music-player-sun">
                 <div class="sun-surface">
                     <img id="sun-album-art" src="photos/photo1.jpg" alt="Album Art">
@@ -487,8 +494,8 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <script type="module" src="js/main.js?v=20260914c"></script>
-    <script src="js/chinese_enhancements.js?v=20260914c"></script>
+    <script type="module" src="js/main.js?v=20260915"></script>
+    <script src="js/chinese_enhancements.js?v=20260915"></script>
 
 </body>
 </html>

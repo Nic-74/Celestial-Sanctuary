@@ -15,7 +15,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260914c';
+} from './common.js?v=20260915';
+
+import { initDanceMemory } from './dance-memory.js?v=20260915';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -53,6 +55,7 @@ async function initApp() {
     initQuill();
     addEventListeners();
     initLandingPage();
+    initDanceMemory();
     initMoodPickers();
     initThemeSystem(); // Initialize the theme system
     // Keep the editorial palette steady; theme controls remain available in the archive.
@@ -178,7 +181,7 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260914c`)
+            import(`./modules/${panelId}.js?v=20260915`)
         ]);
 
         if (requestId !== panelRequestId) return;
@@ -232,7 +235,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260914c`;
+        link.href = `css/modules/${panelId}.css?v=20260915`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);
@@ -325,7 +328,11 @@ function initSanctuary() {
     
     let savedTheme = localStorage.getItem('selectedTheme') || 'mystical';
     if (!THEME_COLORS[savedTheme]) savedTheme = 'mystical';
-    // The editorial shell uses a lightweight CSS sky instead of perpetual canvas loops.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        initMainParticles(savedTheme);
+        initWebBackground('web-canvas-main', THEME_COLORS[savedTheme]);
+        initSpiralAnimation('spiral-canvas-main', { intensity: 'subtle' });
+    }
     
     // Re-initialize parallax for the main sanctuary view
     initializeParallax();
@@ -1116,9 +1123,10 @@ function renderSolarSystemNav() {
         AppState.solarSystem.planetTrailIntervals.push(trailIntervalId);
     });
 
+    createShootingStar($('romantic-sky'));
     // Start the shooting star interval
     AppState.solarSystem.shootingStarInterval = setInterval(() => {
-        createShootingStar(DOM.solarSystemContainer);
+        createShootingStar($('romantic-sky'));
     }, 3000);
 }
 
@@ -1207,15 +1215,15 @@ function clearConstellationLines() {
 
 // Create shooting star
 function createShootingStar(container) {
-    if (!container || !document.body.contains(container) || window.location.hash) return; // Defensive check and only on home view
+    if (!container || !document.body.contains(container) || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     
     const star = document.createElement('div');
     star.className = 'shooting-star';
-    star.style.left = Math.random() * 50 + '%';
-    star.style.top = Math.random() * 50 + '%';
+    star.style.left = Math.random() * 75 - 15 + '%';
+    star.style.top = Math.random() * 20 - 5 + '%';
     
     container.appendChild(star);
-    setTimeout(() => star.remove(), 2000);
+    setTimeout(() => star.remove(), 3700);
 }
 
 // Create click ripple effect with particles

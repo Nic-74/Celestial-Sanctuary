@@ -2,21 +2,22 @@
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260914c';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260915';
+
+import { openDanceMemory } from '../dance-memory.js?v=20260915';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;
 
 const DEDICATION_TEXT = `
-    There is a song that carries every version of us inside it.
-    I heard it and thought of you before I even knew your name properly —
-    something in the melody felt like the feeling of standing near you.
+    On 22 August, in our secret place, we danced.
+    These were the songs that sparked something between us,
+    before we found the words for our confession.
 
-    Every time it plays, I am back in every moment we have shared.
-    The quiet ones. The loud ones. The ones where we said nothing at all
-    and still understood each other perfectly.
+    This playlist holds that memory for us.
+    Whenever you press play, there is another dance waiting here.
 
-    This one is for you, Zoya. Always.
+    For you, Zoya. Always.
 `;
 
 // Official artist videos; loaded only when a visitor chooses a song.
@@ -31,6 +32,12 @@ function getOurSongHTML(song) {
     return `
     <div id="oursong-panel" class="content-panel active">
         <div class="oursong-outer">
+            <section class="oursong-dance-keepsake">
+                <span class="dance-date">22 AUGUST · OUR SECRET PLACE</span>
+                <h3>Before we said it, we danced.</h3>
+                <p>The playlist that turned our sparks into a confession.</p>
+                <button id="oursong-dance-button" class="dance-play">♡ Dance with me again</button>
+            </section>
 
             <div class="oursong-vinyl-wrap">
                 <div class="oursong-vinyl" id="oursong-vinyl">
@@ -163,9 +170,21 @@ function selectTrack(index) {
     slot.replaceChildren(frame, fallback);
 }
 
+function stopForDance() {
+    songAudio?.pause();
+    isPlaying = false;
+    document.getElementById('oursong-video-slot')?.replaceChildren();
+    const button = document.getElementById('oursong-play-btn');
+    if (button) button.textContent = '▶';
+    document.getElementById('oursong-vinyl')?.classList.remove('spinning');
+    document.getElementById('oursong-needle')?.classList.remove('dropped');
+}
+
 export function render(container) {
     const song = EDITABLE_CONFIG.SONGS_DATA[FEATURED_SONG_INDEX] || null;
     container.innerHTML = getOurSongHTML(song);
+    container.querySelector('#oursong-dance-button').addEventListener('click', openDanceMemory);
+    document.addEventListener('sanctuary:dance-open', stopForDance);
 
     container.querySelectorAll('.oursong-track').forEach(button => {
         button.addEventListener('click', () => selectTrack(Number(button.dataset.track)));
@@ -177,6 +196,7 @@ export function render(container) {
 }
 
 export function cleanup() {
+    document.removeEventListener('sanctuary:dance-open', stopForDance);
     document.getElementById('oursong-video-slot')?.replaceChildren();
     if (songAudio) {
         songAudio.pause();
