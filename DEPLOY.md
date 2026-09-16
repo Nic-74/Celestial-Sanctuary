@@ -141,3 +141,8 @@ For this release, module and stylesheet URLs carry a shared version query to ref
 The existing planet view and Our Song panel now open the same native dialog, implemented in `js/dance-memory.js` and `css/dance-memory.css`. No new route is added. It features Nic’s `22nd august 2021` YouTube playlist, with the eight tracks observed on 15 September 2026 in their original order. The playlist embed follows live playlist changes; update `DANCE_TRACKS` if you later change the visible eight-song keepsake list. Closing the dialog removes the embedded player and restores keyboard focus.
 
 Falling stars render in `#romantic-sky` even at `#home`; the original animated sky canvases are restored. Reduced-motion preferences suppress the sky animation.
+
+### Playback update — 16 September 2026
+The dance playlist and listening-room tracks share an origin-aware YouTube IFrame API player. It reports provider errors, autoplay blocks and connection timeouts, and links to the exact original song. Browser/provider restrictions may still prevent embedding; this is not a promise that all YouTube recordings are embeddable.
+
+The dance dialog also plays user-selected audio through native HTML audio controls. Files stay on the device, are not uploaded, and are forgotten when the dialog closes. This is separate from future private Drive storage. Google OAuth setup is required before private Drive editing can be released.

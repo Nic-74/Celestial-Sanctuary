@@ -5,7 +5,7 @@
 import {
     $, $$, DOM, AppState, EDITABLE_CONFIG, CHRONICLE_DATA, GUIDE_RIDDLES,
     findImageWithExtension, THEME_COLORS, THEME_STAR_SHAPES
-} from '../common.js?v=20260915';
+} from '../common.js?v=20260916';
 
 // --- Local State ---
 let panelContainer = null;

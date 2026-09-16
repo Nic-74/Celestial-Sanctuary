@@ -42,3 +42,11 @@
 .dance-tracklist small { display:block; margin-top:5px; color:#a7a0b2; font-size:10px; }
 .dance-tracklist button:hover { background:#ffffff08; }
 body:not([data-panel="orbit"]) #planet-keepsakes { display:none; }
+
+.youtube-playback-status { font:14px/1.6 var(--font-body, sans-serif); color:#ead7b8; margin:14px 0 8px; }
+#dance-player > a { color:#ead7b8; text-underline-offset:4px; }
+#dance-player audio { width:100%; margin:16px 0; }
+.dance-local-audio { margin:24px 0; padding:20px; border:1px solid #d9b98a40; border-radius:14px; text-align:left; }
+.dance-local-audio label { display:block; margin-bottom:12px; color:#ead7b8; }
+.dance-local-audio input { width:100%; max-width:100%; font:inherit; font-size:13px; }
+.dance-local-audio input::file-selector-button { padding:9px 12px; margin-right:8px; border:1px solid #d9b98a80; border-radius:8px; background:#1c2036; color:#f6ead7; cursor:pointer; }

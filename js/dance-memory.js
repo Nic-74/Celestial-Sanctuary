@@ -1,4 +1,5 @@
-import { AppState } from './common.js?v=20260915';
+import { mountYouTube } from './youtube-player.js?v=20260916';
+import { AppState } from './common.js?v=20260916';
 
 const PLAYLIST_ID = 'PLbRstMs51Aq7Cd1QfnlRr0y8pzEJqTIsf';
 const PLAYLIST_URL = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;
@@ -14,6 +15,8 @@ const DANCE_TRACKS = [
 ];
 let dialog;
 let previousFocus;
+let disposePlayer;
+let localAudioURL;
 
 export function openDanceMemory() {
     if (!dialog || dialog.open) return;
@@ -48,6 +51,11 @@ export function initDanceMemory() {
         <div id="dance-player"><button id="load-dance-playlist" class="dance-play">▶ &nbsp; Play the songs we danced to</button></div>
         <a class="dance-youtube" href="${PLAYLIST_URL}" target="_blank" rel="noopener noreferrer">Open our complete playlist on YouTube ↗</a>
         <p class="dance-note">Press play in the YouTube player. If a song cannot play here, our playlist opens on YouTube.</p>
+        <div class="dance-local-audio">
+            <label for="dance-audio-file">Or play an audio file from your device</label>
+            <input id="dance-audio-file" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg">
+            <p class="dance-note">Choose a recording or music file you have permission to use. It stays on this device and is not uploaded. Choose it again next visit.</p>
+        </div>
         <details class="dance-tracklist"><summary>The eight songs you chose <span>＋</span></summary><ol>${DANCE_TRACKS.map((track,index) => `<li><button data-dance-track="${index}"><span>${String(index+1).padStart(2,'0')}</span><span><strong>${track.title}</strong><small>${track.artist}</small></span><span aria-hidden="true">▶</span></button></li>`).join('')}</ol></details>
         <p class="dance-signature">One more dance, with you.</p>`;
     dialog.querySelector('.dance-close').addEventListener('click', () => dialog.close());
@@ -56,14 +64,34 @@ export function initDanceMemory() {
         if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
     });
     const loadPlaylist = (index = null) => {
-        const frame = document.createElement('iframe');
-        frame.src = `https://www.youtube-nocookie.com/embed/${Number.isInteger(index) ? DANCE_TRACKS[index].id : 'videoseries'}?list=${PLAYLIST_ID}`;
-        frame.title = 'Our August 22 dance playlist';
-        frame.allow = 'encrypted-media; fullscreen; picture-in-picture';
-        frame.allowFullscreen = true;
-        frame.referrerPolicy = 'strict-origin-when-cross-origin';
-        dialog.querySelector('#dance-player').replaceChildren(frame);
+        dialog.querySelector('audio')?.pause();
+        disposePlayer?.();
+        if (localAudioURL) URL.revokeObjectURL(localAudioURL);
+        localAudioURL = null;
+        const track = DANCE_TRACKS[Number.isInteger(index) ? index : 0];
+        disposePlayer = mountYouTube(dialog.querySelector('#dance-player'), {
+            id: track.id, title: track.title, playlist: PLAYLIST_ID
+        });
     };
+    dialog.querySelector('#dance-audio-file').addEventListener('change', event => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        dialog.querySelector('audio')?.pause();
+        disposePlayer?.();
+        disposePlayer = null;
+        if (localAudioURL) URL.revokeObjectURL(localAudioURL);
+        localAudioURL = URL.createObjectURL(file);
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = localAudioURL;
+        const status = document.createElement('p');
+        status.setAttribute('role', 'status');
+        status.textContent = file.name;
+        audio.addEventListener('error', () => { status.textContent = 'This file could not play. Try an MP3, M4A, or WAV recording.'; });
+        dialog.querySelector('#dance-player').replaceChildren(audio, status);
+        audio.play().catch(() => { status.textContent = `${file.name} — press play to start.`; });
+        event.target.value = '';
+    });
     dialog.querySelector('#load-dance-playlist').addEventListener('click', () => loadPlaylist());
     dialog.querySelectorAll('[data-dance-track]').forEach(button => button.addEventListener('click', () => {
         loadPlaylist(Number(button.dataset.danceTrack));
@@ -71,6 +99,12 @@ export function initDanceMemory() {
     }));
     dialog.addEventListener('close', () => {
         document.body.classList.remove('dance-memory-open');
+        dialog.querySelector('audio')?.pause();
+        disposePlayer?.();
+        disposePlayer = null;
+        dialog.querySelector('audio')?.pause();
+        if (localAudioURL) URL.revokeObjectURL(localAudioURL);
+        localAudioURL = null;
         const loadButton = document.createElement('button');
         loadButton.id = 'load-dance-playlist';
         loadButton.className = 'dance-play';

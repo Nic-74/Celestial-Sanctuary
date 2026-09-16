@@ -1,10 +1,11 @@
+import { mountYouTube } from '../youtube-player.js?v=20260916';
 // ===================================================================
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260915';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260916';
 
-import { openDanceMemory } from '../dance-memory.js?v=20260915';
+import { openDanceMemory } from '../dance-memory.js?v=20260916';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;
@@ -90,6 +91,7 @@ function getOurSongHTML(song) {
     `;
 }
 
+let disposeVideo;
 let songAudio = null;
 let isPlaying = false;
 
@@ -117,7 +119,9 @@ async function togglePlay(song) {
         if (vinyl) vinyl.classList.remove('spinning');
         if (needle) needle.classList.remove('dropped');
     } else {
-        document.getElementById('oursong-video-slot')?.replaceChildren();
+        disposeVideo?.();
+    disposeVideo = null;
+    document.getElementById('oursong-video-slot')?.replaceChildren();
         document.querySelectorAll('.oursong-track').forEach(button => button.setAttribute('aria-pressed', 'false'));
         pauseBackgroundMusic();
         try {
@@ -156,23 +160,15 @@ function selectTrack(index) {
         button.setAttribute('aria-pressed', String(Number(button.dataset.track) === index));
     });
     const slot = document.getElementById('oursong-video-slot');
-    const frame = document.createElement('iframe');
-    frame.src = `https://www.youtube-nocookie.com/embed/${track.videoId}`;
-    frame.title = `${track.title} — ${track.artist}, official music video`;
-    frame.allow = 'encrypted-media; fullscreen; picture-in-picture';
-    frame.allowFullscreen = true;
-    frame.referrerPolicy = 'strict-origin-when-cross-origin';
-    const fallback = document.createElement('a');
-    fallback.href = `https://www.youtube.com/watch?v=${track.videoId}`;
-    fallback.target = '_blank';
-    fallback.rel = 'noopener noreferrer';
-    fallback.textContent = `Open ${track.title} on YouTube ↗`;
-    slot.replaceChildren(frame, fallback);
+    disposeVideo?.();
+    disposeVideo = mountYouTube(slot, { id: track.videoId, title: `${track.title} — ${track.artist}` });
 }
 
 function stopForDance() {
     songAudio?.pause();
     isPlaying = false;
+    disposeVideo?.();
+    disposeVideo = null;
     document.getElementById('oursong-video-slot')?.replaceChildren();
     const button = document.getElementById('oursong-play-btn');
     if (button) button.textContent = '▶';
@@ -197,6 +193,8 @@ export function render(container) {
 
 export function cleanup() {
     document.removeEventListener('sanctuary:dance-open', stopForDance);
+    disposeVideo?.();
+    disposeVideo = null;
     document.getElementById('oursong-video-slot')?.replaceChildren();
     if (songAudio) {
         songAudio.pause();

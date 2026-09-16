@@ -15,9 +15,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260915';
+} from './common.js?v=20260916';
 
-import { initDanceMemory } from './dance-memory.js?v=20260915';
+import { initDanceMemory } from './dance-memory.js?v=20260916';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -181,7 +181,7 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260915`)
+            import(`./modules/${panelId}.js?v=20260916`)
         ]);
 
         if (requestId !== panelRequestId) return;
@@ -235,7 +235,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260915`;
+        link.href = `css/modules/${panelId}.css?v=20260916`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);
