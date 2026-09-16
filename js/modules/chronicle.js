@@ -1,3 +1,4 @@
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
 // ===================================================================
 //  MODULE: CHRONICLE (js/modules/chronicle.js)
 // ===================================================================
@@ -5,7 +6,7 @@
 import {
     $, $$, AppState, CHRONICLE_DATA, EDITABLE_CONFIG,
     apiAddItem, apiUpdateItem, apiDeleteItem, findImageWithExtension
-} from '../common.js?v=20260916-music2';
+} from '../common.js?v=20260917-vault';
 
 // --- Local state for this module ---
 let counterInterval;
@@ -426,13 +427,7 @@ function createHeartParticles() {
 
 let currentEventIndex = 0;
 let displayedDate = new Date();
-const PROPHECIES = [ 
-    "In the infinite scroll of the cosmos, our chapter is written in starlight.", 
-    "Two souls, one orbit, bound by a gravity stronger than any star.", 
-    "Fate whispered your name in the solar winds, and my heart knew to listen.", 
-    "Every shared glance is a supernova, birthing new galaxies within us.", 
-    "Like twin stars, we dance through the darkness, forever illuminating each other's path." 
-];
+const PROPHECIES = EXTRA_CONTENT.find(item=>item.id === 'chronicle-PROPHECIES').data;
 let currentProphecyIndex = 0;
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

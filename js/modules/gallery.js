@@ -1,3 +1,4 @@
+import { uploadContentMedia } from '../content-vault.js?v=20260917-vault';
 // ===================================================================
 //  MODULE: GALLERY (js/modules/gallery.js)
 // ===================================================================
@@ -6,7 +7,7 @@ import {
     apiAddItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260916-music2';
+} from '../common.js?v=20260917-vault';
 
 // --- Local State ---
 let panelContainer = null; // To store the main content element
@@ -43,7 +44,7 @@ function getGalleryPanelHTML() {
 function getCombinedPhotosData() {
     const visitedDiscoverPhotos = EDITABLE_CONFIG.DISCOVER_DATA
         .filter(item => item.status === 'visited')
-        .flatMap(item => 
+        .flatMap(item =>
             (item.photos || []).map(photoSrc => ({
                 src: photoSrc,
                 caption: item.title,
@@ -72,8 +73,8 @@ function renderGallery(category = 'all') {
 
     // 1. Get all photos and filter them
     const allPhotos = getCombinedPhotosData();
-    const allPhotosInCategory = category === 'all' 
-        ? allPhotos 
+    const allPhotosInCategory = category === 'all'
+        ? allPhotos
         : allPhotos.filter(p => p.category === category);
     AppState.gallery.currentPhotoList = allPhotosInCategory;
 
@@ -153,7 +154,7 @@ async function deleteGalleryItem(photoSrc) {
         return;
     }
     if (confirm(`Are you sure you want to delete the photo "${itemToDelete.caption}"?`)) {
-        const success = await apiDeleteItem('gallery', itemToDelete.src); 
+        const success = await apiDeleteItem('gallery', itemToDelete.id);
         if (success) {
             renderGallery(AppState.currentGalleryCategory);
         }
@@ -195,7 +196,7 @@ async function openUploadCategoryModal(file) {
         </div>
     `;
     document.body.appendChild(modalBackdrop);
-    
+
     const closeModal = () => modalBackdrop.remove();
     modalBackdrop.querySelector('#cancel-upload-btn').addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
@@ -203,12 +204,7 @@ async function openUploadCategoryModal(file) {
     const formData = new FormData();
     formData.append('file', file);
     try {
-        const response = await fetch(`${API_URL}/upload/image`, {
-            method: 'POST',
-            body: formData,
-        });
-        if (!response.ok) throw new Error('Server upload error');
-        const result = await response.json();
+        const result = {status:'success',filepath:await uploadContentMedia(file)};
         if (result.status === 'success') {
             $('upload-status').textContent = 'Upload complete! Please select a category.';
             const categoryButtons = $('upload-category-buttons');
@@ -218,11 +214,11 @@ async function openUploadCategoryModal(file) {
                 button.addEventListener('click', async () => {
                     const caption = $('upload-caption-input').value || "A new memory";
                     const category = button.dataset.category;
-                    const newPhotoData = { 
-                        src: result.filepath, 
-                        caption: caption, 
-                        year: new Date().getFullYear(), 
-                        category: category 
+                    const newPhotoData = {
+                        src: result.filepath,
+                        caption: caption,
+                        year: new Date().getFullYear(),
+                        category: category
                     };
                     const savedItem = await apiAddItem('gallery', newPhotoData);
                     if (savedItem) {
@@ -246,15 +242,15 @@ function handleGalleryClicks(e) {
     const target = e.target;
     const closest = (selector) => target.closest(selector);
 
-    if (closest('.gallery-filter-btn')) { 
-        const category = closest('.gallery-filter-btn').dataset.category; 
+    if (closest('.gallery-filter-btn')) {
+        const category = closest('.gallery-filter-btn').dataset.category;
         renderGallery(category);
     }
     else if (closest('.item-delete-btn')) {
         e.stopPropagation();
         const photoSrc = closest('.item-delete-btn').dataset.src;
         deleteGalleryItem(photoSrc);
-    } 
+    }
     else if (closest('.polaroid-item')) {
         // Update currentPhotoList based on VISIBLE items before opening lightbox
         AppState.gallery.currentPhotoList = Array.from($$('.polaroid-item'))
@@ -272,7 +268,7 @@ function handleGalleryClicks(e) {
         setGalleryView(closest('#gallery-view-grid').dataset.view);
     }
     else if (closest('#upload-photo-btn')) {
-        $('photo-upload-input').click();
+        document.dispatchEvent(new CustomEvent('sanctuary:edit-content',{detail:{type:'gallery'}}));
     }
     // **NEW**: Handle clicks on the favorites stat box to filter liked photos
     else if (closest('.stat-box[data-filter="favorites"]')) {
@@ -297,10 +293,10 @@ function handleGalleryClicks(e) {
 export function render(mainContent) {
     panelContainer = mainContent;
     panelContainer.innerHTML = getGalleryPanelHTML();
-    
+
     // Initial render of the gallery with all enhancements
     renderGallery('all');
-    
+
     panelContainer.addEventListener('click', handleGalleryClicks);
     $('photo-upload-input').addEventListener('change', handleGalleryUpload);
 }
@@ -326,33 +322,33 @@ function addGallerySearch() {
             <button class="gallery-search-clear" id="gallery-search-clear">×</button>
         </div>
     `;
-    
+
     const panel = $('gallery-panel');
     if (panel) {
         // Check if the search container already exists to prevent duplicates
         if (panel.querySelector('.gallery-search-container')) return;
 
         panel.querySelector('.gallery-controls-container').insertAdjacentHTML('afterend', searchHTML);
-        
+
         // Add translation for placeholder
         const searchInputEl = $('gallery-search-input');
         const placeholderText = personalizedContent.gallery_search_placeholder || 'Search memories...';
         if (searchInputEl) searchInputEl.placeholder = placeholderText;
-        
+
         const searchInput = $('gallery-search-input');
         const clearBtn = $('gallery-search-clear');
-        
+
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             clearBtn.classList.toggle('visible', query.length > 0);
-            
+
             $$('.polaroid-item').forEach(item => {
                 const caption = item.querySelector('.polaroid-caption')?.textContent.toLowerCase() || '';
                 const match = caption.includes(query);
                 item.style.display = match ? '' : 'none';
             });
         });
-        
+
         clearBtn.addEventListener('click', () => {
             searchInput.value = '';
             clearBtn.classList.remove('visible');
@@ -374,14 +370,14 @@ function addGallerySorting() {
             </select>
         </div>
     `;
-    
+
     const controlsContainer = document.querySelector('.gallery-controls-container');
     if (controlsContainer) {
         // Check if the sort container already exists
         if (controlsContainer.querySelector('.gallery-sort-container')) return;
 
         controlsContainer.insertAdjacentHTML('beforeend', sortHTML);
-        
+
         $('gallery-sort-select')?.addEventListener('change', (e) => {
             sortGallery(e.target.value);
         });
@@ -391,13 +387,13 @@ function addGallerySorting() {
 function sortGallery(sortType) {
     const grid = $('gallery-grid');
     if (!grid) return;
-    
+
     const items = Array.from($$('.polaroid-item'));
-    
+
     items.sort((a, b) => {
         const captionA = a.querySelector('.polaroid-caption')?.textContent || '';
         const captionB = b.querySelector('.polaroid-caption')?.textContent || '';
-        
+
         switch(sortType) {
             case 'name-asc':
                 return captionA.localeCompare(captionB);
@@ -411,7 +407,7 @@ function sortGallery(sortType) {
                 return 0;
         }
     });
-    
+
     items.forEach(item => grid.appendChild(item));
 }
 
@@ -437,30 +433,30 @@ function updateFavoritesCount() {
 // 4. PHOTO LIKES/HEARTS
 function addPhotoLikes() {
     const likes = JSON.parse(localStorage.getItem('photoLikes') || '{}');
-    
+
     $$('.polaroid-item').forEach(item => {
         // **FIX**: Prevent adding duplicate like buttons
         if (item.querySelector('.photo-like-btn')) return;
 
         const photoSrc = item.dataset.src;
         const isLiked = likes[photoSrc] || false;
-        
+
         const likeBtn = document.createElement('button');
         likeBtn.className = `photo-like-btn ${isLiked ? 'liked' : ''}`;
         likeBtn.innerHTML = isLiked ? '❤️' : '🤍';
         likeBtn.title = 'Like this photo';
-        
+
         likeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const currentlyLiked = likes[photoSrc];
             likes[photoSrc] = !currentlyLiked;
             localStorage.setItem('photoLikes', JSON.stringify(likes));
-            
+
             likeBtn.innerHTML = likes[photoSrc] ? '❤️' : '🤍';
             likeBtn.classList.toggle('liked', likes[photoSrc]);
             updateFavoritesCount();
         });
-        
+
         item.appendChild(likeBtn);
     });
 }
@@ -469,12 +465,12 @@ function addPhotoLikes() {
 function addDownloadButtons() {
     $$('.polaroid-item').forEach(item => {
         const photoSrc = item.dataset.src;
-        
+
         const downloadBtn = document.createElement('button');
         downloadBtn.className = 'photo-download-btn';
         downloadBtn.innerHTML = '⬇️';
         downloadBtn.title = 'Download photo';
-        
+
         downloadBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             try {
@@ -492,7 +488,7 @@ function addDownloadButtons() {
                 console.error('Download failed:', error);
             }
         });
-        
+
         item.appendChild(downloadBtn);
     });
 }
@@ -504,7 +500,7 @@ function calculateGalleryStats() {
     const categories = [...new Set(allPhotos.map(p => p.category))];
     const likes = JSON.parse(localStorage.getItem('photoLikes') || '{}');
     const likedCount = Object.values(likes).filter(v => v).length;
-    
+
     return {
         total: allPhotos.length,
         years: years.length,
@@ -535,7 +531,7 @@ function displayGalleryStats() {
             </div>
         </div>
     `;
-    
+
     const filtersElement = $('gallery-filters');
     if (filtersElement) {
         let banner = document.querySelector('.gallery-stats-banner');
@@ -557,7 +553,7 @@ function displayGalleryStats() {
 function addYearTimeline() {
     const allPhotos = getCombinedPhotosData();
     const years = [...new Set(allPhotos.map(p => p.year))].sort((a, b) => b - a);
-    
+
     const timelineHTML = `
         <div class="gallery-timeline">
             <div class="timeline-year active" data-year="all" data-translate-id="gallery_timeline_all">All Years</div>
@@ -566,14 +562,14 @@ function addYearTimeline() {
             `).join('')}
         </div>
     `;
-    
+
     const filtersElement = $('gallery-filters');
     if (filtersElement) {
         // Check if the timeline already exists
         if (document.querySelector('.gallery-timeline')) return;
 
         filtersElement.insertAdjacentHTML('beforebegin', timelineHTML);
-        
+
         $$('.timeline-year').forEach(yearBtn => {
             yearBtn.addEventListener('click', () => {
                 $$('.timeline-year').forEach(btn => btn.classList.remove('active'));
@@ -613,9 +609,9 @@ function createSlideshowContainer() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', slideshowHTML);
-    
+
     $('slideshow-prev')?.addEventListener('click', () => navigateSlide(-1));
     $('slideshow-next')?.addEventListener('click', () => navigateSlide(1));
     $('slideshow-play-pause')?.addEventListener('click', toggleSlideshow);
@@ -625,24 +621,24 @@ function createSlideshowContainer() {
 function startSlideshow(startIndex = 0) {
     currentSlideIndex = startIndex;
     const container = $('slideshow-container');
-    
+
     if (!container) {
         createSlideshowContainer();
     }
-    
+
     $('slideshow-container')?.classList.add('active');
     showSlide(currentSlideIndex);
-    
+
     slideshowInterval = setInterval(() => navigateSlide(1), 3000);
 }
 
 function showSlide(index) {
     const photos = AppState.gallery.currentPhotoList || [];
     if (photos.length === 0) return;
-    
+
     currentSlideIndex = ((index % photos.length) + photos.length) % photos.length;
     const photo = photos[currentSlideIndex];
-    
+
     $('slideshow-image').src = photo.src;
     $('slideshow-caption').textContent = photo.caption;
 }
@@ -678,14 +674,14 @@ function addSlideshowButton() {
             <span data-translate-id="gallery_slideshow">🎬 Slideshow</span>
         </button>
     `;
-    
+
     const uploadBtn = $('upload-photo-btn');
     if (uploadBtn) {
         // Check if the slideshow button already exists
         if (document.getElementById('start-slideshow-btn')) return;
 
         uploadBtn.insertAdjacentHTML('afterend', slideshowBtn);
-        
+
         $('start-slideshow-btn')?.addEventListener('click', () => {
             startSlideshow(0);
         });
@@ -696,11 +692,11 @@ function addSlideshowButton() {
 function setGalleryView(view) {
     const grid = $('gallery-grid');
     if (!grid) return;
-    
+
     // Set the correct class, removing others
     grid.className = 'gallery-grid'; // Reset to base class
     grid.classList.add(`${view}-view`);
-    
+
     localStorage.setItem('galleryView', view);
     // Re-apply polaroid effect conditionally after changing the view
     applyPolaroidEffect();
@@ -726,14 +722,14 @@ function addMasonryViewButton() {
     const masonryBtn = `
         <button class="btn-view" data-view="masonry" title="Masonry View" data-translate-id="gallery_view_masonry">⊞ Masonry</button>
     `;
-    
+
     const viewToggle = $('gallery-view-toggle');
     if (viewToggle) {
         // Check if button already exists before adding
         if (!viewToggle.querySelector('[data-view="masonry"]')) {
             viewToggle.querySelector('[data-view="list"]').insertAdjacentHTML('afterend', masonryBtn);
         }
-        
+
     }
 }
 
@@ -747,11 +743,11 @@ function addHoverZoom() {
 // 13. PHOTO METADATA OVERLAY
 function addPhotoMetadata() {
     const allPhotos = getCombinedPhotosData();
-    
+
     $$('.polaroid-item').forEach(item => {
         const photoSrc = item.dataset.src;
         const photo = allPhotos.find(p => p.src === photoSrc);
-        
+
         if (photo) {
             const metadataHTML = `
                 <div class="photo-metadata">
@@ -759,7 +755,7 @@ function addPhotoMetadata() {
                     <div class="photo-location" data-translate-id="gallery_meta_memory" data-caption="${photo.caption || 'Memory'}">📍 ${photo.caption || 'Memory'}</div>
                 </div>
             `;
-            
+
             item.insertAdjacentHTML('beforeend', metadataHTML);
         }
     });
@@ -774,10 +770,10 @@ function setupInfiniteScroll() {
     window.addEventListener('scroll', () => {
         const grid = $('gallery-grid');
         if (!grid || isLoadingMore) return;
-        
+
         const gridRect = grid.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        
+
         // Check if we're near the bottom
         if (gridRect.bottom <= windowHeight + 200) {
             loadMorePhotos();
@@ -788,12 +784,12 @@ function setupInfiniteScroll() {
 function loadMorePhotos() {
     const allPhotos = AppState.gallery.currentPhotoList || [];
     const displayedPhotos = $$('.polaroid-item').length;
-    
+
     if (displayedPhotos >= allPhotos.length) return;
-    
+
     isLoadingMore = true;
     const grid = $('gallery-grid');
-    
+
     // Show loading indicator
     grid.insertAdjacentHTML('beforeend', `
         <div class="gallery-loading-more">
@@ -801,12 +797,12 @@ function loadMorePhotos() {
             <p data-translate-id="gallery_loading_more">Loading more memories...</p>
         </div>
     `);
-    
+
     // Simulate loading delay
     setTimeout(() => {
         const nextBatch = allPhotos.slice(displayedPhotos, displayedPhotos + 6);
         const loadingIndicator = grid.querySelector('.gallery-loading-more');
-        
+
         nextBatch.forEach((photo, index) => {
             const photoHTML = `
                 <div class="polaroid-item" data-index="${displayedPhotos + index}" data-src="${photo.src}">
@@ -817,10 +813,10 @@ function loadMorePhotos() {
             `;
             loadingIndicator.insertAdjacentHTML('beforebegin', photoHTML);
         });
-        
+
         loadingIndicator.remove();
         isLoadingMore = false;
-        
+
         // Re-apply enhancements to new items
         addPhotoLikes();
         addDownloadButtons();
@@ -835,13 +831,13 @@ let selectedPhotos = new Set();
 
 function toggleBulkSelection() {
     bulkSelectionMode = !bulkSelectionMode;
-    
+
     if (bulkSelectionMode) {
         $$('.polaroid-item').forEach(item => {
             item.style.cursor = 'pointer';
             item.addEventListener('click', handleBulkPhotoClick);
         });
-        
+
         showBulkActions();
     } else {
         $$('.polaroid-item').forEach(item => {
@@ -857,7 +853,7 @@ function handleBulkPhotoClick(e) {
     e.stopPropagation();
     const item = e.currentTarget;
     const photoSrc = item.dataset.src;
-    
+
     if (selectedPhotos.has(photoSrc)) {
         selectedPhotos.delete(photoSrc);
         item.classList.remove('selected');
@@ -865,7 +861,7 @@ function handleBulkPhotoClick(e) {
         selectedPhotos.add(photoSrc);
         item.classList.add('selected');
     }
-    
+
     updateBulkActionsCount();
 }
 
@@ -878,9 +874,9 @@ function showBulkActions() {
             <button class="btn" id="bulk-cancel-btn">Cancel</button>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', bulkActionsHTML);
-    
+
     $('bulk-cancel-btn')?.addEventListener('click', toggleBulkSelection);
 }
 

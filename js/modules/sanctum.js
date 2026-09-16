@@ -1,7 +1,8 @@
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
 // ===================================================================
 //  MODULE: SANCTUARY (js/modules/sanctuary.js) - ENHANCED
 // ===================================================================
-import { $, $$, AppState, personalizedContent } from '../common.js?v=20260916-music2';
+import { $, $$, AppState, personalizedContent } from '../common.js?v=20260917-vault';
 
 // --- Local State ---
 let panelContainer = null;
@@ -343,14 +344,7 @@ function closeModal(modalId) {
     }, 500);
 }
 
-const wisdoms = [
-    "The cosmos whispers: Every storm passes, every wound heals. You are loved beyond the capacity of words to express.",
-    "Ancient prophecy reveals: The strongest bonds are forged in the fires of challenge, tempered by time, unbreakable.",
-    "The stars align to say: Your happiness is the universe's greatest priority, written in celestial law.",
-    "Celestial wisdom speaks: In every ending lies a new beginning, in every tear, the seed of future joy.",
-    "The void echoes: You are cherished, valued, and irreplaceable in this cosmic dance of existence.",
-    "Oracle of ages declares: Bad days fade like morning mist before the eternal sun of unconditional love."
-];
+const wisdoms = EXTRA_CONTENT.find(item=>item.id === 'sanctum-wisdoms').data;
 
 function revealWisdom() {
     const wisdom = wisdoms[Math.floor(Math.random() * wisdoms.length)];
@@ -495,17 +489,8 @@ function resetCandles() {
     litCandles = 0;
 }
 
-const winPrizes = [
-    { title: "Cosmic Coupon: Weekend Getaway!", description: "Claim a weekend away to a destination of your choice." },
-    { title: "Cosmic Coupon: No Dishes For a Week!", description: "You are exempt from all dish-related duties for 7 days." },
-    { title: "Cosmic Coupon: Sunset Dinner!", description: "A romantic dinner and drinks at a beautiful scenic spot." },
-    { title: "Cosmic Coupon: Breakfast in Bed!", description: "A delicious, royal breakfast served to you in bed." },
-    { title: "Cosmic Coupon: Relaxing Massage!", description: "A full, professional-tier massage with luxurious oils." },
-    { title: "Cosmic Coupon: Movie Marathon!", description: "Your choice of movie or show, with all your favorite snacks." },
-    { title: "Cosmic Coupon: A Giant Cuddle!", description: "Redeemable for one enormous, soul-recharging cuddle, anytime." },
-    { title: "Cosmic Coupon: Customized!", description: "This coupon can be whatever you want it to be. Your wish is my command!" }
-];
-const losePrize = { title: "A Whisper from the Void...", description: "The stars weren't aligned this time. But my love for you is constant! Try again." };
+const winPrizes = EXTRA_CONTENT.find(item=>item.id === 'sanctum-winPrizes').data;
+const losePrize = EXTRA_CONTENT.find(item=>item.id === 'sanctum-losePrize').data;
 
 function initScratchCard() {
     const isWin = Math.random() < 0.1; // 10% win chance

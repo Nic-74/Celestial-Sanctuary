@@ -1,3 +1,4 @@
+import { uploadContentMedia } from '../content-vault.js?v=20260917-vault';
 // ===================================================================
 //  MODULE: DISCOVER (js/modules/discover.js)
 // ===================================================================
@@ -7,7 +8,7 @@ import {
     apiAddItem, apiUpdateItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260916-music2';
+} from '../common.js?v=20260917-vault';
 
 // --- Local State ---
 let panelContainer = null;
@@ -211,12 +212,7 @@ async function handlePhotoUpload(event) {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const response = await fetch(`${API_URL}/upload/image`, {
-                method: 'POST',
-                body: formData,
-            });
-            if (!response.ok) throw new Error('Server upload error');
-            const result = await response.json();
+            const result = {status:'success',filepath:await uploadContentMedia(file)};
             if (result.status === 'success') {
                 tempPhotos.push(result.filepath);
             } else {

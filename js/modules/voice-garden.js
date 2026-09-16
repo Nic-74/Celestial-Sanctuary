@@ -2,7 +2,7 @@
 //  MODULE: VOICE GARDEN (js/modules/voicegarden.js)
 // ===================================================================
 
-import { $, $$, formatTime } from '../common.js?v=20260916-music2';
+import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem } from '../common.js?v=20260917-vault';
 
 // --- Local State ---
 let panelContainer = null;
@@ -69,16 +69,10 @@ function loadVoiceMessages() {
     // This mock data is based on your control.js. 
     // In a real scenario, this would come from EDITABLE_CONFIG.SONGS_DATA or a dedicated API endpoint.
     // For now, we'll hardcode the relevant files.
-    const allVoiceMessages = [
-        { id: 'vm_004', from: 'Zoya', to: 'Nic', audioFile: 'recordings/Zoyareadletter.m4a', duration: 35, flower: { type: 'rose', position: { x: 35, y: 25 } }, textNote: 'To my Baobei...', recordedDate: '2024-05-22T10:00:00Z', transcript: "To my Baobei, you used to be the light, the hope, the future, the strands in my life after I made you, my sky became clear and bright. I wanted so much to tell you outw. Hey, you're too late, and it's so good to meet you. because if you I decided to love deeply without reservation for only once at that time I thought I have countless features with you, so I began to plan our futuring detail. I believe that people will love each other in this world can go to the end. I thought you love as much as I did and you were as brave as I was and appreciated as much as I did. I you sllept. Oh, you finished?", lang: 'en' },
-        { id: 'vm_005', from: 'Nini', to: 'Zoya', audioFile: 'recordings/3rd_anniversary.m4a', duration: null, flower: { type: 'lily', position: { x: 60, y: 50 } }, textNote: '3rd anniversary message (Chinese)', recordedDate: '2025-10-26T12:00:00Z', lang: 'zh' },
-        { id: 'vm_006', from: 'Zoya', to: 'Nic', audioFile: 'recordings/Zoy_sings.m4a', duration: null, flower: { type: 'daisy', position: { x: 70, y: 30 } }, textNote: '', recordedDate: '2025-10-26T13:00:00Z', lang: 'en' },
-        { id: 'vm_007', from: 'Zoya', to: 'Nic', audioFile: 'recordings/The most precios tear.m4a', duration: null, flower: { type: 'lily', position: { x: 25, y: 55 } }, textNote: 'A bedtime story', recordedDate: '2025-10-27T14:00:00Z', transcript: `Actually, I just feel like it's interesting. Can you tell me one more? I should tell you a boring one so that I can feel sleepy. Tell me one more, please... (transcript)... Thank you. You got the story? Of course. Even though it was a little bit long, but I got it. You want me to tell you what you said? Yeah.`, lang: 'zh' },
-        { id: 'vm_008', from: 'Zoya', to: 'Nic', audioFile: 'recordings/Zoya sings again.m4a', duration: null, flower: { type: 'daisy', position: { x: 55, y: 40 } }, textNote: 'Another song for you', recordedDate: '2025-10-28T15:00:00Z', lang: 'en' },
-    ];
+    const allVoiceMessages = EDITABLE_CONFIG.VOICE_DATA;
 
     // Filter only files from the 'recordings/' path
-    voiceMessages = allVoiceMessages.filter(m => m.audioFile && m.audioFile.startsWith('recordings/'));
+    voiceMessages = allVoiceMessages.filter(m => m.audioFile && (m.audioFile.startsWith('recordings/') || m.audioFile.startsWith('blob:')));
 }
 
 function updateStats() {
@@ -357,27 +351,22 @@ function initLikeAndFavControls() {
         renderFlowers();
     });
 
-    deleteBtn.addEventListener('click', (e) => {
+    deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (!currentMsg) return;
         if (!confirm("Are you sure you want to delete this voice message?")) return;
         
-        // Remove from local array
-        voiceMessages = voiceMessages.filter(v => v.id !== currentMsg.id);
-        
-        // Remove from persistence
-        const favs = loadFavs();
-        const emojis = loadEmojis();
-        delete favs[currentMsg.id];
-        delete emojis[currentMsg.id];
-        saveFavs(favs);
-        saveEmojis(emojis);
-        
-        // Close modal and re-render
+        const deletingId = currentMsg.id;
         $('voice-playback-modal').classList.remove('active');
         voicePlayer.pause();
         currentMsg = null;
-        renderFlowers();
+        try {
+            if (!await apiDeleteItem('voice', deletingId)) return;
+            const favs = loadFavs(), emojis = loadEmojis();
+            delete favs[deletingId]; delete emojis[deletingId];
+            saveFavs(favs); saveEmojis(emojis);
+        } catch (error) { alert(error.message); }
+
     });
 }
 

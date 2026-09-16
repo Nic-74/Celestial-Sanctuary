@@ -1,4 +1,5 @@
-import { mountYouTube } from './youtube-player.js?v=20260916-music2';
+import { saveSongLyrics } from './content-vault.js?v=20260917-vault';
+import { mountYouTube } from './youtube-player.js?v=20260917-vault';
 
 export function parseLyrics(source) {
     const lines = [];
@@ -21,7 +22,7 @@ export function createListeningRoom(root, tracks, beforePlay = () => {}) {
         <div class="listening-transport"><button type="button" data-previous aria-label="Previous song">←</button><button type="button" data-start>▶ Play our playlist</button><button type="button" data-next aria-label="Next song">→</button><label><input type="checkbox" data-auto checked> Auto-next</label><label><input type="checkbox" data-repeat> Repeat</label></div>
         <p class="listening-notice" role="status">Your songs, in their original order. Press play to begin.</p>
         <div class="listening-columns"><section class="listening-queue"><h4>Our songbook <span>CHOOSE A MOMENT</span></h4><ol></ol></section>
-        <section class="listening-lyrics"><h4>Words to stay with <span>LYRICS & CAPTIONS</span></h4><div class="lyrics-lines"><p>Captions are requested in the video when available. Use its CC control to choose a language.</p><p>Add your own lyrics file for this space. Timed .lrc lyrics follow the song; .txt lyrics stay readable beside it.</p></div><label class="lyrics-import">Add lyrics for the selected song<input type="file" accept=".lrc,.txt,text/plain" data-lyrics></label><small>Lyrics stay in this tab and are not uploaded.</small></section></div>
+        <section class="listening-lyrics"><h4>Words to stay with <span>LYRICS & CAPTIONS</span></h4><div class="lyrics-lines"><p>Captions are requested in the video when available. Use its CC control to choose a language.</p><p>Add your own lyrics file for this space. Timed .lrc lyrics follow the song; .txt lyrics stay readable beside it.</p></div><label class="lyrics-import">Add lyrics for the selected song<input type="file" accept=".lrc,.txt,text/plain" data-lyrics></label><button type="button" data-save-lyrics hidden>Save lyrics to Drive</button><small>Imported lyrics stay in this tab until you save them to Drive.</small></section></div>
         <details class="listening-files"><summary>Your own recordings</summary><p>Choose multiple audio files to play them in sequence. They stay on your device.</p><input type="file" multiple accept="audio/*,.mp3,.m4a,.wav,.ogg" aria-label="Choose audio files"></details>`;
     const $ = selector => root.querySelector(selector);
     const notice = text => { $('.listening-notice').textContent = text; };
@@ -39,7 +40,8 @@ export function createListeningRoom(root, tracks, beforePlay = () => {}) {
     }
     function renderLyrics() {
         activeLine=-1;
-        const saved=lyrics.get(queue[index]?.id);const box=$('.lyrics-lines');box.replaceChildren();
+        const track=queue[index];if(!lyrics.has(track?.id)&&track?.lyrics)lyrics.set(track.id,{text:track.lyrics,timed:parseLyrics(track.lyrics)});
+        const saved=lyrics.get(track?.id);$('[data-save-lyrics]').hidden=!saved;const box=$('.lyrics-lines');box.replaceChildren();
         if (!saved) {
             const p=document.createElement('p');p.textContent='Turn on CC in the video for available captions, or add your lyrics file below.';box.append(p);return;
         }
@@ -91,6 +93,7 @@ export function createListeningRoom(root, tracks, beforePlay = () => {}) {
         try {const text=await file.text();if(destroyed)return;lyrics.set(track.id,{text,timed:parseLyrics(text)});if(queue[index]?.id===track.id)renderLyrics();notice(`Lyrics added for ${track.title}.`);}catch {notice('That lyrics file could not be read.');}
         event.target.value='';
     });
+    $('[data-save-lyrics]').addEventListener('click',async()=>{const track=queue[index],saved=lyrics.get(track?.id);if(!saved)return;try{await saveSongLyrics(track,saved.text);notice('Lyrics saved to Drive.');}catch(error){notice(error.message);}});
     $('.listening-files input').addEventListener('change',event=>{
         const files=[...event.target.files];if(!files.length)return;
         audio?.pause();disposePlayer?.();disposePlayer=null;

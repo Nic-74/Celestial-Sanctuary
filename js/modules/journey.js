@@ -1,19 +1,11 @@
-import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260916-music2';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
+import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260917-vault';
 
 let clockInterval;
 let voice;
 let observer;
-const memories = [
-    { photo: 4, title: 'A little closer to the sky', place: 'Arashiyama · 2021', note: 'Some views stay with us. Some people become the view.', x: 16, y: 54 },
-    { photo: 5, title: 'The quiet between us', place: 'Tenryuji temple · 2022', note: 'A place to slow down. A moment to keep.', x: 39, y: 27 },
-    { photo: 7, title: 'Another beginning, together', place: 'Yasaka Jinja · 2024', note: 'A new year, and the same wish: more days with you.', x: 62, y: 63 },
-    { photo: 12, title: 'Where ordinary becomes forever', place: 'Kyoto botanical garden · 2022', note: 'The small afternoons make the biggest memories.', x: 85, y: 34 },
-];
-const places = [
-    { name: 'Uganda · Kampala', zone: 'Africa/Kampala' },
-    { name: 'China · Beijing', zone: 'Asia/Shanghai' },
-    { name: 'Japan · Tokyo', zone: 'Asia/Tokyo' },
-];
+const memories = EXTRA_CONTENT.find(item=>item.id === 'journey-memories').data;
+const places = EXTRA_CONTENT.find(item=>item.id === 'journey-places').data;
 const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function placeOptions(selected) {
     return places.map((p, i) => `<option value="${i}" ${i === selected ? 'selected' : ''}>${p.name}</option>`).join('');

@@ -2,39 +2,13 @@
 //  MODULE: A LETTER TO ZOYA (js/modules/letter.js)
 // ===================================================================
 
-import { EDITABLE_CONFIG } from '../common.js?v=20260916-music2';
+import { EDITABLE_CONFIG } from '../common.js?v=20260917-vault';
 
-const LETTER_LINES = [
-    "To my Zoya,",
-    "",
-    "There are things I carry with me every single day that I never quite know how to say out loud.",
-    "So I am writing them here, in a place that belongs only to us.",
-    "",
-    "I remember the first time I saw you — it was a sports festival, and you were laughing",
-    "about something I couldn't hear across the field. I didn't know your name yet.",
-    "I only knew that something in me shifted, quietly, like a star changing course.",
-    "",
-    "Loving you has taught me things no book ever could.",
-    "You taught me that patience is a form of devotion.",
-    "That showing up — even on ordinary days, even when it's hard —",
-    "is the most profound act of love there is.",
-    "",
-    "I have watched you be brave in ways you don't even recognise as bravery.",
-    "I have seen you carry difficult things with a grace that leaves me in awe.",
-    "And in every version of our story — the joyful ones, the uncertain ones,",
-    "the late-night ones — I have always chosen you.",
-    "",
-    "I want you to know, on whatever day you are reading this:",
-    "You are seen. You are known. You are treasured beyond what I have words for.",
-    "",
-    "All my stars,",
-    "Nic 🌙",
-];
 
 let typewriterTimeout = null;
 
 function getLetter() {
-    return LETTER_LINES;
+    return (EDITABLE_CONFIG.LETTERS_DATA.find(item => item.id === 'original-letter')?.text || '').split('\n');
 }
 
 function getLetterHTML() {

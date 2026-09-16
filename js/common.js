@@ -1,3 +1,6 @@
+import { EXTRA_CONTENT } from './extra-data.js?v=20260917-vault';
+import { INITIAL_VOICES } from './voice-data.js?v=20260917-vault';
+import { INITIAL_LETTER } from './letter-data.js?v=20260917-vault';
 // ===================================================================
 //  COMMON CONFIGURATION & DATA
 // ===================================================================
@@ -16,6 +19,9 @@ export let EDITABLE_CONFIG = {
         { then: 'then3', now: 'now3' }, { then: 'then4', now: 'now4' },
         { then: 'then5', now: 'now5' }
     ],
+    SITE_DATA: [{id:'entrance',title:'Entrance',eyebrow:'AN ANCIENT COSMOS · AN EVERLASTING LOVE',tagline:'Beyond time, beyond the known stars.\nA sanctuary written for two souls.',photo:'photos/web/memory-4.jpg',button:'Open the celestial gates'}],
+    VOICE_DATA: structuredClone(INITIAL_VOICES),
+    LETTERS_DATA: [{id:'original-letter',title:'A Letter to Zoya',text:INITIAL_LETTER.join('\n')}],
     PHOTOS_DATA: [
         { src: `photos/photo1.jpg`, caption: 'Day she cooked Kimuchi fried rice', year: 2024, category: 'cooking' }, { src: `photos/photo2.jpg`, caption: 'Fried rice plus', year: 2024, category: 'cooking' },
         { src: `photos/photo3.jpg`, caption: 'Day she cooked Chicken fried wings', year: 2024, category: 'cooking' }, { src: `photos/photo4.jpg`, caption: 'Arashiyama Observation Deck', year: 2021, category: 'travel' },
@@ -833,83 +839,39 @@ function parseRawBookContent() {
     return chapters;
 }
 
-export async function apiAddItem(dataType, itemData) {
-    try {
-        const response = await fetch(`${API_URL}/${dataType}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(itemData),
-        });
-        if (!response.ok) throw new Error('Server error');
-        const savedItem = await response.json();
-        const dataMap = {
-            'gallery': EDITABLE_CONFIG.PHOTOS_DATA,
-            'music': EDITABLE_CONFIG.SONGS_DATA,
-            'discover': EDITABLE_CONFIG.DISCOVER_DATA,
-            'timeline': CHRONICLE_DATA,
-            'universes': ALTERNATE_UNIVERSES,
-            'tome': AppState.chapters
-        };
-        if (dataMap[dataType]) {
-            dataMap[dataType].push(savedItem);
+let contentPersistence;
+export function setContentPersistence(handler) { contentPersistence = handler; }
+export function contentCollections() {
+    return { gallery: EDITABLE_CONFIG.PHOTOS_DATA, music: EDITABLE_CONFIG.SONGS_DATA,
+        discover: EDITABLE_CONFIG.DISCOVER_DATA, timeline: CHRONICLE_DATA,
+        universes: ALTERNATE_UNIVERSES, tome: AppState.chapters,
+        voice: EDITABLE_CONFIG.VOICE_DATA, letter: EDITABLE_CONFIG.LETTERS_DATA,
+        extras:[...EXTRA_CONTENT,{id:'guide-riddles',title:'Constellation Guide riddles',data:GUIDE_RIDDLES},{id:'floating-compliments',title:'Floating love notes',data:COMPLIMENTS},{id:'sanctuary-words',title:'Sanctuary messages and promises',data:personalizedContent}],
+        site: EDITABLE_CONFIG.SITE_DATA };
+}
+export function replaceContent(type, items) {
+    const keys = {gallery:'PHOTOS_DATA',music:'SONGS_DATA',discover:'DISCOVER_DATA',voice:'VOICE_DATA',letter:'LETTERS_DATA',site:'SITE_DATA'};
+    if (keys[type]) EDITABLE_CONFIG[keys[type]] = items;
+    else if(type === 'timeline') CHRONICLE_DATA = items;
+    else if(type === 'universes') ALTERNATE_UNIVERSES = items;
+    else if(type === 'tome') AppState.chapters = items;
+    else if(type === 'extras') {
+        for(const item of items) {
+            const target=EXTRA_CONTENT.find(x=>x.id===item.id)?.data || ({'guide-riddles':GUIDE_RIDDLES,'floating-compliments':COMPLIMENTS,'sanctuary-words':personalizedContent})[item.id];
+            if(Array.isArray(target)&&Array.isArray(item.data))target.splice(0,target.length,...item.data);
+            else if(target&&typeof target==='object'&&!Array.isArray(target)&&item.data&&typeof item.data==='object'){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,item.data);}
         }
-        return savedItem;
-    } catch (error) {
-        console.error(`Failed to add item to ${dataType}:`, error);
-        alert(`Error: Could not add new ${dataType} item.`);
-        return null;
     }
 }
-
-export async function apiUpdateItem(dataType, itemId, itemData) {
+async function persistContent(action,type,id,data) {
     try {
-        const response = await fetch(`${API_URL}/${dataType}/${itemId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(itemData),
-        });
-        if (!response.ok) throw new Error('Server error');
-        const savedItem = await response.json();
-        const dataMap = { 'gallery': EDITABLE_CONFIG.PHOTOS_DATA, 'music': EDITABLE_CONFIG.SONGS_DATA, 'discover': EDITABLE_CONFIG.DISCOVER_DATA, 'timeline': CHRONICLE_DATA, 'universes': ALTERNATE_UNIVERSES, 'tome': AppState.chapters };
-        if (dataMap[dataType]) {
-            const index = dataMap[dataType].findIndex(item => item.id === itemId);
-            if (index !== -1) {
-                dataMap[dataType][index] = savedItem;
-            }
-        }
-        return savedItem;
-    } catch (error) {
-        console.error(`Failed to update item in ${dataType}:`, error);
-        alert(`Error: Could not update ${dataType} item.`);
-        return null;
-    }
+        if (!contentPersistence) throw new Error('Open Manage content and sign in to Google Drive first.');
+        return await contentPersistence(action,type,id,data);
+    } catch(error) { alert(error.message); return action==='delete' ? false : null; }
 }
-
-export async function apiDeleteItem(dataType, itemId) {
-    if (!itemId) return;
-    try {
-        const response = await fetch(`${API_URL}/${dataType}/${itemId}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Server error');
-        const dataMap = { 'gallery': 'PHOTOS_DATA', 'music': 'SONGS_DATA', 'discover': 'DISCOVER_DATA', 'timeline': null, 'universes': null, 'tome': null };
-        const configKey = dataMap[dataType];
-        if (configKey) {
-            EDITABLE_CONFIG[configKey] = EDITABLE_CONFIG[configKey].filter(item => item.id !== itemId && item.src !== itemId);
-        } else if (dataType === 'timeline') {
-            CHRONICLE_DATA = CHRONICLE_DATA.filter(item => item.id !== itemId);
-        } else if (dataType === 'universes') {
-            ALTERNATE_UNIVERSES = ALTERNATE_UNIVERSES.filter(item => item.id !== itemId);
-        } else if (dataType === 'tome') {
-            AppState.chapters = AppState.chapters.filter(item => item.id !== itemId);
-        }
-        return true;
-    } catch (error) {
-        console.error(`Failed to delete item from ${dataType}:`, error);
-        alert(`Error: Could not delete the ${dataType} item.`);
-        return false;
-    }
-}
+export const apiAddItem = (type,data) => persistContent('add',type,null,data);
+export const apiUpdateItem = (type,id,data) => persistContent('update',type,id,data);
+export const apiDeleteItem = (type,id) => persistContent('delete',type,id,null);
 
 // ===================================================================
 //  GLOBAL MODAL CONTROLLERS (MOVED FROM MAIN.JS)

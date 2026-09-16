@@ -1,4 +1,6 @@
-import { initPrivateMemories } from './private-memories.js?v=20260916-drive1';
+import { uploadContentMedia } from './content-vault.js?v=20260917-vault';
+import { mountContentTools } from './content-vault.js?v=20260917-vault';
+import { initPrivateMemories } from './private-memories.js?v=20260917-vault';
 // =****************************************************************==
 //  MAIN APPLICATION BOOTSTRAP (js/main.js) - CORRECTED & ORGANIZED
 // ===================================================================
@@ -16,9 +18,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260916-music2';
+} from './common.js?v=20260917-vault';
 
-import { initDanceMemory } from './dance-memory.js?v=20260916-music2';
+import { initDanceMemory } from './dance-memory.js?v=20260917-vault';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -64,6 +66,7 @@ async function initApp() {
 
     // 4. Set up navigation
     window.addEventListener('hashchange', handleHashChange, false);
+    document.addEventListener('sanctuary:content-changed', () => { if(sessionStorage.getItem('enteredFromGate') === 'true') handleHashChange(); });
     
     // 5. Check if we are already in the sanctuary
     if (sessionStorage.getItem('enteredFromGate') === 'true') {
@@ -183,13 +186,14 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260916`)
+            import(`./modules/${panelId}.js?v=20260917-vault`)
         ]);
 
         if (requestId !== panelRequestId) return;
         if (jsModule && typeof jsModule.render === 'function') {
             AppState.activePanel = panelId;
-            jsModule.render(DOM.mainContent); // Pass the container to the module
+            jsModule.render(DOM.mainContent);
+            mountContentTools(panelId, DOM.mainContent); // Pass the container to the module
             currentPanelModule = jsModule; // Store for cleanup
             window.currentPanelModule = jsModule; // Expose to common.js
             const journeySteps = [
@@ -237,7 +241,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260916`;
+        link.href = `css/modules/${panelId}.css?v=20260917-vault`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);
@@ -412,7 +416,7 @@ function addEventListeners() {
                 volume: AppState.music.player.volume
             };
             sessionStorage.setItem('musicPlayerState', JSON.stringify(musicState));
-            sessionStorage.setItem('songsData', JSON.stringify(EDITABLE_CONFIG.SONGS_DATA));
+            // Private Drive media must not be persisted in browser storage.
         }
         if (AppState.music.albumArtInterval) {
             clearInterval(AppState.music.albumArtInterval);
@@ -658,12 +662,7 @@ async function handleMusicUpload(event) {
     const formData = new FormData();
     formData.append('file', file);
     try {
-        const response = await fetch(`${API_URL}/upload/audio`, {
-            method: 'POST',
-            body: formData,
-        });
-        if (!response.ok) throw new Error('Server upload error');
-        const result = await response.json();
+        const result = {status:'success',filepath:await uploadContentMedia(file)};
         if (result.status === 'success') {
             const newSongData = { 
                 src: result.filepath, 

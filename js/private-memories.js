@@ -1,3 +1,4 @@
+import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260917-vault';
 // Google access tokens and private content exist only in this tab's memory.
 const CLIENT_ID = '690422772790-id9snpi35tci6n9lrreu4682vo6p438b.apps.googleusercontent.com';
 const PROJECT_NUMBER = '690422772790';
@@ -19,6 +20,7 @@ function script(src) {
 }
 function status(text) { dialog.querySelector('[role=status]').textContent = text; }
 function clearPrivate() {
+    resetVault();
     generation++; refreshVersion++; abort.abort(); abort = new AbortController();
     clearTimeout(expiry); token = null;
     dialog.querySelectorAll('audio,video').forEach(media => media.pause());
@@ -69,24 +71,23 @@ async function connect() {
         client.requestAccessToken({ prompt: 'select_account' });
     } catch (error) { button.disabled = false; status(error.message); }
 }
-async function authorizeFolder() {
+async function authorizeFolder(mode='folder') {
     if (!PICKER_KEY) { status('Google Picker configuration is awaiting API-key restrictions. Nothing has been uploaded.'); return; }
     try {
         await script('https://apis.google.com/js/api.js');
         await new Promise(resolve => gapi.load('picker', resolve));
         if (!token) return;
         const pickerGeneration = generation;
-        const view = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-            .setIncludeFolders(true).setSelectFolderEnabled(true);
+        const view = mode === 'folder' ? new google.picker.DocsView(google.picker.ViewId.FOLDERS).setIncludeFolders(true).setSelectFolderEnabled(true) : new google.picker.DocsView().setParent(FOLDER_ID);
         picker = new google.picker.PickerBuilder().setAppId(PROJECT_NUMBER).setDeveloperKey(PICKER_KEY)
-            .setOAuthToken(token).setOrigin(location.origin).addView(view)
+            .setOAuthToken(token).setOrigin(location.origin).addView(view).enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .setTitle('Select Celestial Sanctuary — Private Memories')
             .setCallback(async data => {
                 if (!token || generation !== pickerGeneration) return;
                 if (data.action === google.picker.Action.CANCEL) { if (!dialog.open) dialog.showModal(); return; }
                 if (data.action !== google.picker.Action.PICKED) return;
                 if (!dialog.open) dialog.showModal();
-                if (data.docs?.[0]?.id !== FOLDER_ID) { status('Please select the sanctuary’s designated private folder.'); return; }
+                if (mode === 'folder' && data.docs?.[0]?.id !== FOLDER_ID) { status('Please select the sanctuary’s designated private folder.'); return; }
                 await refresh();
             }).build();
         // Picker is a separate Google dialog; close the native modal so it can receive focus.
@@ -94,52 +95,8 @@ async function authorizeFolder() {
     } catch (error) { status(error.message); }
 }
 async function refresh() {
-    const current = generation;
-    const version = ++refreshVersion;
-    try {
-        await verifyFolder();
-        const params = new URLSearchParams({q:`'${FOLDER_ID}' in parents and trashed = false and appProperties has { key='sanctuaryMemory' and value='1' }`,fields:'nextPageToken,files(id,name)',pageSize:'100',orderBy:'createdTime desc'});
-        const records = [];
-        let page;
-        do {
-            if (page) params.set('pageToken', page);
-            const result = await (await request(`drive/v3/files?${params}`)).json();
-            records.push(...result.files); page = result.nextPageToken;
-        } while (page);
-        if (current !== generation || version !== refreshVersion) return;
-        dialog.querySelectorAll('#private-list audio').forEach(audio => audio.pause());
-        mediaURLs.forEach(url => URL.revokeObjectURL(url)); mediaURLs.clear();
-        const list = dialog.querySelector('#private-list'); list.replaceChildren();
-        for (const file of records) {
-            const response = await request(`drive/v3/files/${file.id}?alt=media`);
-            const record = await response.json();
-            if (current !== generation || version !== refreshVersion) return;
-            if (record.schema !== 1 || typeof record.text !== 'string') continue;
-            const card = document.createElement('article');
-            const title = document.createElement('h3'); title.textContent = record.title || 'A moment to keep';
-            const date = document.createElement('small'); date.textContent = record.date || '';
-            const text = document.createElement('p'); text.textContent = record.text;
-            card.append(date, title, text);
-            if (record.attachment?.id) {
-                const show = document.createElement('button'); show.type = 'button'; show.textContent = 'Open attachment';
-                show.addEventListener('click', async () => {
-                    show.disabled = true;
-                    try {
-                        const blob = await (await request(`drive/v3/files/${encodeURIComponent(record.attachment.id)}?alt=media`)).blob();
-                        if (current !== generation || version !== refreshVersion) return;
-                        const url = URL.createObjectURL(blob); mediaURLs.add(url);
-                        const kind = blob.type.startsWith('image/') ? 'img' : blob.type.startsWith('audio/') ? 'audio' : null;
-                        if (!kind) { URL.revokeObjectURL(url); mediaURLs.delete(url); throw new Error('This attachment is not a supported photo or audio recording.'); }
-                        const media = document.createElement(kind); media.src = url;
-                        if (kind === 'img') media.alt = record.title || 'Private memory'; else media.controls = true;
-                        show.replaceWith(media);
-                    } catch (error) { show.disabled = false; if (error.name !== 'AbortError') status(error.message); }
-                }); card.append(show);
-            }
-            list.append(card);
-        }
-        status(records.length ? 'Your private memories are ready.' : 'Your private collection is ready. Keep your first moment below.');
-    } catch (error) { if (error.name !== 'AbortError') status(error.message); }
+    try { await loadVault(); status('Your Drive content is loaded into the sanctuary.'); }
+    catch(error) { if(error.name !== 'AbortError') status(error.message); }
 }
 async function upload(metadata, blob) {
     if (blob.size > 5 * 1024 * 1024) {
@@ -160,30 +117,12 @@ async function upload(metadata, blob) {
     ], {type:`multipart/related; boundary=${boundary}`});
     return (await request('upload/drive/v3/files?uploadType=multipart&fields=id', { method:'POST', body })).json();
 }
-async function save(event) {
-    event.preventDefault();
-    const form = event.currentTarget, button = form.querySelector('[type=submit]');
-    const data = new FormData(form); const file = data.get('attachment');
-    if (file?.size && (!/^(image\/(jpeg|png|webp|gif)|audio\/)/.test(file.type) || file.size > 20*1024*1024)) { status('Choose a photo or audio file up to 20 MB.'); return; }
-    const current = generation; button.disabled = true;
-    let attachment;
-    try {
-        await verifyFolder(); status('Saving privately to Google Drive…');
-        if (file?.size) attachment = await upload({name:file.name,parents:[FOLDER_ID]}, file);
-        if (current !== generation) return;
-        const record = {schema:1,title:String(data.get('title')).trim(),date:data.get('date'),text:String(data.get('text')).trim(),attachment};
-        await upload({name:`memory-${crypto.randomUUID()}.json`,parents:[FOLDER_ID],appProperties:{sanctuaryMemory:'1'}},new Blob([JSON.stringify(record)],{type:'application/json'}));
-        if (current !== generation) return;
-        form.reset(); await refresh(); status('Memory saved in your private Drive folder.');
-    } catch (error) { if (error.name !== 'AbortError') status(`${error.message}${attachment ? ' The attachment was uploaded, but its memory was not saved. It remains in your private folder.' : ''}`); }
-    finally { button.disabled = false; }
-}
 export function initPrivateMemories() {
     dialog = document.createElement('dialog'); dialog.id = 'private-memories';
     dialog.setAttribute('aria-labelledby','private-title');
-    dialog.innerHTML = `<button class="private-close" aria-label="Close private memories">×</button><p class="private-eyebrow">A LITTLE WORLD, JUST FOR TWO</p><h2 id="private-title">Keep this moment.</h2><p>Photos, words, and voices. Saved in your private Google Drive folder.</p><p role="status" aria-live="polite">Sign in to open your private collection.</p><button id="private-connect">Sign in with Google</button><div id="private-signed-in" hidden><div class="private-actions"><button id="private-authorize">Authorize folder</button><button id="private-refresh">Refresh</button><button id="private-signout">Sign out</button></div><form><label>A name for this moment<input name="title" maxlength="120" required></label><label>When it happened<input type="date" name="date" required></label><label>What you want to remember<textarea name="text" rows="4" maxlength="10000" required></textarea></label><label>A photo or recording (optional, up to 20 MB)<input type="file" name="attachment" accept="image/jpeg,image/png,image/webp,image/gif,audio/*"></label><button type="submit">Save our memory ♡</button></form><div id="private-list"></div></div>`;
+    dialog.innerHTML = `<button class="private-close" aria-label="Close content manager">×</button><p class="private-eyebrow">THE KEEPER OF OUR UNIVERSE</p><h2 id="private-title">The living archive.</h2><p>Write, renew, and keep every chapter in Google Drive. Your additions appear in their own sanctuary sections after sign-in.</p><p role="status" aria-live="polite">Sign in to load and edit your permanent archive.</p><button id="private-connect">Sign in with Google</button><div id="private-signed-in" hidden><div class="private-actions"><button id="private-authorize">Authorize folder</button><button id="private-shared">Authorize shared entries</button><button id="private-refresh">Reload from Drive</button><button id="private-signout">Sign out</button></div><label>Which part of our universe?<select id="vault-type"></select></label><button id="vault-add">Add a new entry</button><form id="vault-form" hidden></form><div id="private-list"></div></div>`;
     document.body.append(dialog);
-    const button = document.createElement('button'); button.id = 'open-private-memories'; button.textContent = '♡ Private memories';
+    const button = document.createElement('button'); button.id = 'open-private-memories'; button.textContent = '✧ Manage all content';
     document.querySelector('#main-menu-dropdown').append(button);
     button.addEventListener('click', async () => {
         dialog.showModal();
@@ -196,8 +135,10 @@ export function initPrivateMemories() {
     dialog.querySelector('.private-close').addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => dialog.querySelectorAll('audio').forEach(audio => audio.pause()));
     dialog.querySelector('#private-connect').addEventListener('click',connect);
-    dialog.querySelector('#private-authorize').addEventListener('click',authorizeFolder);
+    dialog.querySelector('#private-authorize').addEventListener('click',()=>authorizeFolder('folder'));
+    dialog.querySelector('#private-shared').addEventListener('click',()=>authorizeFolder('files'));
     dialog.querySelector('#private-refresh').addEventListener('click',refresh);
     dialog.querySelector('#private-signout').addEventListener('click', () => { const old = token; clearPrivate(); status('Signed out. Private content has been cleared from this tab.'); if (old) google.accounts.oauth2.revoke(old,()=>{}); });
-    dialog.querySelector('form').addEventListener('submit',save);
+    document.querySelector('#gate-keeper')?.addEventListener('click',()=>button.click());
+    initializeVault({request,upload,verifyFolder,folder:FOLDER_ID,status,signedIn:()=>!!token,open:()=>button.click()});
 }

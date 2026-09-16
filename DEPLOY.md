@@ -160,3 +160,15 @@ Both the listening panel (ten tracks) and August 22 dialog (the original eight i
 Captions are requested with `cc_load_policy=1`; availability and languages depend on each video. The separate lyrics panel imports user-supplied TXT/LRC, renders text safely, and highlights timed LRC lines using player time. Lyrics remain in the current component session and are not uploaded. Multiple local audio files can also play in sequence. Closing/changing panels destroys players and revokes local file URLs.
 
 Verification: unit checks for YouTube lifecycle/error handling, queue end/advance/repeat/auto-next off, and LRC timestamps. Browser test confirmed native audio advanced from one file to the next and selected the expected timed-lyrics line. Mobile dialog fit verified at 390px; nine planets retained. YouTube playback for every recording and provider-controlled caption availability cannot be guaranteed by these checks.
+
+## Living archive (September 2026)
+
+Use **Manage all content** or a section's **Add / edit** button after Google sign-in. The category menu covers gallery, chronicles, letters, alternate universes, voice recordings, tome chapters, discoveries, music, games/guide/sanctuary collections, and entrance words. Expand nested collections to add or edit their items. Media uploads are limited to 20 MB each.
+
+Content edits are private overlays on the original site data. Each save creates a JSON revision in the configured restricted Drive folder; media are separate files. Archive hides an entry and Restore recovers it. Original repository content remains public and is not migrated or deleted. Sign-out restores the public defaults and clears private content from the tab. Google Drive folder permissions enforce access; the OAuth client secret is never needed by this static site.
+
+New letters require an unlock phrase. Their bodies are encrypted in the browser with PBKDF2 and AES-GCM before upload. Titles and dates remain visible to both folder members. Keep the phrase: the site cannot recover it. Dates label letters; they do not enforce a time lock.
+
+With drive.file, a second account may need **Authorize shared entries** to select existing shared files. Revisions preserve prior saves, but simultaneous editing is not a transactional merge: refresh before editing shared content. Do not remove files from Drive unless you intend to remove their history or media.
+
+Validation: JavaScript syntax, simulated Drive add/update/reload/archive and sign-out, letter encryption/wrong-phrase tests, playlist progression/repeat and timed lyrics, and local browser layout checks. The new integration still needs a real Google-account save/reload check on the deployed origin.

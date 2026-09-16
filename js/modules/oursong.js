@@ -1,12 +1,12 @@
-import { createListeningRoom } from '../listening-room.js?v=20260916-music2';
-import { ALL_TRACKS } from '../music-catalog.js?v=20260916-music2';
+import { createListeningRoom } from '../listening-room.js?v=20260917-vault';
+import { ALL_TRACKS } from '../music-catalog.js?v=20260917-vault';
 // ===================================================================
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260916-music2';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260917-vault';
 
-import { openDanceMemory } from '../dance-memory.js?v=20260916-music2';
+import { openDanceMemory } from '../dance-memory.js?v=20260917-vault';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;
@@ -143,7 +143,7 @@ export function render(container) {
     container.querySelector('#oursong-dance-button').addEventListener('click', openDanceMemory);
     document.addEventListener('sanctuary:dance-open', stopForDance);
 
-    room = createListeningRoom(container.querySelector('#oursong-songbook'), ALL_TRACKS, () => {
+    room = createListeningRoom(container.querySelector('#oursong-songbook'), [...ALL_TRACKS, ...EDITABLE_CONFIG.SONGS_DATA], () => {
         songAudio?.pause(); isPlaying = false;
         document.getElementById('oursong-play-btn').textContent = '▶';
         document.getElementById('oursong-vinyl').classList.remove('spinning');
