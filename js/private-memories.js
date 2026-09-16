@@ -185,7 +185,14 @@ export function initPrivateMemories() {
     document.body.append(dialog);
     const button = document.createElement('button'); button.id = 'open-private-memories'; button.textContent = '♡ Private memories';
     document.querySelector('#main-menu-dropdown').append(button);
-    button.addEventListener('click', () => dialog.showModal());
+    button.addEventListener('click', async () => {
+        dialog.showModal();
+        const connectButton = dialog.querySelector('#private-connect');
+        connectButton.disabled = true;
+        try { await script('https://accounts.google.com/gsi/client'); }
+        catch (error) { status(error.message); }
+        finally { connectButton.disabled = false; }
+    });
     dialog.querySelector('.private-close').addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => dialog.querySelectorAll('audio').forEach(audio => audio.pause()));
     dialog.querySelector('#private-connect').addEventListener('click',connect);
