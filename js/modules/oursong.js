@@ -1,11 +1,12 @@
-import { mountYouTube } from '../youtube-player.js?v=20260916';
+import { createListeningRoom } from '../listening-room.js?v=20260916-music2';
+import { ALL_TRACKS } from '../music-catalog.js?v=20260916-music2';
 // ===================================================================
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260916';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260916-music2';
 
-import { openDanceMemory } from '../dance-memory.js?v=20260916';
+import { openDanceMemory } from '../dance-memory.js?v=20260916-music2';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;
@@ -20,12 +21,6 @@ const DEDICATION_TEXT = `
 
     For you, Zoya. Always.
 `;
-
-// Official artist videos; loaded only when a visitor chooses a song.
-const LISTENING_ROOM = [
-    { title: 'Let Me Down Slowly', artist: 'Alec Benjamin', videoId: '50VNCymT-Cs' },
-    { title: 'Perfect', artist: 'Ed Sheeran', videoId: '2Vv-BfVoq4g' },
-];
 
 function getOurSongHTML(song) {
     const title = song ? song.title : 'Our Song';
@@ -69,29 +64,14 @@ function getOurSongHTML(song) {
                 </div>
             </div>
 
-            <section class="oursong-listening-room" aria-labelledby="listening-room-title">
-                <p class="oursong-eyebrow">THE SOUNDTRACK OF US</p>
-                <h3 id="listening-room-title">Stay for one more song</h3>
-                <p>For the quiet evenings, the distance, and every dance still to come.</p>
-                <div class="oursong-track-list">
-                    ${LISTENING_ROOM.map((track, index) => `
-                        <button class="oursong-track" data-track="${index}" aria-pressed="false">
-                            <span class="oursong-track-number">0${index + 1}</span>
-                            <span><strong>${track.title}</strong><small>${track.artist}</small></span>
-                            <span aria-hidden="true">↗</span>
-                        </button>
-                    `).join('')}
-                </div>
-                <div id="oursong-video-slot"></div>
-                <p class="oursong-listening-note">Choose a song to load its official YouTube player, then press play. Availability may vary by region.</p>
-            </section>
+            <section id="oursong-songbook" aria-label="Our songbook"></section>
 
         </div>
     </div>
     `;
 }
 
-let disposeVideo;
+let room;
 let songAudio = null;
 let isPlaying = false;
 
@@ -119,8 +99,7 @@ async function togglePlay(song) {
         if (vinyl) vinyl.classList.remove('spinning');
         if (needle) needle.classList.remove('dropped');
     } else {
-        disposeVideo?.();
-    disposeVideo = null;
+        room?.stop();
     document.getElementById('oursong-video-slot')?.replaceChildren();
         document.querySelectorAll('.oursong-track').forEach(button => button.setAttribute('aria-pressed', 'false'));
         pauseBackgroundMusic();
@@ -147,28 +126,10 @@ function pauseBackgroundMusic() {
     AppState.landingAudioPlayer?.pause();
 }
 
-function selectTrack(index) {
-    const track = LISTENING_ROOM[index];
-    if (!track) return;
-    songAudio?.pause();
-    isPlaying = false;
-    document.getElementById('oursong-play-btn').textContent = '▶';
-    document.getElementById('oursong-vinyl').classList.remove('spinning');
-    document.getElementById('oursong-needle').classList.remove('dropped');
-    pauseBackgroundMusic();
-    document.querySelectorAll('.oursong-track').forEach(button => {
-        button.setAttribute('aria-pressed', String(Number(button.dataset.track) === index));
-    });
-    const slot = document.getElementById('oursong-video-slot');
-    disposeVideo?.();
-    disposeVideo = mountYouTube(slot, { id: track.videoId, title: `${track.title} — ${track.artist}` });
-}
-
 function stopForDance() {
     songAudio?.pause();
     isPlaying = false;
-    disposeVideo?.();
-    disposeVideo = null;
+    room?.stop();
     document.getElementById('oursong-video-slot')?.replaceChildren();
     const button = document.getElementById('oursong-play-btn');
     if (button) button.textContent = '▶';
@@ -182,8 +143,12 @@ export function render(container) {
     container.querySelector('#oursong-dance-button').addEventListener('click', openDanceMemory);
     document.addEventListener('sanctuary:dance-open', stopForDance);
 
-    container.querySelectorAll('.oursong-track').forEach(button => {
-        button.addEventListener('click', () => selectTrack(Number(button.dataset.track)));
+    room = createListeningRoom(container.querySelector('#oursong-songbook'), ALL_TRACKS, () => {
+        songAudio?.pause(); isPlaying = false;
+        document.getElementById('oursong-play-btn').textContent = '▶';
+        document.getElementById('oursong-vinyl').classList.remove('spinning');
+        document.getElementById('oursong-needle').classList.remove('dropped');
+        pauseBackgroundMusic();
     });
     const playBtn = document.getElementById('oursong-play-btn');
     if (playBtn) {
@@ -193,8 +158,8 @@ export function render(container) {
 
 export function cleanup() {
     document.removeEventListener('sanctuary:dance-open', stopForDance);
-    disposeVideo?.();
-    disposeVideo = null;
+    room?.destroy();
+    room = null;
     document.getElementById('oursong-video-slot')?.replaceChildren();
     if (songAudio) {
         songAudio.pause();

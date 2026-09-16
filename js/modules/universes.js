@@ -5,7 +5,7 @@
 import {
     $, $$, AppState, ALTERNATE_UNIVERSES,
     apiAddItem, apiUpdateItem, apiDeleteItem
-} from '../common.js?v=20260916';
+} from '../common.js?v=20260916-music2';
 
 // --- Local State ---
 let panelContainer = null;

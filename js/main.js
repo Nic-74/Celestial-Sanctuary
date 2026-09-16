@@ -16,9 +16,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260916';
+} from './common.js?v=20260916-music2';
 
-import { initDanceMemory } from './dance-memory.js?v=20260916';
+import { initDanceMemory } from './dance-memory.js?v=20260916-music2';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;

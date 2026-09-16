@@ -17,11 +17,12 @@ function loadAPI() {
     }).catch(error => { apiPromise = null; throw error; });
     return apiPromise;
 }
-export function mountYouTube(slot, { id, title, playlist }) {
+export function mountYouTube(slot, { id, title, playlist, onEnded, onTime, onState, onError }) {
     let disposed = false;
     let player;
+    let clock;
     const frame = document.createElement('iframe');
-    const params = new URLSearchParams({ enablejsapi: '1', origin: location.origin, playsinline: '1', autoplay: '1', rel: '0' });
+    const params = new URLSearchParams({ enablejsapi: '1', origin: location.origin, playsinline: '1', autoplay: '1', rel: '0', cc_load_policy: '1' });
     if (playlist) params.set('list', playlist);
     frame.src = `https://www.youtube.com/embed/${id}?${params}`;
     frame.title = title;
@@ -47,12 +48,13 @@ export function mountYouTube(slot, { id, title, playlist }) {
     loadAPI().then(YT => {
         if (disposed) return;
         player = new YT.Player(frame, { events: {
-            onReady: () => { if (!disposed) status.textContent = 'Press play if playback does not start automatically.'; },
+            onReady: () => { if (!disposed) { status.textContent = 'Press play if playback does not start automatically.'; clock = setInterval(() => { if (!disposed) onTime?.(player.getCurrentTime?.() || 0); }, 250); } },
             onStateChange: event => {
                 if (disposed) return;
+                onState?.(event.data);
                 if (event.data === 1) { clearTimeout(timer); status.textContent = 'Playing'; }
                 if (event.data === 2) status.textContent = 'Paused';
-                if (event.data === 0) status.textContent = 'Song finished';
+                if (event.data === 0) { status.textContent = 'Song finished'; onEnded?.(); }
             },
             onAutoplayBlocked: () => { if (!disposed) status.textContent = 'Press play in the player to start the music.'; },
             onError: event => {
@@ -66,9 +68,20 @@ export function mountYouTube(slot, { id, title, playlist }) {
                     5: 'YouTube could not play this recording in this browser.',
                     2: 'YouTube could not load this song.'
                 };
+                onError?.(event.data);
                 status.textContent = `${messages[event.data] || 'YouTube could not start playback.'} Open the song below. (YouTube ${event.data})`;
             }
         }});
     }).catch(error => { if (!disposed) { clearTimeout(timer); status.textContent = `${error.message} Open the song below.`; } });
-    return () => { disposed = true; clearTimeout(timer); player?.destroy(); frame.remove(); };
+    const dispose = () => { disposed = true; clearTimeout(timer); clearInterval(clock); player?.destroy(); frame.remove(); };
+    dispose.load = track => {
+        if (disposed || !player?.loadVideoById) return false;
+        frame.title = track.title;
+        link.href = `https://www.youtube.com/watch?v=${track.id}`;
+        link.textContent = `Play ${track.title} on YouTube ↗`;
+        status.textContent = 'Loading next song…';
+        player.loadVideoById(track.id);
+        return true;
+    };
+    return dispose;
 }

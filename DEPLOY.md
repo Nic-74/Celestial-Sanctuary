@@ -153,3 +153,10 @@ The existing menu now opens a Private memories dialog for Google sign-in, text e
 Configuration verified through Drive metadata: folder restricted to the owner and Zoya as writer. API key restrictions confirmed by the owner. Local checks cover signed-out UI, folder privacy rejection, upload formatting and destination validation. Real Google consent, saving/reopening, and cross-account visibility still require end-to-end verification; do not represent those as passed. OAuth currently permits the live GitHub origin, not a local preview origin. Google OAuth should be tested in a normal browser.
 
 With `drive.file`, selecting a folder must not be assumed to authorize all pre-existing children. Verify both accounts can see each other's app-created records before treating the collection as fully shared. Existing public repository media remains public.
+
+### Shared songbook — sequential playback and lyrics
+Both the listening panel (ten tracks) and August 22 dialog (the original eight in order) now use the same songbook. A single YouTube player advances via its ended event and `loadVideoById`, with previous/next, auto-next and repeat controls. Playback starts only after a visitor chooses a song. Videos blocked by YouTube retain their original link and a manual Next control.
+
+Captions are requested with `cc_load_policy=1`; availability and languages depend on each video. The separate lyrics panel imports user-supplied TXT/LRC, renders text safely, and highlights timed LRC lines using player time. Lyrics remain in the current component session and are not uploaded. Multiple local audio files can also play in sequence. Closing/changing panels destroys players and revokes local file URLs.
+
+Verification: unit checks for YouTube lifecycle/error handling, queue end/advance/repeat/auto-next off, and LRC timestamps. Browser test confirmed native audio advanced from one file to the next and selected the expected timed-lyrics line. Mobile dialog fit verified at 390px; nine planets retained. YouTube playback for every recording and provider-controlled caption availability cannot be guaranteed by these checks.

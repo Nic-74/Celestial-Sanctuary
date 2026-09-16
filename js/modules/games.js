@@ -2,7 +2,7 @@
 //  MODULE: GAMES (js/modules/games.js)
 // ===================================================================
 
-import { $, $$, DOM } from '../common.js?v=20260916';
+import { $, $$, DOM } from '../common.js?v=20260916-music2';
 
 // --- Local State ---
 let panelContainer = null;
