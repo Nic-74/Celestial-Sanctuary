@@ -1,3 +1,4 @@
+import { initPrivateMemories } from './private-memories.js?v=20260916-drive1';
 // =****************************************************************==
 //  MAIN APPLICATION BOOTSTRAP (js/main.js) - CORRECTED & ORGANIZED
 // ===================================================================
@@ -56,6 +57,7 @@ async function initApp() {
     addEventListeners();
     initLandingPage();
     initDanceMemory();
+    initPrivateMemories();
     initMoodPickers();
     initThemeSystem(); // Initialize the theme system
     // Keep the editorial palette steady; theme controls remain available in the archive.

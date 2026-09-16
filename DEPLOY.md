@@ -146,3 +146,10 @@ Falling stars render in `#romantic-sky` even at `#home`; the original animated s
 The dance playlist and listening-room tracks share an origin-aware YouTube IFrame API player. It reports provider errors, autoplay blocks and connection timeouts, and links to the exact original song. Browser/provider restrictions may still prevent embedding; this is not a promise that all YouTube recordings are embeddable.
 
 The dance dialog also plays user-selected audio through native HTML audio controls. Files stay on the device, are not uploaded, and are forgotten when the dialog closes. This is separate from future private Drive storage. Google OAuth setup is required before private Drive editing can be released.
+
+### Private Drive editor — initial integration
+The existing menu now opens a Private memories dialog for Google sign-in, text entries, and optional photos/audio up to 20 MB. The browser uses `drive.file`, an owner-configured web OAuth client, a referrer/API-restricted Picker key, and the designated private folder. No OAuth client secret is used. Tokens are in memory only; sign-out and expiry clear rendered private content. Folder privacy and write permissions are checked before saving. Small files use multipart/related; larger files use a resumable-upload session with a single body transfer (automatic resume/retry is not yet implemented).
+
+Configuration verified through Drive metadata: folder restricted to the owner and Zoya as writer. API key restrictions confirmed by the owner. Local checks cover signed-out UI, folder privacy rejection, upload formatting and destination validation. Real Google consent, saving/reopening, and cross-account visibility still require end-to-end verification; do not represent those as passed. OAuth currently permits the live GitHub origin, not a local preview origin. Google OAuth should be tested in a normal browser.
+
+With `drive.file`, selecting a folder must not be assumed to authorize all pre-existing children. Verify both accounts can see each other's app-created records before treating the collection as fully shared. Existing public repository media remains public.
