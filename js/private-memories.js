@@ -1,4 +1,4 @@
-import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260917-forms';
+import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260917-savefix';
 // Google access tokens and private content exist only in this tab's memory.
 const CLIENT_ID = '690422772790-id9snpi35tci6n9lrreu4682vo6p438b.apps.googleusercontent.com';
 const PROJECT_NUMBER = '690422772790';
@@ -38,9 +38,13 @@ async function request(path, options = {}) {
         headers: { ...options.headers, Authorization: `Bearer ${token}` }
     });
     if (response.status === 401) { clearPrivate(); throw new Error('Your Google session expired. Sign in again.'); }
-    if (!response.ok) throw new Error(response.status === 403 || response.status === 404
-        ? 'Google has not granted access to this folder or file. Click “Connect storage folder”, single-click the Private Memories folder and click Select. Opening the empty folder does not grant access.'
-        : `Google could not complete the request (${response.status}). Your draft has been kept.`);
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        const detail = payload.error?.message || 'No additional details returned.';
+        const reason = payload.error?.errors?.[0]?.reason || payload.error?.status || '';
+        // Keep quota, disabled API, permissions and malformed uploads distinct.
+        throw new Error(`Google Drive ${response.status}${reason ? ` (${reason})` : ''}: ${detail}`);
+    }
     return response;
 }
 async function verifyFolder() {

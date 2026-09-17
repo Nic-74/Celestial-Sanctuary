@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260917-forms';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260917-forms';
+import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260917-savefix';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260917-savefix';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();
@@ -78,7 +78,7 @@ function rawCollection(type) {
  return [...map.values()];
 }
 export function currentLetters(){return ready?rawCollection('letter'):[];}
-async function apply() {
+async function apply(deferRefresh=false) {
  const myEpoch=epoch;
  const nextURLs=new Set();
  const collections={};
@@ -99,7 +99,10 @@ async function apply() {
   document.querySelectorAll('audio,video').forEach(el=>el.pause());AppState.music.player?.pause();
   for(const [type,items] of Object.entries(collections))replaceContent(type,items);
   applySiteWords();
-  const previous=urls;urls=nextURLs;document.dispatchEvent(new Event('sanctuary:content-changed'));
+  const previous=urls;urls=nextURLs;
+  const refresh=()=>{if(myEpoch===epoch)document.dispatchEvent(new Event('sanctuary:content-changed'));};
+  // Native save handlers must finish closing their forms before routing tears them down.
+  if(deferRefresh)setTimeout(refresh,0);else refresh();
   previous.forEach(url=>URL.revokeObjectURL(url));
  } catch(error) {nextURLs.forEach(url=>URL.revokeObjectURL(url));throw error;}
 }
@@ -150,7 +153,7 @@ async function persist(action,type,id,data,expected) {
  const saved=await driver.upload({name:`${type}-${itemId}-${crypto.randomUUID()}.json`,parents:[driver.folder],appProperties:{sanctuaryMemory:'1'}},new Blob([JSON.stringify(record)],{type:'application/json'}));
  if(operationEpoch!==epoch)throw new Error('Session changed. Sign in again to view the saved revision.');
  latest.set(key(type,itemId),{...record,fileId:saved.id});revisions.push({...record,fileId:saved.id});
- await apply();renderManager();
+ await apply(true);renderManager();
  return action==='delete'?true:contentCollections()[type].find(item=>item.id===itemId);
 }
 function fieldEditor(value,label,onChange) {

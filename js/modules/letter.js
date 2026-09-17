@@ -2,7 +2,7 @@
 //  MODULE: A LETTER TO ZOYA (js/modules/letter.js)
 // ===================================================================
 
-import { EDITABLE_CONFIG } from '../common.js?v=20260917-forms';
+import { EDITABLE_CONFIG } from '../common.js?v=20260917-savefix';
 
 
 let typewriterTimeout = null;
