@@ -1,6 +1,6 @@
-import { EXTRA_CONTENT } from './extra-data.js?v=20260917-savefix';
-import { INITIAL_VOICES } from './voice-data.js?v=20260917-savefix';
-import { INITIAL_LETTER } from './letter-data.js?v=20260917-savefix';
+import { EXTRA_CONTENT } from './extra-data.js?v=20260918-connect';
+import { INITIAL_VOICES } from './voice-data.js?v=20260918-connect';
+import { INITIAL_LETTER } from './letter-data.js?v=20260918-connect';
 // ===================================================================
 //  COMMON CONFIGURATION & DATA
 // ===================================================================

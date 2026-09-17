@@ -2,7 +2,7 @@
 //  MODULE: VOICE GARDEN (js/modules/voicegarden.js)
 // ===================================================================
 
-import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem } from '../common.js?v=20260917-savefix';
+import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem } from '../common.js?v=20260918-connect';
 
 // --- Local State ---
 let panelContainer = null;

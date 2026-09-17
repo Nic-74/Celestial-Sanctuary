@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260917-savefix';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260917-savefix';
+import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-connect';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260918-connect';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();
@@ -227,7 +227,9 @@ function renderManager() {
 }
 export function openContentManager(type='gallery') {
  activeType=CONTENT_LABELS[type]?type:'gallery';driver.open();
- document.querySelector('#vault-type').value=activeType;renderManager();
+ document.querySelector('#vault-type').value=activeType;
+ if(ready){const library=document.querySelector('#private-signed-in > details');if(library)library.open=true;}
+ renderManager();
 }
 export function mountContentTools(panelId,container) {
  const type={chronicle:'timeline','voice-garden':'voice',oursong:'music',guide:'extras',games:'extras',sanctum:'extras',journey:'extras'}[panelId]||panelId;

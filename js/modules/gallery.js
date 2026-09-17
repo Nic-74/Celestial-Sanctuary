@@ -1,4 +1,4 @@
-import { uploadContentMedia, requireContentSignIn } from '../content-vault.js?v=20260917-savefix';
+import { uploadContentMedia, requireContentSignIn } from '../content-vault.js?v=20260918-connect';
 // ===================================================================
 //  MODULE: GALLERY (js/modules/gallery.js)
 // ===================================================================
@@ -7,7 +7,7 @@ import {
     apiAddItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260917-savefix';
+} from '../common.js?v=20260918-connect';
 
 // --- Local State ---
 let panelContainer = null; // To store the main content element
