@@ -1,5 +1,5 @@
-import { requireContentSignIn } from '../content-vault.js?v=20260918-connect';
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-connect';
+import { requireContentSignIn } from '../content-vault.js?v=20260918-direct';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-direct';
 // ===================================================================
 //  MODULE: CHRONICLE (js/modules/chronicle.js)
 // ===================================================================
@@ -7,7 +7,7 @@ import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-connect';
 import {
     $, $$, AppState, CHRONICLE_DATA, EDITABLE_CONFIG,
     apiAddItem, apiUpdateItem, apiDeleteItem, findImageWithExtension
-} from '../common.js?v=20260918-connect';
+} from '../common.js?v=20260918-direct';
 
 // --- Local state for this module ---
 let counterInterval;

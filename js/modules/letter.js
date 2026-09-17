@@ -2,7 +2,7 @@
 //  MODULE: A LETTER TO ZOYA (js/modules/letter.js)
 // ===================================================================
 
-import { EDITABLE_CONFIG } from '../common.js?v=20260918-connect';
+import { EDITABLE_CONFIG } from '../common.js?v=20260918-direct';
 
 
 let typewriterTimeout = null;

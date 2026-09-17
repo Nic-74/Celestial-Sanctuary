@@ -32,3 +32,8 @@
 .sealed-letter-shelf input { background:#101427; color:#eee; padding:12px; border:1px solid #d7b58b70; border-radius:10px; margin:10px; max-width:100%; box-sizing:border-box; }
 .sealed-letter-shelf p { white-space:pre-wrap; font:17px/1.9 Georgia,serif; }
 @media(max-width:600px) { .vault-toolbar { flex-direction:column; align-items:stretch; } #vault-form {padding:12px;} }
+
+#drive-save-status {position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100000;max-width:min(90vw,620px);padding:14px 20px;border:1px solid #d7b982;border-radius:12px;background:#111628;color:#f4e7cf;box-shadow:0 8px 35px #0008;font:15px/1.5 Georgia,serif;pointer-events:none;}
+#drive-save-status[data-state="error"] {border-color:#e9a6ac;color:#ffdae0;}
+#drive-save-status[hidden] {display:none;}
+.private-permission-note {font-size:13px;opacity:.8;}

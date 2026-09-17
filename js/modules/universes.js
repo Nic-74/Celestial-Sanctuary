@@ -1,4 +1,4 @@
-import { requireContentSignIn } from '../content-vault.js?v=20260918-connect';
+import { requireContentSignIn } from '../content-vault.js?v=20260918-direct';
 // ===================================================================
 //  MODULE: UNIVERSES (js/modules/universes.js)
 // ===================================================================
@@ -6,7 +6,7 @@ import { requireContentSignIn } from '../content-vault.js?v=20260918-connect';
 import {
     $, $$, AppState, ALTERNATE_UNIVERSES,
     apiAddItem, apiUpdateItem, apiDeleteItem
-} from '../common.js?v=20260918-connect';
+} from '../common.js?v=20260918-direct';
 
 // --- Local State ---
 let panelContainer = null;

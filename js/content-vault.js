@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-connect';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260918-connect';
+import { contentCollections, replaceContent, setContentPersistence, showSaveStatus, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-direct';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260918-direct';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();
@@ -23,7 +23,7 @@ async function hydrateAssets(value,newURLs) {
 export function requireContentSignIn(type='gallery') {
  if(driver?.signedIn())return true;
  openContentManager(type);
- driver.status('Sign in and connect the private folder, then return to your page’s upload button.');
+ driver.status('Connect Google Drive once, then use this page’s form. No folder selection is needed.');
  return false;
 }
 export async function uploadContentMedia(file) {
@@ -136,7 +136,12 @@ export async function loadVault() {
  revisions=found;latest=new Map();for(const record of found)latest.set(key(record.type,record.itemId),record);
  ready=true;try { await apply();renderManager(); } catch(error) {ready=false;throw error;}
 }
-async function persist(action,type,id,data,expected) {
+async function persist(...args) {
+ showSaveStatus('Saving to Google Drive…');
+ try {const saved=await persistEntry(...args);showSaveStatus('Saved to Google Drive','success');return saved;}
+ catch(error){showSaveStatus(`Not saved: ${error.message}`,'error');throw error;}
+}
+async function persistEntry(action,type,id,data,expected) {
  const operationEpoch=epoch;
  if(!driver.signedIn()){openContentManager(type);throw new Error('Sign in to Google Drive, then save again.');}
  if(!ready)await loadVault();

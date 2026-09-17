@@ -1,6 +1,6 @@
-import { EXTRA_CONTENT } from './extra-data.js?v=20260918-connect';
-import { INITIAL_VOICES } from './voice-data.js?v=20260918-connect';
-import { INITIAL_LETTER } from './letter-data.js?v=20260918-connect';
+import { EXTRA_CONTENT } from './extra-data.js?v=20260918-direct';
+import { INITIAL_VOICES } from './voice-data.js?v=20260918-direct';
+import { INITIAL_LETTER } from './letter-data.js?v=20260918-direct';
 // ===================================================================
 //  COMMON CONFIGURATION & DATA
 // ===================================================================
@@ -837,6 +837,16 @@ function parseRawBookContent() {
         }
     });
     return chapters;
+}
+
+let saveNoticeTimer;
+export function showSaveStatus(message, state='saving') {
+    let notice=document.getElementById('drive-save-status');
+    if(!notice){notice=document.createElement('div');notice.id='drive-save-status';notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');}
+    (document.querySelector('dialog[open]')||document.body).append(notice);
+    notice.textContent=message;notice.dataset.state=state;notice.hidden=false;
+    clearTimeout(saveNoticeTimer);
+    if(state==='success')saveNoticeTimer=setTimeout(()=>{notice.hidden=true;},6000);
 }
 
 let contentPersistence;
