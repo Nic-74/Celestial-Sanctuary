@@ -1,3 +1,4 @@
+import { requireContentSignIn } from '../content-vault.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: UNIVERSES (js/modules/universes.js)
 // ===================================================================
@@ -5,7 +6,7 @@
 import {
     $, $$, AppState, ALTERNATE_UNIVERSES,
     apiAddItem, apiUpdateItem, apiDeleteItem
-} from '../common.js?v=20260917-vault';
+} from '../common.js?v=20260917-forms';
 
 // --- Local State ---
 let panelContainer = null;
@@ -194,6 +195,7 @@ function returnToUniverseHub() {
 }
 
 function openUniverseEditor(universeId = null) {
+    if (!requireContentSignIn('universes')) return;
     const modal = $('universe-editor-modal');
     const titleEl = $('universe-modal-title');
     

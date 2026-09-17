@@ -1,8 +1,8 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: SANCTUARY (js/modules/sanctuary.js) - ENHANCED
 // ===================================================================
-import { $, $$, AppState, personalizedContent } from '../common.js?v=20260917-vault';
+import { $, $$, AppState, personalizedContent } from '../common.js?v=20260917-forms';
 
 // --- Local State ---
 let panelContainer = null;

@@ -1,4 +1,5 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
+import { requireContentSignIn } from '../content-vault.js?v=20260917-forms';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: CHRONICLE (js/modules/chronicle.js)
 // ===================================================================
@@ -6,7 +7,7 @@ import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
 import {
     $, $$, AppState, CHRONICLE_DATA, EDITABLE_CONFIG,
     apiAddItem, apiUpdateItem, apiDeleteItem, findImageWithExtension
-} from '../common.js?v=20260917-vault';
+} from '../common.js?v=20260917-forms';
 
 // --- Local state for this module ---
 let counterInterval;
@@ -531,6 +532,7 @@ function displayEvent(index) {
 };
 
 function openEventModal(index = -1) {
+    if (!requireContentSignIn('timeline')) return;
     const title = $('timeline-modal-title');
     const dateInput = $('timeline-modal-date');
     const titleInput = $('timeline-modal-title-input');

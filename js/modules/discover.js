@@ -1,4 +1,5 @@
-import { uploadContentMedia } from '../content-vault.js?v=20260917-vault';
+import { requireContentSignIn } from '../content-vault.js?v=20260917-forms';
+import { uploadContentMedia } from '../content-vault.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: DISCOVER (js/modules/discover.js)
 // ===================================================================
@@ -8,7 +9,7 @@ import {
     apiAddItem, apiUpdateItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260917-vault';
+} from '../common.js?v=20260917-forms';
 
 // --- Local State ---
 let panelContainer = null;
@@ -78,6 +79,7 @@ function renderGrid(filter = 'all') {
 }
 
 function openDiscoverModal(itemId = null) {
+    if (!requireContentSignIn('discover')) return;
     const modal = $('discover-item-modal');
     const modalTitle = $('discover-modal-title');
     const editIdInput = $('discover-modal-edit-id');

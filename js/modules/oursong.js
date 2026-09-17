@@ -1,12 +1,12 @@
-import { createListeningRoom } from '../listening-room.js?v=20260917-vault';
-import { ALL_TRACKS } from '../music-catalog.js?v=20260917-vault';
+import { createListeningRoom } from '../listening-room.js?v=20260917-forms';
+import { ALL_TRACKS } from '../music-catalog.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: OUR SONG (js/modules/oursong.js)
 // ===================================================================
 
-import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260917-vault';
+import { AppState, EDITABLE_CONFIG } from '../common.js?v=20260917-forms';
 
-import { openDanceMemory } from '../dance-memory.js?v=20260917-vault';
+import { openDanceMemory } from '../dance-memory.js?v=20260917-forms';
 
 // The song index to feature (0 = song1.mp3). Change this to any index.
 const FEATURED_SONG_INDEX = 0;

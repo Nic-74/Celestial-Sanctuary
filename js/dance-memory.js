@@ -1,6 +1,6 @@
-import { createListeningRoom } from './listening-room.js?v=20260917-vault';
-import { DANCE_TRACKS } from './music-catalog.js?v=20260917-vault';
-import { AppState } from './common.js?v=20260917-vault';
+import { createListeningRoom } from './listening-room.js?v=20260917-forms';
+import { DANCE_TRACKS } from './music-catalog.js?v=20260917-forms';
+import { AppState } from './common.js?v=20260917-forms';
 
 const PLAYLIST_ID = 'PLbRstMs51Aq7Cd1QfnlRr0y8pzEJqTIsf';
 const PLAYLIST_URL = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;

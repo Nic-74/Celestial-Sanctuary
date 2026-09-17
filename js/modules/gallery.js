@@ -1,4 +1,4 @@
-import { uploadContentMedia } from '../content-vault.js?v=20260917-vault';
+import { uploadContentMedia, requireContentSignIn } from '../content-vault.js?v=20260917-forms';
 // ===================================================================
 //  MODULE: GALLERY (js/modules/gallery.js)
 // ===================================================================
@@ -7,7 +7,7 @@ import {
     apiAddItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260917-vault';
+} from '../common.js?v=20260917-forms';
 
 // --- Local State ---
 let panelContainer = null; // To store the main content element
@@ -179,7 +179,7 @@ async function openUploadCategoryModal(file) {
     modalBackdrop.innerHTML = `
         <div class="modal-content" style="max-width: 500px;">
             <h3 class="panel-header" style="margin-bottom: 1.5rem;">Upload New Memory</h3>
-            <div id="upload-status" style="margin-bottom: 1rem; color: var(--gold-light);">Uploading photo to server...</div>
+            <div id="upload-status" style="margin-bottom: 1rem; color: var(--gold-light);">Uploading photo to your private Google Drive…</div>
             <div class="form-group">
                 <label>Caption</label>
                 <input type="text" id="upload-caption-input" class="text-input" placeholder="A new memory...">
@@ -220,7 +220,9 @@ async function openUploadCategoryModal(file) {
                         year: new Date().getFullYear(),
                         category: category
                     };
+                    button.disabled = true;
                     const savedItem = await apiAddItem('gallery', newPhotoData);
+                    button.disabled = false;
                     if (savedItem) {
                         closeModal();
                         AppState.gallery.showAll = false;
@@ -268,7 +270,7 @@ function handleGalleryClicks(e) {
         setGalleryView(closest('#gallery-view-grid').dataset.view);
     }
     else if (closest('#upload-photo-btn')) {
-        document.dispatchEvent(new CustomEvent('sanctuary:edit-content',{detail:{type:'gallery'}}));
+        if(requireContentSignIn('gallery')) $('photo-upload-input').click();
     }
     // **NEW**: Handle clicks on the favorites stat box to filter liked photos
     else if (closest('.stat-box[data-filter="favorites"]')) {

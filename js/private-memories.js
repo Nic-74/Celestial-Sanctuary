@@ -1,4 +1,4 @@
-import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260917-vault';
+import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260917-forms';
 // Google access tokens and private content exist only in this tab's memory.
 const CLIENT_ID = '690422772790-id9snpi35tci6n9lrreu4682vo6p438b.apps.googleusercontent.com';
 const PROJECT_NUMBER = '690422772790';
@@ -39,7 +39,7 @@ async function request(path, options = {}) {
     });
     if (response.status === 401) { clearPrivate(); throw new Error('Your Google session expired. Sign in again.'); }
     if (!response.ok) throw new Error(response.status === 403 || response.status === 404
-        ? 'Google has not granted access to this folder or file. Choose it with “Authorize folder”, and check its sharing settings.'
+        ? 'Google has not granted access to this folder or file. Click “Connect storage folder”, single-click the Private Memories folder and click Select. Opening the empty folder does not grant access.'
         : `Google could not complete the request (${response.status}). Your draft has been kept.`);
     return response;
 }
@@ -78,10 +78,10 @@ async function authorizeFolder(mode='folder') {
         await new Promise(resolve => gapi.load('picker', resolve));
         if (!token) return;
         const pickerGeneration = generation;
-        const view = mode === 'folder' ? new google.picker.DocsView(google.picker.ViewId.FOLDERS).setIncludeFolders(true).setSelectFolderEnabled(true) : new google.picker.DocsView().setParent(FOLDER_ID);
+        const view = mode === 'folder' ? new google.picker.DocsView(google.picker.ViewId.FOLDERS).setIncludeFolders(true).setSelectFolderEnabled(true).setMode(google.picker.DocsViewMode.LIST) : new google.picker.DocsView().setParent(FOLDER_ID);
         picker = new google.picker.PickerBuilder().setAppId(PROJECT_NUMBER).setDeveloperKey(PICKER_KEY)
             .setOAuthToken(token).setOrigin(location.origin).addView(view).enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-            .setTitle('Select Celestial Sanctuary — Private Memories')
+            .setTitle(mode === 'folder' ? 'Single-click the Private Memories folder, then click Select (do not open it)' : 'Select shared sanctuary files')
             .setCallback(async data => {
                 if (!token || generation !== pickerGeneration) return;
                 if (data.action === google.picker.Action.CANCEL) { if (!dialog.open) dialog.showModal(); return; }
@@ -95,7 +95,7 @@ async function authorizeFolder(mode='folder') {
     } catch (error) { status(error.message); }
 }
 async function refresh() {
-    try { await loadVault(); status('Your Drive content is loaded into the sanctuary.'); }
+    try { await loadVault(); status('Drive connected. Close this window and use Upload Photo, Add New Destination, or the editor on your chosen page.'); }
     catch(error) { if(error.name !== 'AbortError') status(error.message); }
 }
 async function upload(metadata, blob) {
@@ -120,7 +120,7 @@ async function upload(metadata, blob) {
 export function initPrivateMemories() {
     dialog = document.createElement('dialog'); dialog.id = 'private-memories';
     dialog.setAttribute('aria-labelledby','private-title');
-    dialog.innerHTML = `<button class="private-close" aria-label="Close content manager">×</button><p class="private-eyebrow">THE KEEPER OF OUR UNIVERSE</p><h2 id="private-title">The living archive.</h2><p>Write, renew, and keep every chapter in Google Drive. Your additions appear in their own sanctuary sections after sign-in.</p><p role="status" aria-live="polite">Sign in to load and edit your permanent archive.</p><button id="private-connect">Sign in with Google</button><div id="private-signed-in" hidden><div class="private-actions"><button id="private-authorize">Authorize folder</button><button id="private-shared">Authorize shared entries</button><button id="private-refresh">Reload from Drive</button><button id="private-signout">Sign out</button></div><label>Which part of our universe?<select id="vault-type"></select></label><button id="vault-add">Add a new entry</button><form id="vault-form" hidden></form><div id="private-list"></div></div>`;
+    dialog.innerHTML = `<button class="private-close" aria-label="Close content manager">×</button><p class="private-eyebrow">THE KEEPER OF OUR UNIVERSE</p><h2 id="private-title">The living archive.</h2><p>Write, renew, and keep every chapter in Google Drive. Your additions appear in their own sanctuary sections after sign-in.</p><p role="status" aria-live="polite">Sign in to load and edit your permanent archive.</p><button id="private-connect">Sign in with Google</button><div id="private-signed-in" hidden><div class="private-actions"><p>Select the folder itself, not a file inside it. This connects storage; upload your content using the controls on each page.</p><button id="private-authorize">Connect storage folder</button><button id="private-shared">Authorize shared entries</button><button id="private-refresh">Reload from Drive</button><button id="private-signout">Sign out</button></div><label>Which part of our universe?<select id="vault-type"></select></label><button id="vault-add">Add a new entry</button><form id="vault-form" hidden></form><div id="private-list"></div></div>`;
     document.body.append(dialog);
     const button = document.createElement('button'); button.id = 'open-private-memories'; button.textContent = '✧ Manage all content';
     document.querySelector('#main-menu-dropdown').append(button);

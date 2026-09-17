@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260917-vault';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260917-vault';
+import { contentCollections, replaceContent, setContentPersistence, AppState, EDITABLE_CONFIG } from './common.js?v=20260917-forms';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260917-forms';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();
@@ -19,6 +19,12 @@ async function hydrateAssets(value,newURLs) {
   const id=value.slice(6);const blob=await(await driver.request(`drive/v3/files/${id}?alt=media`)).blob();const url=URL.createObjectURL(blob);newURLs.add(url);mediaRefs.set(url,id);return url;
  }
  return value;
+}
+export function requireContentSignIn(type='gallery') {
+ if(driver?.signedIn())return true;
+ openContentManager(type);
+ driver.status('Sign in and connect the private folder, then return to your page’s upload button.');
+ return false;
 }
 export async function uploadContentMedia(file) {
  if(!driver.signedIn()){openContentManager();throw new Error('Sign in before uploading.');}
@@ -163,7 +169,7 @@ function fieldEditor(value,label,onChange) {
    if(Array.isArray(value)){const add=document.createElement('button');add.type='button';add.textContent='Add item';add.onclick=()=>{value.push(value.length?clone(value[value.length-1]):label==='chapters'?{title:'A new chapter',author:'Nic',date:new Date().toISOString().slice(0,10),content:''}:'');onChange(value);build();};details.append(add);}
   };build();
  }else {
-  const labelEl=document.createElement('label');labelEl.textContent=({q:'Question',o:'Answer choices',a:'Correct answer (option number starts at 0)',ans:'Correct option (starts at 0)',src:'Media URL (or upload a file below)',audioFile:'Audio URL (or upload a recording below)',textNote:'Message beside the recording',content:'Chapter text',desc:'Story',premise:'The beginning of this universe'})[label]||label.replace(/([A-Z])/g,' $1');
+  const labelEl=document.createElement('label');labelEl.textContent=({recordedDate:'Recording date',from:'From',to:'For',text:'Your letter',date:'Date',title:'Title',q:'Question',o:'Answer choices',a:'Correct answer (option number starts at 0)',ans:'Correct option (starts at 0)',src:'Media URL (or upload a file below)',audioFile:'Audio URL (or upload a recording below)',textNote:'Message beside the recording',content:'Chapter text',desc:'Story',premise:'The beginning of this universe'})[label]||label.replace(/([A-Z])/g,' $1');
   const input=document.createElement(typeof value==='string'&&(['text','content','desc','description','premise','textNote','lyrics'].includes(label)||value.length>120)?'textarea':'input');
   if(typeof value==='boolean'){input.type='checkbox';input.checked=value;input.onchange=()=>onChange(input.checked);}
   else {input.value=value??'';if(typeof value==='number')input.type='number';input.oninput=()=>onChange(typeof value==='number'?Number(input.value):input.value);}
@@ -175,9 +181,12 @@ function startEdit(type,item) {
  activeType=type;activeFile=latest.get(key(type,item?.id))?.fileId||null;
  editing=serializeAssets(clone(item||templates[type]));delete editing.sealed;
  const form=document.querySelector('#vault-form');form.replaceChildren();
- form.append(fieldEditor(editing,'Content',next=>{editing=next;}));
+ const fields={voice:['from','to','textNote','recordedDate'],letter:['title','date','text'],music:['title','artist','lyrics'],gallery:['caption','year','category'],timeline:['title','year','desc'],discover:['title','location','date','description','status','link'],tome:['title','author','date','content'],site:['title','eyebrow','tagline','button','photo'] }[type];
+ if(fields){for(const name of fields){if(editing[name]===undefined)continue;form.append(fieldEditor(editing[name],name,next=>{editing[name]=next;}));}}
+ else form.append(fieldEditor(editing,'Content',next=>{editing=next;}));
+
  if(['gallery','voice','music','universes'].includes(type)){
-  const label=document.createElement('label');label.textContent='Upload or replace media (up to 20 MB)';
+  const label=document.createElement('label');label.textContent=type==='voice'?'Choose your voice recording (up to 20 MB)':type==='music'?'Choose an audio file (up to 20 MB)':'Choose a photograph (up to 20 MB)';
   const input=document.createElement('input');input.type='file';input.name='vault-file';input.accept=type==='voice'||type==='music'?'audio/*':'image/jpeg,image/png,image/webp,image/gif';label.append(input);form.append(label);
  }
  if(type==='letter') {
@@ -218,11 +227,11 @@ export function openContentManager(type='gallery') {
  document.querySelector('#vault-type').value=activeType;renderManager();
 }
 export function mountContentTools(panelId,container) {
- const type={chronicle:'timeline','voice-garden':'voice',oursong:'music',guide:'extras',games:'extras',sanctum:'extras',journey:'site'}[panelId]||panelId;
+ const type={chronicle:'timeline','voice-garden':'voice',oursong:'music',guide:'extras',games:'extras',sanctum:'extras',journey:'extras'}[panelId]||panelId;
  if(!CONTENT_LABELS[type])return;
+ const hasOwnEditor=['gallery','discover','chronicle','tome','book','universes','oursong'].includes(panelId);
  const toolbar=document.createElement('div');toolbar.className='vault-toolbar';
- const text=document.createElement('span');text.textContent=ready?'Connected to your permanent Drive archive':'Sign in to load your private additions and edits';
- const button=document.createElement('button');button.textContent=`Add / edit ${CONTENT_LABELS[type]}`;button.onclick=()=>openContentManager(type);toolbar.append(text,button);container.prepend(toolbar);
+ const button=document.createElement('button');button.textContent=({letter:'Write a sealed letter',voice:'Plant a voice message',extras:'Edit this collection',site:'Edit our story'})[type]||`Add / edit ${CONTENT_LABELS[type]}`;button.onclick=()=>{openContentManager(type);if(ready&&['letter','voice'].includes(type))startEdit(type);};toolbar.append(button);if(!hasOwnEditor)container.prepend(toolbar);
  if(type==='letter'&&ready){
   const letters=document.createElement('section');letters.dataset.privateLetter='true';letters.className='sealed-letter-shelf';
   for(const item of currentLetters().filter(item=>item.sealed)){

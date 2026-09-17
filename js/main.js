@@ -1,6 +1,6 @@
-import { uploadContentMedia } from './content-vault.js?v=20260917-vault';
-import { mountContentTools } from './content-vault.js?v=20260917-vault';
-import { initPrivateMemories } from './private-memories.js?v=20260917-vault';
+import { uploadContentMedia, requireContentSignIn } from './content-vault.js?v=20260917-forms';
+import { mountContentTools } from './content-vault.js?v=20260917-forms';
+import { initPrivateMemories } from './private-memories.js?v=20260917-forms';
 // =****************************************************************==
 //  MAIN APPLICATION BOOTSTRAP (js/main.js) - CORRECTED & ORGANIZED
 // ===================================================================
@@ -18,9 +18,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260917-vault';
+} from './common.js?v=20260917-forms';
 
-import { initDanceMemory } from './dance-memory.js?v=20260917-vault';
+import { initDanceMemory } from './dance-memory.js?v=20260917-forms';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -99,7 +99,7 @@ async function initApp() {
     // Expose editor modal functions
     window.openLightbox = openLightbox;
     window.openEditor = openEditor;
-    window.openNewChapterMeta = openNewChapterMeta;
+    window.openNewChapterMeta = () => { if(requireContentSignIn('tome')) openNewChapterMeta(); };
     window.openUniverseEditor = openUniverseEditor; // Expose the new editor function
 }
 
@@ -186,7 +186,7 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260917-vault`)
+            import(`./modules/${panelId}.js?v=20260917-forms`)
         ]);
 
         if (requestId !== panelRequestId) return;
@@ -241,7 +241,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260917-vault`;
+        link.href = `css/modules/${panelId}.css?v=20260917-forms`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);
@@ -566,7 +566,7 @@ function initMusicPlayer() {
     AppState.music.player.addEventListener('timeupdate', updateProgressBar);
     AppState.music.player.addEventListener('ended', () => changeSong(1));
     progressBarContainer.addEventListener('click', (e) => { e.stopPropagation(); setProgress(e); });
-    uploadBtn?.addEventListener('click', (e) => { e.stopPropagation(); musicInput.click(); });
+    uploadBtn?.addEventListener('click', (e) => { e.stopPropagation(); if(requireContentSignIn('music')) musicInput.click(); });
     musicInput?.addEventListener('change', handleMusicUpload);
 
     const savedStateJSON = sessionStorage.getItem('musicPlayerState');

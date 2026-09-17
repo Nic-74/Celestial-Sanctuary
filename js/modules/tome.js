@@ -5,7 +5,7 @@
 import {
     $, $$, AppState,
     apiDeleteItem
-} from '../common.js?v=20260917-vault';
+} from '../common.js?v=20260917-forms';
 
 let panelContainer = null;
 let availableVoices = []; // Stores the list of available voices

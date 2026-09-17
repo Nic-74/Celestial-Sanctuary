@@ -1,5 +1,5 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-vault';
-import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260917-vault';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260917-forms';
+import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260917-forms';
 
 let clockInterval;
 let voice;
