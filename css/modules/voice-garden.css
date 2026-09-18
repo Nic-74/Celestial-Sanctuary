@@ -474,6 +474,14 @@
     }
 }
 
+/* Final cascade guard: these controls live inside the upload sheet and must
+   remain text buttons, rather than inheriting the old circular modal controls. */
+.voice-upload-form .voice-recorder { display:grid; grid-template-columns:auto auto 1fr; align-items:center; gap:10px; margin:12px 0 20px; padding:14px; border:1px solid rgba(216,185,135,.28); border-radius:14px; background:rgba(8,14,30,.6); }
+.voice-upload-form .record-btn { width:auto !important; min-width:0; height:auto !important; padding:10px 14px; border:1px solid #d8b98799; border-radius:999px; background:#30233c; color:#f2dfbc; font:600 13px/1.2 Arial,sans-serif; white-space:nowrap; }
+.voice-upload-form .record-btn.recording { background:#57283d; color:#ffd5dc; }
+.voice-upload-form #voice-record-status { color:#cbbcca; font:13px/1.4 Arial,sans-serif; }
+@media (max-width:600px) { .voice-upload-form .voice-recorder { grid-template-columns:1fr; } .voice-upload-form .record-btn { width:100% !important; } }
+
 @media (max-width: 480px) {
     .voice-playback-modal .voice-playback-content {
         width: 100%;
