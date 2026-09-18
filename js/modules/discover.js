@@ -1,5 +1,5 @@
-import { requireContentSignIn } from '../content-vault.js?v=20260918-direct';
-import { uploadContentMedia } from '../content-vault.js?v=20260918-direct';
+import { requireContentSignIn } from '../content-vault.js?v=20260918-audit2';
+import { uploadContentMedia } from '../content-vault.js?v=20260918-audit2';
 // ===================================================================
 //  MODULE: DISCOVER (js/modules/discover.js)
 // ===================================================================
@@ -9,7 +9,7 @@ import {
     apiAddItem, apiUpdateItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260918-direct';
+} from '../common.js?v=20260918-audit2';
 
 // --- Local State ---
 let panelContainer = null;

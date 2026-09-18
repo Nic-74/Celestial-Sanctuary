@@ -1,8 +1,9 @@
+import { requireContentSignIn, uploadContentMedia } from '../content-vault.js?v=20260918-audit2';
 // ===================================================================
 //  MODULE: VOICE GARDEN (js/modules/voicegarden.js)
 // ===================================================================
 
-import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem } from '../common.js?v=20260918-direct';
+import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem, apiAddItem } from '../common.js?v=20260918-audit2';
 
 // --- Local State ---
 let panelContainer = null;
@@ -30,6 +31,21 @@ function getVoiceGardenHTML() {
         <h2 class="panel-header">🌸 Voice Message Garden 🎤</h2>
         <p class="panel-subheader">"Where words bloom into memories"</p>
 
+        <div class="voice-upload-controls">
+            <button class="btn primary" id="voice-upload-open">Upload a voice recording</button>
+            <form id="voice-upload-form" hidden class="voice-upload-form">
+                <label>Recording <input name="audio" type="file" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm" required></label>
+                <p>Choose a recording from your phone or computer (up to 20 MB).</p>
+                <label>From <select name="from"><option>Nic</option><option>Zoya</option></select></label>
+                <label>For <select name="to"><option>Zoya</option><option>Nic</option></select></label>
+                <label>Language <select name="lang"><option value="en">English</option><option value="zh">Chinese</option></select></label>
+                <label>Flower <select name="flower">${Object.entries(FLOWER_LIBRARY).map(([key,f])=>`<option value="${key}">${f.emoji} ${key}</option>`).join('')}</select></label>
+                <label>A note for this recording <textarea name="note" placeholder="What would you like to say?"></textarea></label>
+                <button class="btn primary" type="submit">Save voice to the garden</button>
+                <button class="btn" id="voice-upload-cancel" type="button">Cancel</button>
+                <p role="status" id="voice-upload-status"></p>
+            </form>
+        </div>
         <div class="voice-garden-container">
             <div class="garden-stats-bar">
                 <div class="garden-stat">
@@ -392,6 +408,26 @@ export function render(mainContent) {
     panelContainer = mainContent;
     panelContainer.innerHTML = getVoiceGardenHTML();
     
+    const form=$('voice-upload-form');
+    $('voice-upload-open').onclick=()=>{if(requireContentSignIn('voice'))form.hidden=false;};
+    $('voice-upload-cancel').onclick=()=>{form.reset();form.hidden=true;};
+    form.onsubmit=async event=>{
+        event.preventDefault();
+        if(!requireContentSignIn('voice'))return;
+        const fields=new FormData(form),file=fields.get('audio');
+        if(!file?.size)return;
+        const button=form.querySelector('[type=submit]'),status=$('voice-upload-status');
+        button.disabled=true;status.textContent='Uploading your recording…';
+        const draft={from:fields.get('from'),to:fields.get('to'),lang:fields.get('lang'),textNote:fields.get('note'),recordedDate:new Date().toISOString(),flower:{type:fields.get('flower'),position:{x:15+Math.random()*70,y:20+Math.random()*55}}};
+        try {
+            draft.audioFile=await uploadContentMedia(file);
+            status.textContent='Saving your voice message…';
+            const saved=await apiAddItem('voice',draft);
+            if(saved){form.reset();form.hidden=true;status.textContent='Saved to your garden.';}
+            else status.textContent='The message was not saved. Your form is still here; please retry.';
+        }catch(error){status.textContent=error.message;}
+        finally{button.disabled=false;}
+    };
     loadVoiceMessages();
     initAudioPlayer();
     

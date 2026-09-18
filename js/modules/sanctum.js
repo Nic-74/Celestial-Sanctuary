@@ -1,14 +1,16 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-direct';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-audit2';
 // ===================================================================
 //  MODULE: SANCTUARY (js/modules/sanctuary.js) - ENHANCED
 // ===================================================================
-import { $, $$, AppState, personalizedContent } from '../common.js?v=20260918-direct';
+import { $, $$, AppState, personalizedContent } from '../common.js?v=20260918-audit2';
 
 // --- Local State ---
 let panelContainer = null;
 let litCandles = 0;
 const totalCandles = 7;
 let scratchCtx;
+let scratchEvents;
+let isScratched = false;
 let constellationPoints = [];
 let constellationLines = [];
 
@@ -504,7 +506,16 @@ function setupCanvas() {
     const scratchCanvas = $('scratchCanvas');
     if (!scratchCanvas) return;
     
-    scratchCtx = scratchCanvas.getContext('2d');
+    scratchEvents?.abort();
+    scratchEvents = new AbortController();
+    isScratched = false;
+    scratchCanvas.style.opacity = '1';
+    scratchCanvas.style.pointerEvents = 'auto';
+    scratchCanvas.style.touchAction = 'none';
+    scratchCanvas.tabIndex = 0;
+    scratchCanvas.setAttribute('role','button');
+    scratchCanvas.setAttribute('aria-label','Scratch to reveal your fortune, or press Enter');
+    scratchCtx = scratchCanvas.getContext('2d', {willReadFrequently:true});
     scratchCanvas.width = scratchCanvas.parentElement.offsetWidth;
     scratchCanvas.height = scratchCanvas.parentElement.offsetHeight;
     
@@ -539,61 +550,48 @@ function setupCanvas() {
     scratchCtx.fillText('Your cosmic fortune awaits...', scratchCanvas.width / 2, scratchCanvas.height / 2 + 30);
     
     let isDrawing = false;
-    let isScratched = false;
-    
-    const start = (e) => { 
-        e.preventDefault(); 
-        isDrawing = true; 
-        if (!isScratched) {
-            scratch(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
-        }
-    };
-    
-    const end = (e) => { 
-        e.preventDefault(); 
-        isDrawing = false; 
-        
-        // Check if enough is scratched to reveal
-        if (!isScratched) {
-            checkScratchCompletion();
-        }
-    };
-    
-    const draw = (e) => {
-        if (!isDrawing || isScratched) return;
-        e.preventDefault();
+    let previous = null;
+    const point = e => {
         const rect = scratchCanvas.getBoundingClientRect();
-        const touch = e.touches ? e.touches[0] : e;
-        scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+        return {x:(e.clientX-rect.left)*scratchCanvas.width/rect.width,
+                y:(e.clientY-rect.top)*scratchCanvas.height/rect.height};
     };
-    
-    scratchCanvas.addEventListener('mousedown', start);
-    scratchCanvas.addEventListener('mouseup', end);
-    scratchCanvas.addEventListener('mousemove', draw);
-    scratchCanvas.addEventListener('touchstart', start, { passive: false });
-    scratchCanvas.addEventListener('touchend', end, { passive: false });
-    scratchCanvas.addEventListener('touchmove', draw, { passive: false });
+    const erase = e => {
+        const p=point(e);
+        scratchCtx.globalCompositeOperation='destination-out';
+        scratchCtx.lineWidth=50;scratchCtx.lineCap='round';
+        if(previous){scratchCtx.beginPath();scratchCtx.moveTo(previous.x,previous.y);scratchCtx.lineTo(p.x,p.y);scratchCtx.stroke();}
+        scratchCtx.beginPath();scratchCtx.arc(p.x,p.y,25,0,Math.PI*2);scratchCtx.fill();
+        previous=p;
+    };
+    const options={signal:scratchEvents.signal};
+    scratchCanvas.addEventListener('pointerdown',e=>{
+        if(isScratched)return;
+        e.preventDefault();isDrawing=true;previous=null;
+        scratchCanvas.setPointerCapture(e.pointerId);erase(e);
+    },options);
+    scratchCanvas.addEventListener('pointermove',e=>{if(isDrawing&&!isScratched){e.preventDefault();erase(e);}},options);
+    const end=()=>{isDrawing=false;previous=null;checkScratchCompletion();};
+    scratchCanvas.addEventListener('pointerup',end,options);
+    scratchCanvas.addEventListener('pointercancel',end,options);
+    scratchCanvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();revealScratch();}},options);
 }
-
-function scratch(x, y) {
-    if (!scratchCtx || isScratched) return;
-    
-    scratchCtx.globalCompositeOperation = 'destination-out';
-    scratchCtx.beginPath();
-    scratchCtx.arc(x, y, 25, 0, Math.PI * 2, true);
-    scratchCtx.fill();
+function revealScratch() {
+    if(isScratched)return;
+    isScratched=true;
+    const canvas=$('scratchCanvas');
+    scratchCtx.clearRect(0,0,canvas.width,canvas.height);
+    canvas.style.opacity='0';canvas.style.pointerEvents='none';
+    canvas.setAttribute('aria-label','Fortune revealed');
+    $('prizeDiv').setAttribute('role','status');
 }
-
 function checkScratchCompletion() {
-    // Simplified completion check - in a real implementation you'd analyze pixel data
-    setTimeout(() => {
-        isScratched = true;
-        // Add celebration effect for wins
-        const prizeTitle = $('prizeTitle').textContent;
-        if (!prizeTitle.includes('Whisper from the Void')) {
-            $('prizeDiv').style.animation = 'sanctuary-glow 2s infinite';
-        }
-    }, 100);
+    if(!scratchCtx||isScratched)return;
+    const canvas=$('scratchCanvas');
+    const pixels=scratchCtx.getImageData(0,0,canvas.width,canvas.height).data;
+    let clear=0,total=0;
+    for(let i=3;i<pixels.length;i+=64){total++;if(pixels[i]===0)clear++;}
+    if(total&&clear/total>=0.35)revealScratch();
 }
 
 // --- Enhanced Riddle & Threshold Logic ---
@@ -875,6 +873,8 @@ export function cleanup() {
     
     panelContainer = null;
     litCandles = 0;
+    scratchEvents?.abort();
+    scratchEvents = null;
     scratchCtx = null;
     constellationPoints = [];
     constellationLines = [];

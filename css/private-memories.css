@@ -37,3 +37,9 @@
 #drive-save-status[data-state="error"] {border-color:#e9a6ac;color:#ffdae0;}
 #drive-save-status[hidden] {display:none;}
 .private-permission-note {font-size:13px;opacity:.8;}
+
+.voice-upload-controls {text-align:center;margin:24px auto;max-width:650px;}
+.voice-upload-form {text-align:left;padding:24px;margin-top:20px;background:#10182bdd;border:1px solid #c9af7866;border-radius:18px;}
+.voice-upload-form label {display:block;margin:14px 0;color:#eee1ca;}
+.voice-upload-form input,.voice-upload-form select,.voice-upload-form textarea {display:block;width:100%;box-sizing:border-box;margin-top:8px;padding:12px;color:#f4e7cf;background:#080e1e;border:1px solid #b99d7166;border-radius:8px;}
+.voice-upload-form textarea {min-height:90px;}

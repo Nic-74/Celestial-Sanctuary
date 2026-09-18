@@ -1,5 +1,5 @@
-import { saveSongLyrics } from './content-vault.js?v=20260918-direct';
-import { mountYouTube } from './youtube-player.js?v=20260918-direct';
+import { saveSongLyrics } from './content-vault.js?v=20260918-audit2';
+import { mountYouTube } from './youtube-player.js?v=20260918-audit2';
 
 export function parseLyrics(source) {
     const lines = [];

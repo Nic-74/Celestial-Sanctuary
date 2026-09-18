@@ -1,4 +1,4 @@
-import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260918-direct';
+import { initializeVault, loadVault, resetVault } from './content-vault.js?v=20260918-audit2';
 // Google access tokens and private content exist only in this tab's memory.
 const CLIENT_ID = '690422772790-id9snpi35tci6n9lrreu4682vo6p438b.apps.googleusercontent.com';
 const FOLDER_ID = '1gj1UqHb38XoCKwTXrUNUN1-D5BkXsYOE';

@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, showSaveStatus, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-direct';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260918-direct';
+import { contentCollections, replaceContent, setContentPersistence, showSaveStatus, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-audit2';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260918-audit2';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();
@@ -239,7 +239,11 @@ export function openContentManager(type='gallery') {
 export function mountContentTools(panelId,container) {
  const type={chronicle:'timeline','voice-garden':'voice',oursong:'music',guide:'extras',games:'extras',sanctum:'extras',journey:'extras'}[panelId]||panelId;
  if(!CONTENT_LABELS[type])return;
- const hasOwnEditor=['gallery','discover','chronicle','tome','book','universes','oursong'].includes(panelId);
+ // These immersive panels already provide their own controls (or are read-only
+ // experiences). A generic "Edit this collection" strip obscures the artwork
+ // and makes the entrance feel like an admin screen, so keep editing in the
+ // Keeper's key / page-specific controls instead.
+ const hasOwnEditor=['gallery','discover','chronicle','tome','book','universes','oursong','sanctum','voice-garden','journey','guide','games'].includes(panelId);
  const toolbar=document.createElement('div');toolbar.className='vault-toolbar';
  const button=document.createElement('button');button.textContent=({letter:'Write a sealed letter',voice:'Plant a voice message',extras:'Edit this collection',site:'Edit our story'})[type]||`Add / edit ${CONTENT_LABELS[type]}`;button.onclick=()=>{openContentManager(type);if(ready&&['letter','voice'].includes(type))startEdit(type);};toolbar.append(button);if(!hasOwnEditor)container.prepend(toolbar);
  if(type==='letter'&&ready){
