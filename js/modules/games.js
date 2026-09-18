@@ -1,9 +1,9 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-audit2';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260919-audit3';
 // ===================================================================
 //  MODULE: GAMES (js/modules/games.js)
 // ===================================================================
 
-import { $, $$, DOM } from '../common.js?v=20260918-audit2';
+import { $, $$, DOM } from '../common.js?v=20260919-audit3';
 
 // --- Local State ---
 let panelContainer = null;

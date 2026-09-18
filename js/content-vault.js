@@ -1,5 +1,5 @@
-import { contentCollections, replaceContent, setContentPersistence, showSaveStatus, AppState, EDITABLE_CONFIG } from './common.js?v=20260918-audit2';
-import { sealLetter, openLetter } from './letter-lock.js?v=20260918-audit2';
+import { contentCollections, replaceContent, setContentPersistence, showSaveStatus, AppState, EDITABLE_CONFIG } from './common.js?v=20260919-audit3';
+import { sealLetter, openLetter } from './letter-lock.js?v=20260919-audit3';
 export const CONTENT_LABELS = {gallery:'Gallery',timeline:'Chronicles',letter:'Letters to Zoya',universes:'Alternate Chronicles',voice:'Voice Garden',tome:'Stardust Tome',discover:'Discovery',music:'Music & recordings',extras:'Games, guide & sanctuary',site:'Entrance & site words'};
 let driver, base, revisions=[], latest=new Map(), urls=new Set(), ready=false;
 const mediaRefs = new Map();

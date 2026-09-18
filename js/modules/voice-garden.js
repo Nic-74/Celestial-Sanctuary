@@ -1,14 +1,18 @@
-import { requireContentSignIn, uploadContentMedia } from '../content-vault.js?v=20260918-audit2';
+import { requireContentSignIn, uploadContentMedia } from '../content-vault.js?v=20260919-audit3';
 // ===================================================================
 //  MODULE: VOICE GARDEN (js/modules/voicegarden.js)
 // ===================================================================
 
-import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem, apiAddItem } from '../common.js?v=20260918-audit2';
+import { $, $$, formatTime, EDITABLE_CONFIG, apiDeleteItem, apiAddItem } from '../common.js?v=20260919-audit3';
 
 // --- Local State ---
 let panelContainer = null;
 let voicePlayer = null; // Our single audio player instance
 let currentMsg = null;
+let recorder = null;
+let recorderStream = null;
+let recordedFile = null;
+let recordedChunks = [];
 
 const FLOWER_LIBRARY = {
     rose: { emoji: '🌹', color: '#FF1744', meaning: 'Romantic, loving messages' },
@@ -34,8 +38,13 @@ function getVoiceGardenHTML() {
         <div class="voice-upload-controls">
             <button class="btn primary" id="voice-upload-open">Upload a voice recording</button>
             <form id="voice-upload-form" hidden class="voice-upload-form">
-                <label>Recording <input name="audio" type="file" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm" required></label>
+                <label>Recording <input name="audio" type="file" accept="audio/*,.m4a,.mp3,.wav,.ogg,.webm"></label>
                 <p>Choose a recording from your phone or computer (up to 20 MB).</p>
+                <div class="voice-recorder" aria-live="polite">
+                    <button type="button" class="record-btn" id="voice-record-start">Record with microphone</button>
+                    <button type="button" class="record-btn" id="voice-record-stop" hidden>Stop recording</button>
+                    <span id="voice-record-status">Or record a short message here.</span>
+                </div>
                 <label>From <select name="from"><option>Nic</option><option>Zoya</option></select></label>
                 <label>For <select name="to"><option>Zoya</option><option>Nic</option></select></label>
                 <label>Language <select name="lang"><option value="en">English</option><option value="zh">Chinese</option></select></label>
@@ -82,13 +91,54 @@ function getVoiceGardenHTML() {
 // --- Module-Specific Logic ---
 
 function loadVoiceMessages() {
-    // This mock data is based on your control.js. 
-    // In a real scenario, this would come from EDITABLE_CONFIG.SONGS_DATA or a dedicated API endpoint.
-    // For now, we'll hardcode the relevant files.
+    // Base recordings ship with the sanctuary; private Drive recordings are merged by the vault.
     const allVoiceMessages = EDITABLE_CONFIG.VOICE_DATA;
 
     // Filter only files from the 'recordings/' path
     voiceMessages = allVoiceMessages.filter(m => m.audioFile && (m.audioFile.startsWith('recordings/') || m.audioFile.startsWith('blob:')));
+}
+
+function resetRecorder() {
+    try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch {}
+    recorder = null;
+    if (recorderStream) recorderStream.getTracks().forEach(track => track.stop());
+    recorderStream = null;
+    recordedChunks = [];
+}
+
+async function startVoiceRecording() {
+    const status = $('voice-record-status');
+    const start = $('voice-record-start');
+    const stop = $('voice-record-stop');
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        status.textContent = 'Recording is not supported here; choose an audio file instead.';
+        return;
+    }
+    try {
+        recorderStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(type => MediaRecorder.isTypeSupported(type)) || '';
+        const activeRecorder = recorder = new MediaRecorder(recorderStream, mime ? { mimeType: mime } : undefined);
+        recordedChunks = [];
+        activeRecorder.ondataavailable = event => { if (event.data.size) recordedChunks.push(event.data); };
+        activeRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: activeRecorder.mimeType || 'audio/webm' });
+            recordedFile = new File([blob], `voice-${new Date().toISOString().replace(/[:.]/g, '-')}.webm`, { type: blob.type });
+            status.textContent = 'Recording ready. Save it to plant the flower.';
+            start.hidden = false; stop.hidden = true; start.classList.remove('recording');
+            if (recorderStream) recorderStream.getTracks().forEach(track => track.stop());
+            recorderStream = null; recorder = null;
+        };
+        activeRecorder.start();
+        start.hidden = true; stop.hidden = false; start.classList.add('recording');
+        status.textContent = 'Recording… press Stop when you are finished.';
+    } catch {
+        status.textContent = 'Microphone access was not granted. You can choose an audio file instead.';
+        resetRecorder();
+    }
+}
+
+function stopVoiceRecording() {
+    if (recorder?.state === 'recording') recorder.stop();
 }
 
 function updateStats() {
@@ -410,20 +460,24 @@ export function render(mainContent) {
     
     const form=$('voice-upload-form');
     $('voice-upload-open').onclick=()=>{if(requireContentSignIn('voice'))form.hidden=false;};
-    $('voice-upload-cancel').onclick=()=>{form.reset();form.hidden=true;};
+    $('voice-record-start').onclick=startVoiceRecording;
+    $('voice-record-stop').onclick=stopVoiceRecording;
+    form.querySelector('input[name="audio"]').onchange=event=>{if(event.target.files?.length) recordedFile=null;};
+    $('voice-upload-cancel').onclick=()=>{resetRecorder();recordedFile=null;form.reset();form.hidden=true;};
     form.onsubmit=async event=>{
         event.preventDefault();
         if(!requireContentSignIn('voice'))return;
-        const fields=new FormData(form),file=fields.get('audio');
-        if(!file?.size)return;
-        const button=form.querySelector('[type=submit]'),status=$('voice-upload-status');
+        const fields=new FormData(form),selectedFile=fields.get('audio'),file=selectedFile?.size?selectedFile:recordedFile;
+        const status=$('voice-upload-status');
+        if(!file?.size){status.textContent='Choose an audio file or record a message first.';return;}
+        const button=form.querySelector('[type=submit]');
         button.disabled=true;status.textContent='Uploading your recording…';
         const draft={from:fields.get('from'),to:fields.get('to'),lang:fields.get('lang'),textNote:fields.get('note'),recordedDate:new Date().toISOString(),flower:{type:fields.get('flower'),position:{x:15+Math.random()*70,y:20+Math.random()*55}}};
         try {
             draft.audioFile=await uploadContentMedia(file);
             status.textContent='Saving your voice message…';
             const saved=await apiAddItem('voice',draft);
-            if(saved){form.reset();form.hidden=true;status.textContent='Saved to your garden.';}
+            if(saved){resetRecorder();recordedFile=null;form.reset();form.hidden=true;status.textContent='Saved to your garden.';}
             else status.textContent='The message was not saved. Your form is still here; please retry.';
         }catch(error){status.textContent=error.message;}
         finally{button.disabled=false;}
@@ -444,6 +498,7 @@ export function render(mainContent) {
  * Cleans up intervals and event listeners when the panel is unloaded.
  */
 export function cleanup() {
+    resetRecorder();
     if (voicePlayer) {
         voicePlayer.pause();
         voicePlayer.src = ''; // Clear source

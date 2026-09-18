@@ -5,7 +5,7 @@
 import {
     $, $$, AppState,
     apiDeleteItem
-} from '../common.js?v=20260918-audit2';
+} from '../common.js?v=20260919-audit3';
 
 let panelContainer = null;
 let availableVoices = []; // Stores the list of available voices

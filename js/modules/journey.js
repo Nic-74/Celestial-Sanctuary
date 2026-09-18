@@ -1,5 +1,5 @@
-import { EXTRA_CONTENT } from '../extra-data.js?v=20260918-audit2';
-import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260918-audit2';
+import { EXTRA_CONTENT } from '../extra-data.js?v=20260919-audit3';
+import { EDITABLE_CONFIG, CHRONICLE_DATA, AppState } from '../common.js?v=20260919-audit3';
 
 let clockInterval;
 let voice;

@@ -1916,6 +1916,18 @@ body:has(#mood-sync-bar.collapsed) #lantern-toggle-right {
     margin: 0 0.2rem;
 }
 
+:where(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--gold-light, #f4d58d);
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .sanctuary-header { padding: 14px 5%; }
+    .sanctuary-header nav { gap: 12px; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
+    .sanctuary-brand span { font-size: 0.55rem; letter-spacing: 0.16em; }
+    .panel-header { font-size: clamp(2rem, 10vw, 3.5rem); }
+}
+
 @media (max-width: 480px) {
     #home-ticker {
         font-size: 0.8rem;

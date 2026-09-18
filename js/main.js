@@ -1,6 +1,6 @@
-import { uploadContentMedia, requireContentSignIn } from './content-vault.js?v=20260918-audit2';
-import { mountContentTools } from './content-vault.js?v=20260918-audit2';
-import { initPrivateMemories } from './private-memories.js?v=20260918-audit2';
+import { uploadContentMedia, requireContentSignIn } from './content-vault.js?v=20260919-audit3';
+import { mountContentTools } from './content-vault.js?v=20260919-audit3';
+import { initPrivateMemories } from './private-memories.js?v=20260919-audit3';
 // =****************************************************************==
 //  MAIN APPLICATION BOOTSTRAP (js/main.js) - CORRECTED & ORGANIZED
 // ===================================================================
@@ -18,9 +18,9 @@ import {
     // Import the global modal controllers
     handleBookPasswordAttempt, openNewChapterMeta, handleContinueMeta, openEditor, saveChapter,
     openLightbox, updateLightboxContent, changeLightboxImage
-} from './common.js?v=20260918-audit2';
+} from './common.js?v=20260919-audit3';
 
-import { initDanceMemory } from './dance-memory.js?v=20260918-audit2';
+import { initDanceMemory } from './dance-memory.js?v=20260919-audit3';
 
 // --- Global State for Panel Management ---
 let panelRequestId = 0;
@@ -186,7 +186,7 @@ async function loadPanel(panelId) {
     try {
         const [cssModule, jsModule] = await Promise.all([
             loadCssModule(panelId),
-            import(`./modules/${panelId}.js?v=20260918-audit2`)
+            import(`./modules/${panelId}.js?v=20260919-audit3`)
         ]);
 
         if (requestId !== panelRequestId) return;
@@ -241,7 +241,7 @@ function loadCssModule(panelId) {
         const link = document.createElement('link');
         link.id = cssId;
         link.rel = 'stylesheet';
-        link.href = `css/modules/${panelId}.css?v=20260918-audit2`;
+        link.href = `css/modules/${panelId}.css?v=20260919-audit3`;
         link.onload = () => resolve();
         link.onerror = () => reject(new Error(`Failed to load css/modules/${panelId}.css`));
         document.head.appendChild(link);

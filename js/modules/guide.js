@@ -5,7 +5,7 @@
 import {
     $, $$, DOM, AppState, EDITABLE_CONFIG, CHRONICLE_DATA, GUIDE_RIDDLES,
     findImageWithExtension, THEME_COLORS, THEME_STAR_SHAPES
-} from '../common.js?v=20260918-audit2';
+} from '../common.js?v=20260919-audit3';
 
 // --- Local State ---
 let panelContainer = null;
@@ -13,6 +13,9 @@ let observatoryAnimationFrameId = null; // To cancel the 3D animation
 let currentRiddleIndex = 0;
 let riddleAttempts = 0;
 let ambientAudio = null;
+let ambientContext = null;
+let ambientNodes = [];
+let ambientSection = null;
 let soundEnabled = false;
 
 // Add to AppState for progress tracking
@@ -534,49 +537,52 @@ function initAmbientSound() {
     const toggle = document.getElementById('ambient-sound-toggle');
     if (!toggle) return;
     
-    // Create audio element if it doesn't exist
-    if (!ambientAudio) {
-        ambientAudio = new Audio();
-        ambientAudio.loop = true;
-        ambientAudio.volume = 0.3;
-    }
-    
     toggle.addEventListener('click', () => {
         soundEnabled = !soundEnabled;
         const icon = toggle.querySelector('.sound-icon');
         
         if (soundEnabled) {
             icon.textContent = '🔊';
-            if (ambientAudio.src) ambientAudio.play().catch(e => console.warn("Audio play interrupted"));
+            setAmbientSound(ambientSection || 'observatory');
         } else {
             icon.textContent = '🔇';
-            ambientAudio.pause();
+            stopAmbientSound();
         }
+        toggle.setAttribute('aria-pressed', String(soundEnabled));
     });
+    toggle.setAttribute('aria-pressed', String(soundEnabled));
 }
 
 function setAmbientSound(sectionId) {
-    if (!ambientAudio) return;
-    
-    // Using placeholder sounds - you will need to add these files
-    const sounds = {
-        physics: 'sounds/cosmic_hum.mp3',
-        anatomy: 'sounds/heartbeat.mp3',
-        artifacts: 'sounds/mystical_chimes.mp3',
-        lexicon: 'sounds/paper_rustle.mp3',
-        observatory: 'sounds/space_ambient.mp3'
-    };
-    
-    const soundFile = sounds[sectionId];
-    
-    if (soundFile && !ambientAudio.src.endsWith(soundFile)) {
-        ambientAudio.src = soundFile;
-        if (soundEnabled) {
-            ambientAudio.play().catch(e => console.warn("Audio play interrupted"));
-        }
-    } else if (!soundFile) {
-        ambientAudio.pause(); // Pause if no sound for this section
-    }
+    ambientSection = sectionId;
+    if (!soundEnabled) return;
+    stopAmbientSound();
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    ambientContext = new AudioContext();
+    const frequencies = { observatory: 110, physics: 174, anatomy: 82, artifacts: 220, lexicon: 146 };
+    const base = frequencies[sectionId] || frequencies.observatory;
+    const gain = ambientContext.createGain();
+    gain.gain.value = 0.018;
+    gain.connect(ambientContext.destination);
+    ambientNodes = [gain];
+    [base, base * 1.5].forEach((frequency, index) => {
+        const oscillator = ambientContext.createOscillator();
+        oscillator.type = index ? 'sine' : 'triangle';
+        oscillator.frequency.value = frequency;
+        oscillator.detune.value = index ? 5 : -4;
+        oscillator.connect(gain);
+        oscillator.start();
+        ambientNodes.push(oscillator);
+    });
+    if (ambientContext.state === 'suspended') ambientContext.resume().catch(() => {});
+}
+
+function stopAmbientSound() {
+    ambientNodes.forEach(node => { try { if (node.stop) node.stop(); } catch {} try { node.disconnect(); } catch {} });
+    ambientNodes = [];
+    if (ambientContext) { ambientContext.close().catch(() => {}); ambientContext = null; }
+    ambientAudio = null;
 }
 
 // ===================================================================
@@ -1432,10 +1438,9 @@ export function cleanup() {
     document.querySelectorAll('.section-star').forEach(s => s.remove());
 
     // --- ENHANCEMENT 5: Stop sound ---
-    if (ambientAudio) {
-        ambientAudio.pause();
-        ambientAudio.src = ''; // Release file
-    }
+    stopAmbientSound();
+    soundEnabled = false;
+    ambientSection = null;
 
     panelContainer = null;
 }

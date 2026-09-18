@@ -1,5 +1,5 @@
-import { requireContentSignIn } from '../content-vault.js?v=20260918-audit2';
-import { uploadContentMedia } from '../content-vault.js?v=20260918-audit2';
+import { requireContentSignIn } from '../content-vault.js?v=20260919-audit3';
+import { uploadContentMedia } from '../content-vault.js?v=20260919-audit3';
 // ===================================================================
 //  MODULE: DISCOVER (js/modules/discover.js)
 // ===================================================================
@@ -9,12 +9,16 @@ import {
     apiAddItem, apiUpdateItem, apiDeleteItem,
     // Import modal controllers
     openLightbox
-} from '../common.js?v=20260918-audit2';
+} from '../common.js?v=20260919-audit3';
 
 // --- Local State ---
 let panelContainer = null;
 let tempPhotos = [];
 let currentFilter = 'all';
+
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const safeHttpUrl = value => /^https?:\/\//i.test(String(value || '')) ? escapeHtml(value) : '';
+const safeStatus = value => ['planned', 'wishlist', 'visited'].includes(value) ? value : 'wishlist';
 
 // --- HTML Template ---
 
@@ -51,27 +55,34 @@ function renderGrid(filter = 'all') {
 
     filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    grid.innerHTML = filteredData.map(item => `
-        <div class="discover-card" data-id="${item.id}">
-            <img src="${item.photos && item.photos.length > 0 ? item.photos[0] : 'photos/default_discover.jpg'}" alt="${item.title}" class="discover-card-image" onerror="this.onerror=null; this.src='photos/default_discover.jpg';">
+    grid.innerHTML = filteredData.map(item => {
+        const id=escapeHtml(item.id), status=safeStatus(item.status), title=escapeHtml(item.title || 'Untitled destination');
+        const photo=escapeHtml(item.photos?.[0] || 'photos/default_discover.jpg');
+        const location=escapeHtml(item.location || 'TBD');
+        const date=escapeHtml(item.date ? new Date(item.date).toLocaleDateString() : 'TBD');
+        const description=escapeHtml(item.description || 'No description yet.');
+        const link=safeHttpUrl(item.link);
+        return `
+        <div class="discover-card" data-id="${id}">
+            <img src="${photo}" alt="${title}" class="discover-card-image" onerror="this.onerror=null; this.src='photos/default_discover.jpg';">
             <div class="discover-card-content">
                 <div class="discover-card-header">
-                    <h3 class="discover-card-title">${item.title}</h3>
-                    <span class="discover-status-badge status-${item.status || 'wishlist'}" data-id="${item.id}" title="Click to change status">${(item.status || 'wishlist').toUpperCase()}</span>
+                    <h3 class="discover-card-title">${title}</h3>
+                    <span class="discover-status-badge status-${status}" data-id="${id}" title="Click to change status">${status.toUpperCase()}</span>
                 </div>
                 <p class="discover-card-meta">
-                    <strong>📍 ${item.location || 'TBD'}</strong> | <strong>🗓️ ${item.date ? new Date(item.date).toLocaleDateString() : 'TBD'}</strong>
+                    <strong>📍 ${location}</strong> | <strong>🗓️ ${date}</strong>
                 </p>
-                <p class="discover-card-description">${item.description || 'No description yet.'}</p>
+                <p class="discover-card-description">${description}</p>
                 <div class="discover-card-actions">
-                    <a href="${item.link}" target="_blank" class="btn" ${!item.link ? 'style="display:none;"' : ''}><span class="btn-icon">🔗</span>Link</a>
-                    <button class="btn view-photos-btn" data-id="${item.id}"><span class="btn-icon">🖼️</span>Photos</button>
-                    <button class="btn edit-discover-btn" data-id="${item.id}"><span class="btn-icon">✏️</span>Edit</button>
-                    <button class="btn btn-icon-only delete-discover-btn" data-id="${item.id}" title="Delete"><span class="btn-icon">🗑️</span></button>
+                    <a href="${link}" target="_blank" rel="noopener noreferrer" class="btn" ${!link ? 'style="display:none;"' : ''}><span class="btn-icon">🔗</span>Link</a>
+                    <button class="btn view-photos-btn" data-id="${id}"><span class="btn-icon">🖼️</span>Photos</button>
+                    <button class="btn edit-discover-btn" data-id="${id}"><span class="btn-icon">✏️</span>Edit</button>
+                    <button class="btn btn-icon-only delete-discover-btn" data-id="${id}" title="Delete" aria-label="Delete destination"><span class="btn-icon">🗑️</span></button>
                 </div>
             </div>
         </div>
-    `).join('');
+    `; }).join('');
 
     $$('.discover-filters .btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.status === filter);
